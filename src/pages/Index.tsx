@@ -3,10 +3,10 @@ import Footer from "@/components/Footer";
 import ProjectCard from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
 import ariaLogo from "@/assets/aria-logo.png";
-import cgeproMockup from "@/assets/cgepro-mockup.jpg";
-import ericRabyMockup from "@/assets/eric-raby-mockup.jpg";
-import connectTalentMockup from "@/assets/connect-talent-mockup.jpg";
-import soaDiaTravelMockup from "@/assets/soa-dia-travel-mockup.jpg";
+import cgeproMockup from "@/assets/go.jpg";
+import ericRabyMockup from "@/assets/eric.jpg";
+import connectTalentMockup from "@/assets/connect.png";
+import soaDiaTravelMockup from "@/assets/soa.jpg";
 
 const projects = [
   {
