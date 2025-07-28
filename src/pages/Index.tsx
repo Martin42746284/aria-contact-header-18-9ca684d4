@@ -47,7 +47,7 @@ const projects = [
       "SEO et hébergement optimaux"
     ],
     imageUrl: ericRabyMockup,
-    websiteUrl: "https://ericraby.com"
+    websiteUrl: "https://eric-raby.com"
   },
   {
     title: "CONNECT TALENT",
