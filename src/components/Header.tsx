@@ -21,14 +21,18 @@ const Header = () => {
             <a href="#accueil" className="text-white/90 hover:text-white transition-colors">
               Accueil
             </a>
+            <a href="#apropos" className="text-white/90 hover:text-white transition-colors">
+               À Propos
+               
+            </a>
             <a href="#realisations" className="text-white/90 hover:text-white transition-colors">
               Nos Réalisations
+              
             </a>
             <a href="#services" className="text-white/90 hover:text-white transition-colors">
-              Services
-            </a>
-            <a href="#apropos" className="text-white/90 hover:text-white transition-colors">
-              À Propos
+             
+               Services
+              
             </a>
             <a href="#contact" className="text-white/90 hover:text-white transition-colors">
               Contact

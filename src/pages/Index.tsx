@@ -117,6 +117,144 @@ const Index = () => {
           </div>
         </div>
       </section>
+         {/* À Propos */}
+      <section id="apropos" className="py-20 bg-aria-cream">
+        <div className="container mx-auto px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-aria-teal mb-6">
+                À PROPOS D'ARIA
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Découvrez l'histoire, la vision et les valeurs qui nous animent dans notre mission 
+                de transformer le paysage digital de nos clients.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold text-aria-teal">
+                  Notre Mission
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Chez ARIA, nous croyons que chaque entreprise mérite une présence digitale qui reflète 
+                  son authenticité et ses ambitions. Notre mission est de transformer vos défis digitaux 
+                  en opportunités de croissance durables, en alliant créativité, innovation technologique 
+                  et compréhension approfondie de vos enjeux métier.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Nous nous engageons à créer des solutions digitales qui non seulement répondent à vos 
+                  besoins actuels, mais anticipent également les évolutions futures de votre secteur d'activité.
+                </p>
+              </div>
+              <div className="bg-white p-8 rounded-lg shadow-lg">
+                <div className="flex justify-center mb-6">
+                  <img 
+                    src={ariaLogo} 
+                    alt="ARIA Innovation" 
+                    className="h-20 w-20"
+                  />
+                </div>
+                <div className="text-center">
+                  <h4 className="text-xl font-bold text-aria-teal mb-4">
+                    Innovation & Excellence
+                  </h4>
+                  <p className="text-muted-foreground">
+                    Depuis notre création, nous avons accompagné des dizaines d'entreprises 
+                    dans leur transformation digitale, avec un taux de satisfaction client de 98%.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <div className="bg-white p-6 rounded-lg text-center">
+                <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">🎯</span>
+                </div>
+                <h4 className="text-lg font-bold text-aria-teal mb-3">
+                  Expertise Technique
+                </h4>
+                <p className="text-muted-foreground text-sm">
+                  Une maîtrise complète des technologies web modernes et des meilleures pratiques du développement.
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg text-center">
+                <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">💡</span>
+                </div>
+                <h4 className="text-lg font-bold text-aria-teal mb-3">
+                  Créativité & Design
+                </h4>
+                <p className="text-muted-foreground text-sm">
+                  Des créations visuelles impactantes qui capturent l'essence de votre marque et engagent vos utilisateurs.
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg text-center">
+                <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-white">🤝</span>
+                </div>
+                <h4 className="text-lg font-bold text-aria-teal mb-3">
+                  Accompagnement
+                </h4>
+                <p className="text-muted-foreground text-sm">
+                  Un suivi personnalisé et un accompagnement stratégique pour maximiser votre retour sur investissement.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-lg">
+              <h3 className="text-2xl font-bold text-aria-teal mb-6 text-center">
+                Nos Valeurs
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
+                    <div>
+                      <h4 className="font-bold text-aria-teal mb-1">Transparence</h4>
+                      <p className="text-muted-foreground text-sm">
+                        Communication claire et honnête à chaque étape du projet.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
+                    <div>
+                      <h4 className="font-bold text-aria-teal mb-1">Excellence</h4>
+                      <p className="text-muted-foreground text-sm">
+                        Recherche constante de la perfection dans chaque détail.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
+                    <div>
+                      <h4 className="font-bold text-aria-teal mb-1">Innovation</h4>
+                      <p className="text-muted-foreground text-sm">
+                        Adoption des dernières technologies et tendances du marché.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
+                    <div>
+                      <h4 className="font-bold text-aria-teal mb-1">Partenariat</h4>
+                      <p className="text-muted-foreground text-sm">
+                        Construction de relations durables basées sur la confiance mutuelle.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Nos Réalisations */}
       <section id="realisations" className="py-20">
@@ -199,6 +337,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+   
 
       <Footer />
     </div>
