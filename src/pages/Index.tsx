@@ -89,19 +89,15 @@ const projects = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-aria-cream">
+    <div className="min-h-screen bg-aria-cream pl-64 scroll-smooth transition-all duration-300">
       <Header />
-      
+
       {/* Hero Section */}
       <section id="accueil" className="bg-gradient-hero text-white py-20">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-8">
-              <img 
-                src={ariaLogo} 
-                alt="ARIA Logo" 
-                className="h-24 w-24"
-              />
+              <img src={ariaLogo} alt="ARIA Logo" className="h-24 w-24" />
             </div>
             <h1 className="text-5xl font-bold mb-6">
               Transformons vos défis digitaux en opportunités de croissance
@@ -117,7 +113,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-         {/* À Propos */}
+
+      {/* À Propos */}
       <section id="apropos" className="py-20 bg-aria-cream">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
@@ -149,11 +146,7 @@ const Index = () => {
               </div>
               <div className="bg-white p-8 rounded-lg shadow-lg">
                 <div className="flex justify-center mb-6">
-                  <img 
-                    src={ariaLogo} 
-                    alt="ARIA Innovation" 
-                    className="h-20 w-20"
-                  />
+                  <img src={ariaLogo} alt="ARIA Innovation" className="h-20 w-20" />
                 </div>
                 <div className="text-center">
                   <h4 className="text-xl font-bold text-aria-teal mb-4">
@@ -168,88 +161,38 @@ const Index = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              <div className="bg-white p-6 rounded-lg text-center">
-                <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-white">🎯</span>
+              {[
+                { icon: "🎯", title: "Expertise Technique", desc: "Une maîtrise complète des technologies web modernes et des meilleures pratiques du développement." },
+                { icon: "💡", title: "Créativité & Design", desc: "Des créations visuelles impactantes qui capturent l'essence de votre marque et engagent vos utilisateurs." },
+                { icon: "🤝", title: "Accompagnement", desc: "Un suivi personnalisé et un accompagnement stratégique pour maximiser votre retour sur investissement." },
+              ].map((item, i) => (
+                <div key={i} className="bg-white p-6 rounded-lg text-center">
+                  <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">{item.icon}</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-aria-teal mb-3">{item.title}</h4>
+                  <p className="text-muted-foreground text-sm">{item.desc}</p>
                 </div>
-                <h4 className="text-lg font-bold text-aria-teal mb-3">
-                  Expertise Technique
-                </h4>
-                <p className="text-muted-foreground text-sm">
-                  Une maîtrise complète des technologies web modernes et des meilleures pratiques du développement.
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg text-center">
-                <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-white">💡</span>
-                </div>
-                <h4 className="text-lg font-bold text-aria-teal mb-3">
-                  Créativité & Design
-                </h4>
-                <p className="text-muted-foreground text-sm">
-                  Des créations visuelles impactantes qui capturent l'essence de votre marque et engagent vos utilisateurs.
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg text-center">
-                <div className="w-16 h-16 bg-gradient-hero rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-bold text-white">🤝</span>
-                </div>
-                <h4 className="text-lg font-bold text-aria-teal mb-3">
-                  Accompagnement
-                </h4>
-                <p className="text-muted-foreground text-sm">
-                  Un suivi personnalisé et un accompagnement stratégique pour maximiser votre retour sur investissement.
-                </p>
-              </div>
+              ))}
             </div>
 
             <div className="bg-white p-8 rounded-lg">
-              <h3 className="text-2xl font-bold text-aria-teal mb-6 text-center">
-                Nos Valeurs
-              </h3>
+              <h3 className="text-2xl font-bold text-aria-teal mb-6 text-center">Nos Valeurs</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
+                {[
+                  { title: "Transparence", desc: "Communication claire et honnête à chaque étape du projet." },
+                  { title: "Excellence", desc: "Recherche constante de la perfection dans chaque détail." },
+                  { title: "Innovation", desc: "Adoption des dernières technologies et tendances du marché." },
+                  { title: "Partenariat", desc: "Construction de relations durables basées sur la confiance mutuelle." },
+                ].map((val, i) => (
+                  <div key={i} className="flex items-start space-x-3">
                     <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
                     <div>
-                      <h4 className="font-bold text-aria-teal mb-1">Transparence</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Communication claire et honnête à chaque étape du projet.
-                      </p>
+                      <h4 className="font-bold text-aria-teal mb-1">{val.title}</h4>
+                      <p className="text-muted-foreground text-sm">{val.desc}</p>
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
-                    <div>
-                      <h4 className="font-bold text-aria-teal mb-1">Excellence</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Recherche constante de la perfection dans chaque détail.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
-                    <div>
-                      <h4 className="font-bold text-aria-teal mb-1">Innovation</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Adoption des dernières technologies et tendances du marché.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="w-2 h-2 bg-aria-teal rounded-full mt-2 flex-shrink-0"></span>
-                    <div>
-                      <h4 className="font-bold text-aria-teal mb-1">Partenariat</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Construction de relations durables basées sur la confiance mutuelle.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -260,16 +203,13 @@ const Index = () => {
       <section id="realisations" className="py-20">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-aria-teal mb-6">
-              NOS RÉALISATIONS
-            </h2>
+            <h2 className="text-4xl font-bold text-aria-teal mb-6">NOS RÉALISATIONS</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Laissez-vous inspirer par ces histoires de transformation digitale réussie. 
               Chaque projet reflète notre engagement à comprendre les enjeux spécifiques 
               de chaque secteur et à concevoir des solutions sur mesure.
             </p>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
             {projects.map((project, index) => (
               <ProjectCard key={index} {...project} />
@@ -278,7 +218,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Notre Approche */}
+      {/* Services */}
       <section id="services" className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
@@ -289,56 +229,33 @@ const Index = () => {
 
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="space-y-8">
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    1. Approche sur mesure pour chaque secteur
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Chaque industrie a ses propres particularités et exigences. Notre approche sur mesure nous permet 
-                    d'adapter nos solutions aux besoins spécifiques de chaque secteur, garantissant ainsi une pertinence 
-                    et une efficacité maximales.
-                  </p>
+              {[
+                {
+                  title: "1. Approche sur mesure pour chaque secteur",
+                  desc: "Chaque industrie a ses propres particularités et exigences. Notre approche sur mesure nous permet d'adapter nos solutions aux besoins spécifiques de chaque secteur, garantissant ainsi une pertinence et une efficacité maximales."
+                },
+                {
+                  title: "2. Qualité visuelle et technique alignée sur les standards actuels",
+                  desc: "Nous sommes déterminés à fournir des produits qui non seulement sont esthétiquement plaisants mais aussi techniquement robustes, offrant ainsi une expérience utilisateur exceptionnelle."
+                },
+                {
+                  title: "3. Sites performants, rapides et centrés utilisateur",
+                  desc: "La performance et la rapidité sont essentielles pour offrir une expérience fluide et agréable. Nos sites sont conçus pour être rapides et réactifs, créons des interfaces intuitives et accessibles."
+                },
+                {
+                  title: "4. Processus collaboratif et accompagnement stratégique",
+                  desc: "Nous croyons en l'importance du travail d'équipe et de la collaboration avec nos clients. En offrant un accompagnement stratégique, nous aidons nos clients à maximiser leur retour sur investissement."
+                }
+              ].map((item, i) => (
+                <div key={i} className="bg-aria-cream p-6 rounded-lg">
+                  <h3 className="text-xl font-bold text-aria-teal mb-3">{item.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
                 </div>
-
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    2. Qualité visuelle et technique alignée sur les standards actuels
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Nous sommes déterminés à fournir des produits qui non seulement sont esthétiquement plaisants mais 
-                    aussi techniquement robustes, offrant ainsi une expérience utilisateur exceptionnelle.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-8">
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    3. Sites performants, rapides et centrés utilisateur
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    La performance et la rapidité sont essentielles pour offrir une expérience fluide et agréable. 
-                    Nos sites sont conçus pour être rapides et réactifs, créons des interfaces intuitives et accessibles.
-                  </p>
-                </div>
-
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    4. Processus collaboratif et accompagnement stratégique
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Nous croyons en l'importance du travail d'équipe et de la collaboration avec nos clients. 
-                    En offrant un accompagnement stratégique, nous aidons nos clients à maximiser leur retour sur investissement.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
-
-   
 
       <Footer />
     </div>
