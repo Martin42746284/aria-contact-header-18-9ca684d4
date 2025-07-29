@@ -150,6 +150,93 @@ const Index = () => {
           </div>
         </div>
       </section>
+      {/* Section À propos */}
+      <section id="about" className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-orange-500 mb-6 animate-fadeIn">
+                À PROPOS D'ARIA
+              </h2>
+              <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed animate-fadeIn delay-100">
+                Plus qu'une agence digitale, nous sommes vos partenaires de transformation numérique
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Contenu textuel */}
+              <div className="space-y-6 animate-fadeIn delay-200">
+                <div className="bg-gradient-to-r from-orange-500/10 to-transparent p-6 rounded-lg border-l-4 border-orange-500">
+                  <h3 className="text-2xl font-bold text-white mb-4">Notre Mission</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    Chez ARIA, nous croyons que chaque entreprise mérite une présence digitale qui reflète son unicité. 
+                    Notre mission est d'accompagner nos clients dans leur transformation numérique en créant des solutions 
+                    innovantes, performantes et sur mesure qui génèrent un impact réel sur leur croissance.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-orange-500/10 to-transparent p-6 rounded-lg border-l-4 border-orange-500">
+                  <h3 className="text-2xl font-bold text-white mb-4">Notre Vision</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    Être le partenaire privilégié des entreprises ambitieuses qui souhaitent exploiter pleinement 
+                    le potentiel du digital. Nous aspirons à créer des expériences numériques exceptionnelles qui 
+                    connectent véritablement les marques à leur audience.
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-orange-500/10 to-transparent p-6 rounded-lg border-l-4 border-orange-500">
+                  <h3 className="text-2xl font-bold text-white mb-4">Nos Valeurs</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    L'excellence technique, la créativité sans limites, et l'écoute attentive de nos clients 
+                    sont au cœur de tout ce que nous faisons. Nous privilégions la transparence, l'innovation 
+                    et la collaboration pour créer des partenariats durables et fructueux.
+                  </p>
+                </div>
+              </div>
+
+              {/* Statistiques et points forts */}
+              <div className="space-y-8 animate-fadeIn delay-300">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 text-center">
+                    <div className="text-3xl font-bold text-orange-500 mb-2">50+</div>
+                    <p className="text-gray-300 text-sm">Projets réalisés</p>
+                  </div>
+                  <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 text-center">
+                    <div className="text-3xl font-bold text-orange-500 mb-2">5+</div>
+                    <p className="text-gray-300 text-sm">Années d'expérience</p>
+                  </div>
+                  <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 text-center">
+                    <div className="text-3xl font-bold text-orange-500 mb-2">98%</div>
+                    <p className="text-gray-300 text-sm">Clients satisfaits</p>
+                  </div>
+                  <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 text-center">
+                    <div className="text-3xl font-bold text-orange-500 mb-2">24/7</div>
+                    <p className="text-gray-300 text-sm">Support client</p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700">
+                  <h3 className="text-xl font-bold text-orange-500 mb-4">Notre Équipe</h3>
+                  <p className="text-gray-300 leading-relaxed mb-4">
+                    Notre équipe multidisciplinaire réunit des experts passionnés : développeurs full-stack, 
+                    designers UI/UX, chefs de projet agiles et consultants en stratégie digitale.
+                  </p>
+                  <p className="text-gray-300 leading-relaxed">
+                    Ensemble, nous formons une équipe soudée et créative, déterminée à repousser les limites 
+                    du possible pour offrir à nos clients des solutions digitales d'exception.
+                  </p>
+                </div>
+
+                <div className="text-center">
+                  <Button className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg transition-all duration-300">
+                    Parlons de votre projet
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Section Réalisations */}
       <section id="realisations" className="py-20 bg-gray-900">
@@ -174,7 +261,7 @@ const Index = () => {
               >
                 <ProjectCard 
                   {...project}
-                  className="hover:scale-[1.02] transition-transform duration-300"
+                  
                 />
               </div>
             ))}
@@ -256,6 +343,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      
 
       <Footer />
     </div>

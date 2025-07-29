@@ -120,9 +120,9 @@ const Header = () => {
             <nav className="hidden md:flex items-center space-x-8">
               {[
                 { href: '#accueil', label: 'Accueil' },
+                { href: '#about', label: 'À Propos' },
                 { href: '#realisations', label: 'Nos Réalisations' },
                 { href: '#services', label: 'Services' },
-                { href: '#apropos', label: 'À Propos' },
                 { href: '#contact', label: 'Contact' }
               ].map((item, index) => (
                 <a
@@ -183,7 +183,7 @@ const Header = () => {
             <nav className="flex flex-col space-y-4 p-4 bg-black/95 backdrop-blur-md rounded-lg border border-orange-500/30">
               {[
                 { href: '#accueil', label: 'Accueil' },
-                { href: '#realisations', label: 'Nos Réalisations' },
+                { href: '#about', label: 'Nos Réalisations' },
                 { href: '#services', label: 'Services' },
                 { href: '#apropos', label: 'À Propos' },
                 { href: '#contact', label: 'Contact' }
