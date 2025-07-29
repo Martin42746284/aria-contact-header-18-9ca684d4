@@ -89,43 +89,76 @@ const projects = [
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-aria-cream">
+    <div className="min-h-screen bg-black">
+      {/* Styles d'animation globaux */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.8s ease-out forwards;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+      `}</style>
+
       <Header />
       
-      {/* Hero Section */}
-      <section id="accueil" className="bg-gradient-hero text-white py-20">
+      {/* Section Hero avec image de fond */}
+      <section 
+        id="accueil" 
+        className="relative py-32 text-white"
+        style={{
+          background: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/cover.webp')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center mb-8 animate-float">
               <img 
-                src={ariaLogo} 
+                src="src/assets/aria-logo.png" 
                 alt="ARIA Logo" 
-                className="h-24 w-24"
+                className="h-40 w-34"
               />
             </div>
-            <h1 className="text-5xl font-bold mb-6">
+            <h1 className="text-5xl font-bold mb-6 animate-fadeIn">
               Transformons vos défis digitaux en opportunités de croissance
             </h1>
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+            <p className="text-xl text-white/90 mb-8 leading-relaxed animate-fadeIn delay-100">
               Chaque projet est pour nous une aventure unique où créativité et technologie se rencontrent 
               pour donner vie à votre vision. Découvrez nos réalisations qui témoignent de notre capacité 
               à concevoir des solutions digitales qui dépassent les attentes.
             </p>
-            <Button variant="sunset" size="lg" className="text-lg px-8 py-4">
+            <Button 
+              className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 transition-all duration-300 animate-fadeIn delay-200"
+            >
               Découvrir nos réalisations
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Nos Réalisations */}
-      <section id="realisations" className="py-20">
+      {/* Section Réalisations */}
+      <section id="realisations" className="py-20 bg-gray-900">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-aria-teal mb-6">
+            <h2 className="text-4xl font-bold text-orange-500 mb-6 animate-fadeIn">
               NOS RÉALISATIONS
             </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed animate-fadeIn delay-100">
               Laissez-vous inspirer par ces histoires de transformation digitale réussie. 
               Chaque projet reflète notre engagement à comprendre les enjeux spécifiques 
               de chaque secteur et à concevoir des solutions sur mesure.
@@ -134,64 +167,88 @@ const Index = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
             {projects.map((project, index) => (
-              <ProjectCard key={index} {...project} />
+              <div 
+                key={index} 
+                className="animate-fadeIn"
+                style={{ animationDelay: `${index * 100 + 200}ms` }}
+              >
+                <ProjectCard 
+                  {...project}
+                  className="hover:scale-[1.02] transition-transform duration-300"
+                />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Notre Approche */}
-      <section id="services" className="py-20 bg-white">
+      {/* Section Approche */}
+      <section id="services" className="py-20 bg-black">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-aria-teal mb-6">
+            <h2 className="text-4xl font-bold text-orange-500 mb-6 animate-fadeIn">
               Pourquoi ces projets nous différencient ?
             </h2>
           </div>
 
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-8">
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    1. Approche sur mesure pour chaque secteur
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Chaque industrie a ses propres particularités et exigences. Notre approche sur mesure nous permet 
-                    d'adapter nos solutions aux besoins spécifiques de chaque secteur, garantissant ainsi une pertinence 
-                    et une efficacité maximales.
+                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 animate-fadeIn delay-100">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-orange-500/10 p-3 rounded-full mr-4">
+                      <span className="text-orange-500 text-xl font-bold">1</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-orange-500">
+                      Approche sur mesure
+                    </h3>
+                  </div>
+                  <p className="text-gray-300">
+                    Chaque industrie a ses particularités. Nous adaptons nos solutions aux besoins spécifiques de chaque secteur.
                   </p>
                 </div>
 
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    2. Qualité visuelle et technique alignée sur les standards actuels
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Nous sommes déterminés à fournir des produits qui non seulement sont esthétiquement plaisants mais 
-                    aussi techniquement robustes, offrant ainsi une expérience utilisateur exceptionnelle.
+                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 animate-fadeIn delay-200">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-orange-500/10 p-3 rounded-full mr-4">
+                      <span className="text-orange-500 text-xl font-bold">2</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-orange-500">
+                      Qualité visuelle et technique
+                    </h3>
+                  </div>
+                  <p className="text-gray-300">
+                    Produits esthétiquement plaisants et techniquement robustes pour une expérience exceptionnelle.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-8">
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    3. Sites performants, rapides et centrés utilisateur
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    La performance et la rapidité sont essentielles pour offrir une expérience fluide et agréable. 
-                    Nos sites sont conçus pour être rapides et réactifs, créons des interfaces intuitives et accessibles.
+                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 animate-fadeIn delay-300">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-orange-500/10 p-3 rounded-full mr-4">
+                      <span className="text-orange-500 text-xl font-bold">3</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-orange-500">
+                      Performance optimale
+                    </h3>
+                  </div>
+                  <p className="text-gray-300">
+                    Sites rapides et réactifs avec des interfaces intuitives et accessibles.
                   </p>
                 </div>
 
-                <div className="bg-aria-cream p-6 rounded-lg">
-                  <h3 className="text-xl font-bold text-aria-teal mb-3">
-                    4. Processus collaboratif et accompagnement stratégique
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Nous croyons en l'importance du travail d'équipe et de la collaboration avec nos clients. 
-                    En offrant un accompagnement stratégique, nous aidons nos clients à maximiser leur retour sur investissement.
+                <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 hover:border-orange-500 transition-all duration-300 animate-fadeIn delay-400">
+                  <div className="flex items-center mb-4">
+                    <div className="bg-orange-500/10 p-3 rounded-full mr-4">
+                      <span className="text-orange-500 text-xl font-bold">4</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-orange-500">
+                      Collaboration étroite
+                    </h3>
+                  </div>
+                  <p className="text-gray-300">
+                    Nous travaillons en étroite collaboration avec nos clients pour maximiser leur ROI.
                   </p>
                 </div>
               </div>
