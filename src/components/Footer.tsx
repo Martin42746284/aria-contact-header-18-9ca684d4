@@ -1,5 +1,5 @@
 import ContactForm from "./ContactForm";
-import ariaLogo from "@/assets/aria-logo.png";
+import ariaLogo from "@/images/aria-logo.png";
 
 const Footer = () => {
   return (

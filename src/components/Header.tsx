@@ -108,7 +108,7 @@ const Header = () => {
             <div className="flex items-center space-x-3 group cursor-pointer animate-float">
               <div className={`relative transition-all duration-500 ease-in-out ${scrolled ? 'h-14 w-14' : 'h-14 w-14'}`}>
                 <img
-                  src="src/assets/aria-logo.png"
+                  src="/images/aria-logo.png"
                   alt="ARIA Logo"
                   className="w-full h-full object-contain group-hover:animate-logo-spin group-hover:border-orange-400"
                 />
