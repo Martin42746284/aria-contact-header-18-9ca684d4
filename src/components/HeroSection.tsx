@@ -41,7 +41,7 @@ const HeroSection = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex justify-center mb-8 animate-float">
               <img 
-                src="src/assets/aria-logo.png" 
+                src="/images/aria-logo.png" 
                 alt="ARIA Logo" 
                 className="h-40 w-34"
               />
