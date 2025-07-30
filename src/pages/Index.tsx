@@ -274,7 +274,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-orange-500 mb-6 animate-fadeIn">
-              Pourquoi ces projets nous différencient ?
+              Pourquoi ces projets nous différencient-ils ?
             </h2>
           </div>
 
