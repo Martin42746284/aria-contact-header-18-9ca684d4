@@ -1,5 +1,4 @@
 import ContactForm from "./ContactForm";
-import ariaLogo from "@/images/aria-logo.png";
 
 const Footer = () => {
   return (
@@ -27,7 +26,7 @@ const Footer = () => {
             <div className="md:col-span-2">
               <div className="flex items-center space-x-3 mb-6">
                 <img
-                  src={ariaLogo}
+                  src="/images/aria-logo.png"
                   alt="ARIA Logo"
                   className="h-12 w-12"
                 />
