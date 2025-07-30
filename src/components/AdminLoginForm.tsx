@@ -18,13 +18,13 @@ const AdminLoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-xs">
+    <div className="min-h-screen flex items-center justify-center bg-black p-4">
+      <div className="w-full max-w-lg">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Header avec fond bleu */}
-          <div className="bg-blue-600 py-4 px-6">
+          {/* Header avec fond orange */}
+          <div className="bg-orange-600 py-4 px-6">
             <h1 className="text-xl font-bold text-white">ARIA</h1>
-            <p className="text-blue-100 text-sm">Administration</p>
+            <p className="text-orange-100 text-sm">Administration</p>
           </div>
 
           {/* Corps du formulaire */}
@@ -37,8 +37,8 @@ const AdminLoginForm = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label 
-                  htmlFor="email" 
+                <label
+                  htmlFor="email"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Nom d'utilisateur
@@ -48,15 +48,15 @@ const AdminLoginForm = () => {
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
                   placeholder="admin"
                   required
                 />
               </div>
 
               <div>
-                <label 
-                  htmlFor="password" 
+                <label
+                  htmlFor="password"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Mot de passe
@@ -66,7 +66,7 @@ const AdminLoginForm = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
                   placeholder="••••••••"
                   required
                 />
@@ -74,7 +74,7 @@ const AdminLoginForm = () => {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition duration-200"
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md transition duration-200"
               >
                 Se connecter
               </button>
