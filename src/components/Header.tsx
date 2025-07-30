@@ -117,7 +117,7 @@ const Header = () => {
             </div>
 
             {/* Navigation Desktop */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-8 ml-24"> {/* Ajout de ml-24 pour déplacer vers la droite */}
               {[
                 { href: '#accueil', label: 'Accueil' },
                 { href: '#about', label: 'À Propos' },
@@ -139,15 +139,13 @@ const Header = () => {
                   {item.label}
                 </a>
               ))}
-            </nav>
 
-            {/* CTA Button */}
-            <div className="hidden md:block">
+              {/* Bouton Contact */}
               <Button 
                 className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold px-6 py-2 rounded-full transform hover:scale-105 transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 animate-glow"
               >
                 <span className="flex items-center space-x-2">
-                  <span>Devis Gratuit</span>
+                  <span>Contact</span>
                   <svg 
                     className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -156,7 +154,7 @@ const Header = () => {
                   </svg>
                 </span>
               </Button>
-            </div>
+            </nav>
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
@@ -205,7 +203,7 @@ const Header = () => {
                 <Button 
                   className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold py-3 rounded-full transform hover:scale-105 transition-all duration-300 shadow-lg shadow-orange-500/25"
                 >
-                  contact
+                  Contact
                 </Button>
               </div>
             </nav>
