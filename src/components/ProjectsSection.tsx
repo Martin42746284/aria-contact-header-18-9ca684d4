@@ -10,7 +10,7 @@ const ProjectsSection = () => {
   const [projects, setProjects] = useState<ClientProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { elementRef, isVisible } = useScrollAnimation<HTMLDivElement>();
-  const { containerRef, visibleItems } = useStaggeredAnimation(projects.length, 200);
+  const { containerRef, visibleItems } = useStaggeredAnimation<HTMLDivElement>(projects.length, 200);
 
   useEffect(() => {
     // Charger les projets depuis le dashboard admin
