@@ -112,8 +112,9 @@ export const convertAdminToClientProject = (adminProject: AdminProject): ClientP
   };
 };
 
-// Clé localStorage pour les projets
-const PROJECTS_STORAGE_KEY = 'aria_admin_projects';
+// Clés localStorage pour les projets
+const PROJECTS_STORAGE_KEY = 'aria_admin_projects'; // Projets publiés (pour compatibilité)
+const ADMIN_PROJECTS_STORAGE_KEY = 'aria_all_admin_projects'; // Tous les projets admin
 
 // Sauvegarder les projets dans localStorage
 export const saveProjectsToStorage = (projects: AdminProject[]): void => {
