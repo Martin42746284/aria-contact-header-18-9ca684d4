@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveProjectsToStorage, getProjectsFromStorage, type AdminProject } from "@/services/projectsService";
+import { saveAllAdminProjects, getAllAdminProjects, getDefaultAdminProjects, type AdminProject } from "@/services/projectsService";
 
 interface CustomerMessage {
   id: number;
