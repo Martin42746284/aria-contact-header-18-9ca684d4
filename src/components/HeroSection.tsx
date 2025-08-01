@@ -122,30 +122,30 @@ const HeroSection = () => {
 
         .logo-container {
           position: relative;
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .logo-container:hover {
-          transform: scale(1.1) rotate(5deg);
+          transform: scale(1.05) rotate(2deg);
         }
 
         .logo-container::after {
           content: '';
           position: absolute;
-          top: -10px;
-          left: -10px;
-          right: -10px;
-          bottom: -10px;
+          top: -20px;
+          left: -20px;
+          right: -20px;
+          bottom: -20px;
           border-radius: 50%;
           background: linear-gradient(45deg, #f97316, #ea580c);
           opacity: 0;
           z-index: -1;
-          transition: opacity 0.3s ease;
+          transition: opacity 0.4s ease;
         }
 
         .logo-container:hover::after {
-          opacity: 0.2;
-          animation: pulse 1.5s ease-in-out infinite;
+          opacity: 0.3;
+          animation: pulse 2s ease-in-out infinite;
         }
       `}</style>
 
