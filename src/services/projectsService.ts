@@ -159,8 +159,10 @@ export const getProjectsFromStorage = (): AdminProject[] => {
 
 // Récupérer les projets formatés pour la page client
 export const getClientProjects = (): ClientProject[] => {
-  const adminProjects = getProjectsFromStorage();
-  return adminProjects.map(convertAdminToClientProject);
+  const allAdminProjects = getAllAdminProjects();
+  // Filtrer seulement les projets terminés pour la page client
+  const publishedProjects = allAdminProjects.filter(project => project.status === 'Terminé');
+  return publishedProjects.map(convertAdminToClientProject);
 };
 
 // Projets admin par défaut (basés sur les projets originaux)
