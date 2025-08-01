@@ -21,10 +21,13 @@ const AdminDashboard = () => {
 
   // Charger les projets depuis localStorage au montage du composant
   useEffect(() => {
-    // Forcer le rechargement des projets originaux
+    // Forcer le rechargement des projets originaux avec les vraies images
     const defaultProjects = getDefaultAdminProjects();
     setProjects(defaultProjects);
     saveAllAdminProjects(defaultProjects);
+
+    // Effacer l'ancien cache pour forcer le rechargement
+    localStorage.removeItem('aria_admin_projects');
   }, []);
 
   // Sauvegarder automatiquement les projets quand ils changent
