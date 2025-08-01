@@ -288,7 +288,7 @@ export const getDefaultProjects = (): ClientProject[] => {
         "Mise en place d'un blog intégré",
         "SEO et hébergement optimaux"
       ],
-      imageUrl: "/src/assets/eric.jpg",
+      imageUrl: "/images/eric.jpg",
       websiteUrl: "https://eric-raby.com"
     },
     {
@@ -306,7 +306,7 @@ export const getDefaultProjects = (): ClientProject[] => {
         "Intégration d'un espace sécurisé pour les profils",
         "Site multilingue prêt à l'internationalisation"
       ],
-      imageUrl: "/src/assets/connect.png",
+      imageUrl: "/images/connect.png",
       websiteUrl: "https://connecttalent.cc"
     },
     {
@@ -324,7 +324,7 @@ export const getDefaultProjects = (): ClientProject[] => {
         "Intégration d'un formulaire de demande de devis",
         "Site rapide et optimisé mobile"
       ],
-      imageUrl: "/src/assets/soa.jpg",
+      imageUrl: "/images/soa.jpg",
       websiteUrl: "https://soatransplus.mg"
     }
   ];
