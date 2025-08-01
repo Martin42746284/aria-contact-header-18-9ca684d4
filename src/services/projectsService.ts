@@ -266,7 +266,7 @@ export const getDefaultProjects = (): ClientProject[] => {
         "Design responsive et contenu optimisé SEO",
         "Back-office simple pour mise à jour autonome du client"
       ],
-      imageUrl: "/src/assets/go.jpg",
+      imageUrl: "/images/go.jpg",
       websiteUrl: "https://cgepro.com"
     },
     {
