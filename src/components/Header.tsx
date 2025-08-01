@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
+import { Menu, X, ChevronRight } from 'lucide-react';
+import "@/styles/animations.css";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('accueil');
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,133 +92,270 @@ const Header = () => {
         .mobile-menu {
           max-height: 0;
           overflow: hidden;
-          transition: max-height 0.3s ease-in-out;
+          transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+          opacity: 0;
         }
         .mobile-menu.open {
-          max-height: 300px;
+          max-height: 400px;
+          opacity: 1;
+        }
+
+        .hamburger-line {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hamburger-open .line1 {
+          transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .hamburger-open .line2 {
+          opacity: 0;
+        }
+
+        .hamburger-open .line3 {
+          transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        .nav-item {
+          position: relative;
+          transition: all 0.3s ease;
+        }
+
+        .nav-item::before {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          width: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #f97316, #ea580c);
+          transition: all 0.3s ease;
+          transform: translateX(-50%);
+          border-radius: 2px;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+          width: 100%;
+        }
+
+        .nav-item::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle at center, rgba(249, 115, 22, 0.1) 0%, transparent 70%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          border-radius: 8px;
+        }
+
+        .nav-item:hover::after {
+          opacity: 1;
+        }
+
+        .logo-glow {
+          position: relative;
+        }
+
+        .logo-glow::before {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          background: linear-gradient(45deg, #f97316, #ea580c, #f97316);
+          border-radius: 50%;
+          opacity: 0;
+          z-index: -1;
+          transition: opacity 0.3s ease;
+          filter: blur(8px);
+        }
+
+        .logo-glow:hover::before {
+          opacity: 0.6;
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .header-backdrop {
+          backdrop-filter: blur(20px);
+          background: rgba(0, 0, 0, 0.8);
+          border-bottom: 1px solid rgba(249, 115, 22, 0.2);
         }
       `}</style>
 
-      <header 
+      <header
         className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          scrolled 
-            ? 'bg-black/95 backdrop-blur-md border-b border-orange-500/30 shadow-lg shadow-orange-500/10' 
+          scrolled
+            ? 'header-backdrop shadow-xl shadow-orange-500/20'
             : 'bg-transparent'
         }`}
       >
         <div className="container mx-auto px-6 py-2">
           <div className="flex items-center justify-between">
-            {/* Logo avec taille dynamique */}
-            <div className="flex items-center space-x-3 group cursor-pointer animate-float">
-              <div className={`relative transition-all duration-500 ease-in-out ${scrolled ? 'h-14 w-14' : 'h-14 w-14'}`}>
+            {/* Logo avec effets avancés */}
+            <div
+              className="flex items-center space-x-3 group cursor-pointer"
+              onClick={() => {
+                document.getElementById('accueil')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <div className={`logo-glow relative transition-all duration-700 ease-out transform group-hover:scale-110 ${
+                scrolled ? 'h-12 w-12' : 'h-16 w-16'
+              }`}>
                 <img
                   src="/images/aria-logo.png"
                   alt="ARIA Logo"
-                  className="w-full h-full object-contain group-hover:animate-logo-spin group-hover:border-orange-400"
+                  className="w-full h-full object-contain transition-all duration-500 group-hover:rotate-12 filter drop-shadow-lg"
+                  style={{
+                    filter: scrolled
+                      ? 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.6))'
+                      : 'drop-shadow(0 0 5px rgba(249, 115, 22, 0.3))'
+                  }}
                 />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-glow"></div>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500/30 to-orange-600/30 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse-custom blur-md" />
+              </div>
+              <div className={`transition-all duration-500 ${
+                scrolled ? 'opacity-0 w-0' : 'opacity-100'
+              }`}>
+                <span className="text-white font-bold text-xl group-hover:text-orange-400 transition-colors duration-300">
+                  ARIA
+                </span>
               </div>
             </div>
 
             {/* Navigation Desktop */}
-            <nav className="hidden md:flex items-center space-x-8 ml-24"> {/* Ajout de ml-24 pour déplacer vers la droite */}
+            <nav className="hidden lg:flex items-center space-x-1">
               {[
-                { href: '#accueil', label: 'Accueil' },
-                { href: '#about', label: 'À Propos' },
-                { href: '#realisations', label: 'Nos Réalisations' },
-                { href: '#services', label: 'Services' },
-                { href: '#contact', label: 'Contact' }
+                { href: '#accueil', label: 'Accueil', icon: '🏠' },
+                { href: '#about', label: 'À Propos', icon: '✨' },
+                { href: '#realisations', label: 'Réalisations', icon: '🚀' },
+                { href: '#services', label: 'Services', icon: '⚡' },
+                { href: '#contact', label: 'Contact', icon: '📧' }
               ].map((item, index) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className={`nav-link px-3 py-2 rounded-lg transition-all duration-300 text-sm font-medium ${
+                  className={`nav-item relative px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group ${
                     activeSection === item.href.substring(1)
                       ? 'text-orange-400 active'
-                      : scrolled 
-                        ? 'text-gray-300 hover:text-orange-400' 
+                      : scrolled
+                        ? 'text-gray-300 hover:text-orange-400'
                         : 'text-white/90 hover:text-orange-400'
                   }`}
+                  onMouseEnter={() => setHoveredItem(item.href)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  {item.label}
+                  <span className="flex items-center space-x-2 relative z-10">
+                    <span className="text-xs group-hover:animate-bounce">{item.icon}</span>
+                    <span>{item.label}</span>
+                  </span>
+                  {hoveredItem === item.href && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-xl animate-scale-in" />
+                  )}
                 </a>
               ))}
 
-              {/* Bouton Contact */}
-              <Button 
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold px-6 py-2 rounded-full transform hover:scale-105 transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 animate-glow"
+              {/* Bouton Contact avancé */}
+              <Button
+                className="group relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold px-8 py-3 rounded-full transform hover:scale-105 transition-all duration-500 shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 overflow-hidden"
+                onClick={() => {
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
-                <span className="flex items-center space-x-2">
-                  <span>Contact</span>
-                  <svg 
-                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                  </svg>
+                <span className="relative z-10 flex items-center space-x-2">
+                  <span className="transition-all duration-300 group-hover:translate-x-1">Parlons projet</span>
+                  <ChevronRight className="w-4 h-4 transform group-hover:translate-x-2 transition-transform duration-300" />
                 </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </Button>
             </nav>
 
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button 
-                className={`relative w-8 h-8 flex flex-col justify-center items-center transition-all duration-300 ${
+            {/* Mobile Menu Button avancé */}
+            <div className="lg:hidden">
+              <button
+                className={`hamburger-open relative w-10 h-10 flex flex-col justify-center items-center rounded-lg transition-all duration-300 hover:bg-orange-500/10 ${
+                  mobileMenuOpen ? 'hamburger-open' : ''
+                } ${
                   scrolled ? 'text-orange-400' : 'text-white'
                 }`}
                 onClick={() => {
-                  const mobileMenu = document.getElementById('mobile-menu');
-                  if (mobileMenu) {
-                    mobileMenu.classList.toggle('open');
-                  }
+                  setMobileMenuOpen(!mobileMenuOpen);
                 }}
               >
-                <span className="block w-6 h-0.5 bg-current transition-all duration-300 transform"></span>
-                <span className="block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform"></span>
-                <span className="block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform"></span>
+                <span className={`hamburger-line line1 block w-6 h-0.5 bg-current transition-all duration-300 transform ${
+                  mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''
+                }`}></span>
+                <span className={`hamburger-line line2 block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform ${
+                  mobileMenuOpen ? 'opacity-0' : ''
+                }`}></span>
+                <span className={`hamburger-line line3 block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform ${
+                  mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''
+                }`}></span>
               </button>
             </div>
           </div>
 
-          {/* Mobile Menu */}
-          <div id="mobile-menu" className="mobile-menu md:hidden mt-4">
-            <nav className="flex flex-col space-y-4 p-4 bg-black/95 backdrop-blur-md rounded-lg border border-orange-500/30">
-              {[
-                { href: '#accueil', label: 'Accueil' },
-                { href: '#about', label: 'Nos Réalisations' },
-                { href: '#services', label: 'Services' },
-                { href: '#apropos', label: 'À Propos' },
-                { href: '#contact', label: 'Contact' }
-              ].map((item, index) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={`nav-link block px-4 py-2 rounded-lg transition-all duration-300 ${
-                    activeSection === item.href.substring(1)
-                      ? 'text-orange-400 bg-orange-500/10 active'
-                      : 'text-gray-300 hover:text-orange-400 hover:bg-orange-500/5'
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
+          {/* Mobile Menu avancé */}
+          <div className={`mobile-menu lg:hidden mt-6 ${mobileMenuOpen ? 'open' : ''}`}>
+            <nav className="bg-black/95 backdrop-blur-xl rounded-2xl border border-orange-500/30 shadow-2xl shadow-orange-500/20 overflow-hidden">
+              <div className="p-6">
+                {[
+                  { href: '#accueil', label: 'Accueil', icon: '🏠' },
+                  { href: '#about', label: 'À Propos', icon: '✨' },
+                  { href: '#realisations', label: 'Réalisations', icon: '🚀' },
+                  { href: '#services', label: 'Services', icon: '⚡' },
+                  { href: '#contact', label: 'Contact', icon: '📧' }
+                ].map((item, index) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={`nav-item flex items-center space-x-3 px-4 py-4 rounded-xl transition-all duration-300 mb-2 group ${
+                      activeSection === item.href.substring(1)
+                        ? 'text-orange-400 bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/30'
+                        : 'text-gray-300 hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-500/10 hover:to-orange-600/10'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <span className="text-lg group-hover:animate-bounce">{item.icon}</span>
+                    <span className="font-medium">{item.label}</span>
+                    <ChevronRight className="w-4 h-4 ml-auto transform group-hover:translate-x-1 transition-transform duration-300" />
+                  </a>
+                ))}
 
-              <div className="pt-4 border-t border-orange-500/30">
-                <Button 
-                  className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold py-3 rounded-full transform hover:scale-105 transition-all duration-300 shadow-lg shadow-orange-500/25"
-                >
-                  Contact
-                </Button>
+                <div className="pt-6 mt-6 border-t border-orange-500/30">
+                  <Button
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold py-4 rounded-full transform hover:scale-105 transition-all duration-300 shadow-xl shadow-orange-500/40 group"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  >
+                    <span className="flex items-center justify-center space-x-2">
+                      <span>Parlons projet</span>
+                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                  </Button>
+                </div>
               </div>
             </nav>
           </div>
         </div>
 
-        {/* Barre de progression scroll */}
-        <div 
-          className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-orange-500 to-orange-600 transition-all duration-300"
-          style={{ width: `${scrollProgress}%` }}
-        ></div>
+        {/* Barre de progression scroll avancée */}
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-800/30">
+          <div
+            className="h-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 transition-all duration-300 relative overflow-hidden"
+            style={{ width: `${scrollProgress}%` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+          </div>
+        </div>
       </header>
     </>
   );
