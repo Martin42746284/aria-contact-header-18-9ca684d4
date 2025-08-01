@@ -143,6 +143,89 @@ export const getClientProjects = (): ClientProject[] => {
   return adminProjects.map(convertAdminToClientProject);
 };
 
+// Projets admin par défaut (basés sur les projets originaux)
+export const getDefaultAdminProjects = (): AdminProject[] => {
+  return [
+    {
+      id: 1,
+      title: "CGEPRO",
+      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
+      technologies: ["WordPress", "PHP", "MySQL", "SEO"],
+      client: "CGEPRO",
+      duration: "2 mois",
+      status: "Terminé",
+      image: null,
+      imagePreview: "/placeholder.svg",
+      date: "15/03/2024",
+      url: "https://cgepro.com"
+    },
+    {
+      id: 2,
+      title: "ERIC RABY",
+      description: "Coaching en compétences sociales et émotionnelles",
+      technologies: ["React", "Node.js", "Stripe", "Calendar API"],
+      client: "Eric Raby Coaching",
+      duration: "3 mois",
+      status: "Terminé",
+      image: null,
+      imagePreview: "/placeholder.svg",
+      date: "22/04/2024",
+      url: "https://eric-raby.com"
+    },
+    {
+      id: 3,
+      title: "CONNECT TALENT",
+      description: "Plateforme de mise en relation entre entreprises et talents africains",
+      technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
+      client: "Connect Talent Inc",
+      duration: "5 mois",
+      status: "Terminé",
+      image: null,
+      imagePreview: "/placeholder.svg",
+      date: "10/05/2024",
+      url: "https://connecttalent.cc"
+    },
+    {
+      id: 4,
+      title: "SOA DIA TRAVEL",
+      description: "Transport & Logistique à Madagascar",
+      technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
+      client: "SOA DIA TRAVEL",
+      duration: "4 mois",
+      status: "Terminé",
+      image: null,
+      imagePreview: "/placeholder.svg",
+      date: "28/06/2024",
+      url: "https://soatransplus.mg"
+    },
+    {
+      id: 5,
+      title: "Site E-commerce Fashion",
+      description: "Développement d'une plateforme e-commerce complète avec système de paiement intégré",
+      technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      client: "Fashion Boutique",
+      duration: "3 mois",
+      status: "Terminé",
+      image: null,
+      imagePreview: null,
+      date: "15/06/2024",
+      url: "https://fashion-boutique.com"
+    },
+    {
+      id: 6,
+      title: "Application Mobile Banking",
+      description: "Application mobile sécurisée pour la gestion bancaire avec authentification biométrique",
+      technologies: ["React Native", "Firebase", "Redux"],
+      client: "BankTech Solutions",
+      duration: "6 mois",
+      status: "En cours",
+      image: null,
+      imagePreview: null,
+      date: "01/07/2024"
+    }
+  ];
+};
+
 // Projets par défaut (fallback)
 export const getDefaultProjects = (): ClientProject[] => {
   return [
