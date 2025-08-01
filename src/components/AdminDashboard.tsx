@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { saveProjectsToStorage, getProjectsFromStorage, type AdminProject } from "@/services/projectsService";
 
 interface CustomerMessage {
   id: number;
@@ -11,49 +12,58 @@ interface CustomerMessage {
   date: string;
 }
 
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  technologies: string[];
-  client: string;
-  duration: string;
-  status: 'En cours' | 'Terminé' | 'En attente';
-  image: File | null;
-  imagePreview: string | null;
-  date: string;
-  url?: string;
-}
+// Interface déplacée vers projectsService.ts
+// Nous utilisons maintenant AdminProject du service
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: 1,
-      title: "Site E-commerce Fashion",
-      description: "Développement d'une plateforme e-commerce complète avec système de paiement intégré",
-      technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-      client: "Fashion Boutique",
-      duration: "3 mois",
-      status: "Terminé",
-      image: null,
-      imagePreview: null,
-      date: "15/06/2024",
-      url: "https://fashion-boutique.com"
-    },
-    {
-      id: 2,
-      title: "Application Mobile Banking",
-      description: "Application mobile sécurisée pour la gestion bancaire avec authentification biométrique",
-      technologies: ["React Native", "Firebase", "Redux"],
-      client: "BankTech Solutions",
-      duration: "6 mois",
-      status: "En cours",
-      image: null,
-      imagePreview: null,
-      date: "01/07/2024"
+  const [projects, setProjects] = useState<AdminProject[]>([]);
+
+  // Charger les projets depuis localStorage au montage du composant
+  useEffect(() => {
+    const savedProjects = getProjectsFromStorage();
+    if (savedProjects.length > 0) {
+      setProjects(savedProjects);
+    } else {
+      // Projets par défaut si aucun projet sauvegardé
+      const defaultProjects: AdminProject[] = [
+        {
+          id: 1,
+          title: "Site E-commerce Fashion",
+          description: "Développement d'une plateforme e-commerce complète avec système de paiement intégré",
+          technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+          client: "Fashion Boutique",
+          duration: "3 mois",
+          status: "Terminé",
+          image: null,
+          imagePreview: null,
+          date: "15/06/2024",
+          url: "https://fashion-boutique.com"
+        },
+        {
+          id: 2,
+          title: "Application Mobile Banking",
+          description: "Application mobile sécurisée pour la gestion bancaire avec authentification biométrique",
+          technologies: ["React Native", "Firebase", "Redux"],
+          client: "BankTech Solutions",
+          duration: "6 mois",
+          status: "En cours",
+          image: null,
+          imagePreview: null,
+          date: "01/07/2024"
+        }
+      ];
+      setProjects(defaultProjects);
+      saveProjectsToStorage(defaultProjects);
     }
-  ]);
+  }, []);
+
+  // Sauvegarder automatiquement les projets quand ils changent
+  useEffect(() => {
+    if (projects.length > 0) {
+      saveProjectsToStorage(projects);
+    }
+  }, [projects]);
   const [messages, setMessages] = useState<CustomerMessage[]>([
     {
       id: 1,
@@ -187,7 +197,7 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleEdit = (project: Project) => {
+  const handleEdit = (project: AdminProject) => {
     setNewProject({
       title: project.title,
       description: project.description,
@@ -593,9 +603,14 @@ const AdminDashboard = () => {
 
             {/* Projects */}
             <div className="bg-gray-900 p-6 rounded-xl shadow-2xl animate-fadeInRight border border-gray-800">
-              <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-1">
-                 Projets (Nos réalisations)
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold text-orange-400 transform transition duration-500 hover:translate-x-1">
+                   Projets (Nos réalisations)
+                </h2>
+                <div className="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full">
+                  {projects.filter(p => p.status === 'Terminé').length} publiés sur le site
+                </div>
+              </div>
               {projects.length === 0 ? (
                 <p className="text-gray-400 animate-pulse text-center py-8">Aucun projet pour le moment</p>
               ) : (
