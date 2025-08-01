@@ -12,6 +12,7 @@ const ProjectsSection = () => {
   const { elementRef, isVisible } = useScrollAnimation<HTMLDivElement>();
   const { containerRef, visibleItems } = useStaggeredAnimation<HTMLDivElement>(projects.length, 200);
 
+  
   useEffect(() => {
     // Charger les projets depuis le dashboard admin
     const loadProjects = () => {
