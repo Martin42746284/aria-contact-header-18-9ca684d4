@@ -127,6 +127,25 @@ export const saveProjectsToStorage = (projects: AdminProject[]): void => {
   }
 };
 
+// Sauvegarder la liste complète des projets admin
+export const saveAllAdminProjects = (projects: AdminProject[]): void => {
+  try {
+    localStorage.setItem(ADMIN_PROJECTS_STORAGE_KEY, JSON.stringify(projects));
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde des projets admin:', error);
+  }
+};
+
+export const getAllAdminProjects = (): AdminProject[] => {
+  try {
+    const stored = localStorage.getItem(ADMIN_PROJECTS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Erreur lors de la récupération des projets admin:', error);
+    return [];
+  }
+};
+
 // Récupérer les projets depuis localStorage
 export const getProjectsFromStorage = (): AdminProject[] => {
   try {
