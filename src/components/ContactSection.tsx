@@ -382,4 +382,4 @@ const ContactSection = () => {
   );
 };
 
-export default Footer;
+export default ContactSection;
