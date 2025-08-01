@@ -191,17 +191,17 @@ const HeroSection = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-5xl mx-auto text-center">
             {/* Logo avec effets avancés */}
-            <div className="flex justify-center mb-12">
+            <div className="flex justify-center mb-16">
               <div className="logo-container animate-bounce-in">
                 <img
                   src="/images/aria-logo.png"
                   alt="ARIA Logo"
-                  className="h-48 w-auto filter drop-shadow-2xl"
+                  className="h-72 md:h-80 lg:h-96 w-auto filter drop-shadow-2xl"
                   style={{
-                    filter: `drop-shadow(0 0 20px rgba(249, 115, 22, 0.6))`
+                    filter: `drop-shadow(0 0 30px rgba(249, 115, 22, 0.8))`
                   }}
                 />
-                <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-full blur-xl opacity-75 animate-pulse-custom" />
+                <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/30 to-orange-600/30 rounded-full blur-2xl opacity-85 animate-pulse-custom" />
               </div>
             </div>
 
