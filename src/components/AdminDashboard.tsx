@@ -11,18 +11,49 @@ interface CustomerMessage {
   date: string;
 }
 
-interface BlogPost {
+interface Project {
   id: number;
   title: string;
-  content: string;
+  description: string;
+  technologies: string[];
+  client: string;
+  duration: string;
+  status: 'En cours' | 'Terminé' | 'En attente';
   image: File | null;
   imagePreview: string | null;
   date: string;
+  url?: string;
 }
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      id: 1,
+      title: "Site E-commerce Fashion",
+      description: "Développement d'une plateforme e-commerce complète avec système de paiement intégré",
+      technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+      client: "Fashion Boutique",
+      duration: "3 mois",
+      status: "Terminé",
+      image: null,
+      imagePreview: null,
+      date: "15/06/2024",
+      url: "https://fashion-boutique.com"
+    },
+    {
+      id: 2,
+      title: "Application Mobile Banking",
+      description: "Application mobile sécurisée pour la gestion bancaire avec authentification biométrique",
+      technologies: ["React Native", "Firebase", "Redux"],
+      client: "BankTech Solutions",
+      duration: "6 mois",
+      status: "En cours",
+      image: null,
+      imagePreview: null,
+      date: "01/07/2024"
+    }
+  ]);
   const [messages, setMessages] = useState<CustomerMessage[]>([
     {
       id: 1,
@@ -44,23 +75,31 @@ const AdminDashboard = () => {
     },
   ]);
 
-  const [newPost, setNewPost] = useState({
+  const [newProject, setNewProject] = useState({
     title: "",
-    content: "",
+    description: "",
+    technologies: [] as string[],
+    client: "",
+    duration: "",
+    status: "En attente" as 'En cours' | 'Terminé' | 'En attente',
     image: null as File | null,
     imagePreview: null as string | null,
+    url: "",
   });
 
-  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const [currentTechnology, setCurrentTechnology] = useState("");
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+  const [messageReply, setMessageReply] = useState("");
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     navigate("/admin");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewPost({ ...newPost, [name]: value });
+    setNewProject({ ...newProject, [name]: value });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,8 +107,8 @@ const AdminDashboard = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewPost({
-          ...newPost,
+        setNewProject({
+          ...newProject,
           image: file,
           imagePreview: reader.result as string,
         });
@@ -78,58 +117,119 @@ const AdminDashboard = () => {
     }
   };
 
+  const addTechnology = () => {
+    if (currentTechnology.trim() && !newProject.technologies.includes(currentTechnology.trim())) {
+      setNewProject({
+        ...newProject,
+        technologies: [...newProject.technologies, currentTechnology.trim()]
+      });
+      setCurrentTechnology("");
+    }
+  };
+
+  const removeTechnology = (tech: string) => {
+    setNewProject({
+      ...newProject,
+      technologies: newProject.technologies.filter(t => t !== tech)
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingPostId !== null) {
-      setPosts(
-        posts.map((post) =>
-          post.id === editingPostId
+    if (editingProjectId !== null) {
+      setProjects(
+        projects.map((project) =>
+          project.id === editingProjectId
             ? {
-                ...post,
-                title: newPost.title,
-                content: newPost.content,
-                image: newPost.image,
-                imagePreview: newPost.imagePreview,
+                ...project,
+                title: newProject.title,
+                description: newProject.description,
+                technologies: newProject.technologies,
+                client: newProject.client,
+                duration: newProject.duration,
+                status: newProject.status,
+                image: newProject.image,
+                imagePreview: newProject.imagePreview,
+                url: newProject.url,
               }
-            : post
+            : project
         )
       );
-      setEditingPostId(null);
+      setEditingProjectId(null);
     } else {
-      setPosts([
-        ...posts,
+      setProjects([
+        ...projects,
         {
           id: Date.now(),
-          title: newPost.title,
-          content: newPost.content,
-          image: newPost.image,
-          imagePreview: newPost.imagePreview,
+          title: newProject.title,
+          description: newProject.description,
+          technologies: newProject.technologies,
+          client: newProject.client,
+          duration: newProject.duration,
+          status: newProject.status,
+          image: newProject.image,
+          imagePreview: newProject.imagePreview,
           date: new Date().toLocaleDateString(),
+          url: newProject.url,
         },
       ]);
     }
-    setNewPost({ title: "", content: "", image: null, imagePreview: null });
-  };
-
-  const handleEdit = (post: BlogPost) => {
-    setNewPost({
-      title: post.title,
-      content: post.content,
-      image: post.image,
-      imagePreview: post.imagePreview,
+    setNewProject({
+      title: "",
+      description: "",
+      technologies: [],
+      client: "",
+      duration: "",
+      status: "En attente",
+      image: null,
+      imagePreview: null,
+      url: "",
     });
-    setEditingPostId(post.id);
   };
 
-  const handleDelete = (postId: number) => {
-    const postElement = document.getElementById(`post-${postId}`);
-    if (postElement) {
-      postElement.classList.add("opacity-0", "scale-95", "transition-all", "duration-300");
+  const handleEdit = (project: Project) => {
+    setNewProject({
+      title: project.title,
+      description: project.description,
+      technologies: project.technologies,
+      client: project.client,
+      duration: project.duration,
+      status: project.status,
+      image: project.image,
+      imagePreview: project.imagePreview,
+      url: project.url || "",
+    });
+    setEditingProjectId(project.id);
+  };
+
+  const handleDelete = (projectId: number) => {
+    const projectElement = document.getElementById(`project-${projectId}`);
+    if (projectElement) {
+      projectElement.classList.add("opacity-0", "scale-95", "transition-all", "duration-300");
       setTimeout(() => {
-        setPosts(posts.filter((post) => post.id !== postId));
+        setProjects(projects.filter((project) => project.id !== projectId));
       }, 300);
     } else {
-      setPosts(posts.filter((post) => post.id !== postId));
+      setProjects(projects.filter((project) => project.id !== projectId));
+    }
+  };
+
+  const handleDeleteMessage = (messageId: number) => {
+    setMessages(messages.filter((message) => message.id !== messageId));
+  };
+
+  const handleMarkAsRead = (messageId: number) => {
+    setMessages(messages.map(msg =>
+      msg.id === messageId ? { ...msg, read: true } : msg
+    ));
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Terminé': return 'text-green-400 bg-green-900/20 border-green-500';
+      case 'En cours': return 'text-blue-400 bg-blue-900/20 border-blue-500';
+      case 'En attente': return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
+      default: return 'text-gray-400 bg-gray-900/20 border-gray-500';
     }
   };
 
@@ -155,38 +255,142 @@ const AdminDashboard = () => {
             {/* New Post Form */}
             <div className="bg-gray-900 p-6 rounded-xl shadow-2xl transition-all duration-300 hover:shadow-orange-500/20 animate-fadeInLeft border border-gray-800">
               <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-2">
-                {editingPostId !== null ? "Modifier la publication" : "Nouvelle publication"}
+                {editingProjectId !== null ? "Modifier le projet" : "Nouveau projet"}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-orange-300 mb-2 font-medium" htmlFor="title">
-                    Titre
+                    Titre du projet
                   </label>
                   <input
                     type="text"
                     id="title"
                     name="title"
-                    value={newPost.title}
+                    value={newProject.title}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600"
                     required
-                    placeholder="Entrez le titre..."
+                    placeholder="Nom du projet..."
                   />
                 </div>
                 <div>
-                  <label className="block text-orange-300 mb-2 font-medium" htmlFor="content">
-                    Contenu
+                  <label className="block text-orange-300 mb-2 font-medium" htmlFor="description">
+                    Description
                   </label>
                   <textarea
-                    id="content"
-                    name="content"
-                    value={newPost.content}
+                    id="description"
+                    name="description"
+                    value={newProject.description}
                     onChange={handleInputChange}
-                    rows={5}
+                    rows={4}
                     className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600 resize-none"
                     required
-                    placeholder="Écrivez votre contenu..."
+                    placeholder="Description du projet..."
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-orange-300 mb-2 font-medium" htmlFor="client">
+                      Client
+                    </label>
+                    <input
+                      type="text"
+                      id="client"
+                      name="client"
+                      value={newProject.client}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600"
+                      required
+                      placeholder="Nom du client..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-orange-300 mb-2 font-medium" htmlFor="duration">
+                      Durée
+                    </label>
+                    <input
+                      type="text"
+                      id="duration"
+                      name="duration"
+                      value={newProject.duration}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600"
+                      required
+                      placeholder="ex: 3 mois"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-orange-300 mb-2 font-medium" htmlFor="status">
+                      Statut
+                    </label>
+                    <select
+                      id="status"
+                      name="status"
+                      value={newProject.status}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600"
+                      required
+                    >
+                      <option value="En attente">En attente</option>
+                      <option value="En cours">En cours</option>
+                      <option value="Terminé">Terminé</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-orange-300 mb-2 font-medium" htmlFor="url">
+                      URL (optionnel)
+                    </label>
+                    <input
+                      type="url"
+                      id="url"
+                      name="url"
+                      value={newProject.url}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-orange-300 mb-2 font-medium">
+                    Technologies utilisées
+                  </label>
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      value={currentTechnology}
+                      onChange={(e) => setCurrentTechnology(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
+                      className="flex-1 px-4 py-2 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600"
+                      placeholder="Ajouter une technologie..."
+                    />
+                    <button
+                      type="button"
+                      onClick={addTechnology}
+                      className="px-4 py-2 bg-orange-500 text-black rounded-lg hover:bg-orange-400 transition duration-300 font-medium"
+                    >
+                      Ajouter
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {newProject.technologies.map((tech) => (
+                      <span
+                        key={tech}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full border border-orange-500/50 text-sm"
+                      >
+                        {tech}
+                        <button
+                          type="button"
+                          onClick={() => removeTechnology(tech)}
+                          className="ml-1 text-orange-400 hover:text-orange-300 transition duration-200"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-orange-300 mb-2 font-medium" htmlFor="image">
@@ -204,12 +408,12 @@ const AdminDashboard = () => {
                     htmlFor="image"
                     className="block w-full px-4 py-3 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-700 transition duration-300 transform hover:scale-[1.01] shadow-sm text-orange-300 text-center font-medium hover:border-orange-500"
                   >
-                     Choisir une image
+                     Choisir une image du projet
                   </label>
-                  {newPost.imagePreview && (
+                  {newProject.imagePreview && (
                     <div className="mt-4 animate-fadeIn">
                       <img
-                        src={newPost.imagePreview}
+                        src={newProject.imagePreview}
                         alt="Preview"
                         className="h-40 w-full object-cover rounded-lg border-2 border-orange-500 transition duration-300 hover:scale-[1.02] shadow-lg"
                       />
@@ -217,12 +421,22 @@ const AdminDashboard = () => {
                   )}
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
-                  {editingPostId !== null && (
+                  {editingProjectId !== null && (
                     <button
                       type="button"
                       onClick={() => {
-                        setNewPost({ title: "", content: "", image: null, imagePreview: null });
-                        setEditingPostId(null);
+                        setNewProject({
+                          title: "",
+                          description: "",
+                          technologies: [],
+                          client: "",
+                          duration: "",
+                          status: "En attente",
+                          image: null,
+                          imagePreview: null,
+                          url: "",
+                        });
+                        setEditingProjectId(null);
                       }}
                       className="bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition duration-300 transform hover:-translate-y-1 font-medium"
                     >
@@ -233,7 +447,7 @@ const AdminDashboard = () => {
                     type="submit"
                     className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-3 px-6 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-orange-500/50"
                   >
-                    {editingPostId !== null ? "Modifier" : "Publier"}
+                    {editingProjectId !== null ? "Modifier" : "Créer le projet"}
                   </button>
                 </div>
               </form>
@@ -246,8 +460,16 @@ const AdminDashboard = () => {
               </h2>
               <div className="space-y-4">
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
-                  <p className="text-orange-300 font-medium">Publications</p>
-                  <p className="text-2xl font-bold text-white">{posts.length}</p>
+                  <p className="text-orange-300 font-medium">Projets totaux</p>
+                  <p className="text-2xl font-bold text-white">{projects.length}</p>
+                </div>
+                <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
+                  <p className="text-orange-300 font-medium">Projets terminés</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'Terminé').length}</p>
+                </div>
+                <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
+                  <p className="text-orange-300 font-medium">Projets en cours</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'En cours').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Visiteurs aujourd'hui</p>
