@@ -177,7 +177,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "2 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/src/assets/go.jpg",
+      imagePreview: "/images/go.jpg",
       date: "15/03/2024",
       url: "https://cgepro.com"
     },
@@ -190,7 +190,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "3 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/src/assets/eric.jpg",
+      imagePreview: "/images/eric.jpg",
       date: "22/04/2024",
       url: "https://eric-raby.com"
     },
@@ -203,7 +203,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "5 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/src/assets/connect.png",
+      imagePreview: "/images/connect.png",
       date: "10/05/2024",
       url: "https://connecttalent.cc"
     },
@@ -216,7 +216,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "4 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/src/assets/soa.jpg",
+      imagePreview: "/images/soa.jpg",
       date: "28/06/2024",
       url: "https://soatransplus.mg"
     },
