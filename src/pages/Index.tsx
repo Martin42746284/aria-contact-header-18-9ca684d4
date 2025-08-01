@@ -4,6 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import ApproachSection from "@/components/ApproachSection";
+import ContactSection from "@/components/ContactSection";
 import "@/styles/animations.css";
 
 const Index = () => {
@@ -23,6 +24,7 @@ const Index = () => {
         <AboutSection />
         <ProjectsSection />
         <ApproachSection />
+        <ContactSection />
         <Footer />
       </div>
     </div>
