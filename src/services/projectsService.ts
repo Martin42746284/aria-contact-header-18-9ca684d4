@@ -177,7 +177,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "2 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/placeholder.svg",
+      imagePreview: "/src/assets/go.jpg",
       date: "15/03/2024",
       url: "https://cgepro.com"
     },
@@ -190,7 +190,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "3 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/placeholder.svg",
+      imagePreview: "/src/assets/eric.jpg",
       date: "22/04/2024",
       url: "https://eric-raby.com"
     },
@@ -203,7 +203,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "5 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/placeholder.svg",
+      imagePreview: "/src/assets/connect.png",
       date: "10/05/2024",
       url: "https://connecttalent.cc"
     },
@@ -216,7 +216,7 @@ export const getDefaultAdminProjects = (): AdminProject[] => {
       duration: "4 mois",
       status: "Terminé",
       image: null,
-      imagePreview: "/placeholder.svg",
+      imagePreview: "/src/assets/soa.jpg",
       date: "28/06/2024",
       url: "https://soatransplus.mg"
     },
@@ -266,7 +266,7 @@ export const getDefaultProjects = (): ClientProject[] => {
         "Design responsive et contenu optimisé SEO",
         "Back-office simple pour mise à jour autonome du client"
       ],
-      imageUrl: "/placeholder.svg",
+      imageUrl: "/src/assets/go.jpg",
       websiteUrl: "https://cgepro.com"
     },
     {
@@ -288,8 +288,44 @@ export const getDefaultProjects = (): ClientProject[] => {
         "Mise en place d'un blog intégré",
         "SEO et hébergement optimaux"
       ],
-      imageUrl: "/placeholder.svg",
+      imageUrl: "/src/assets/eric.jpg",
       websiteUrl: "https://eric-raby.com"
+    },
+    {
+      title: "CONNECT TALENT",
+      description: "Plateforme de mise en relation entre entreprises et talents africains",
+      sector: "Recrutement & Talents internationaux",
+      objectives: [
+        "Créer une plateforme de mise en relation entre entreprises et talents africains",
+        "Valoriser la dimension humaine et l'impact social du projet",
+        "Faciliter l'enregistrement et la candidature en ligne"
+      ],
+      solutions: [
+        "UI/UX épuré pour une navigation intuitive",
+        "Formulaires interactifs pour les candidats et recruteurs",
+        "Intégration d'un espace sécurisé pour les profils",
+        "Site multilingue prêt à l'internationalisation"
+      ],
+      imageUrl: "/src/assets/connect.png",
+      websiteUrl: "https://connecttalent.cc"
+    },
+    {
+      title: "SOA DIA TRAVEL",
+      description: "Transport & Logistique à Madagascar",
+      sector: "Transport & Logistique",
+      objectives: [
+        "Mettre en avant la flotte de transport et les services logistiques",
+        "Créer une plateforme responsive et professionnelle",
+        "Intégrer une navigation simple et une identité visuelle forte"
+      ],
+      solutions: [
+        "Design moderne centré sur la fiabilité",
+        "Structure claire et hiérarchisée pour les services",
+        "Intégration d'un formulaire de demande de devis",
+        "Site rapide et optimisé mobile"
+      ],
+      imageUrl: "/src/assets/soa.jpg",
+      websiteUrl: "https://soatransplus.mg"
     }
   ];
 };
