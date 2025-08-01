@@ -21,47 +21,16 @@ const AdminDashboard = () => {
 
   // Charger les projets depuis localStorage au montage du composant
   useEffect(() => {
-    const savedProjects = getProjectsFromStorage();
-    if (savedProjects.length > 0) {
-      setProjects(savedProjects);
-    } else {
-      // Projets par défaut si aucun projet sauvegardé
-      const defaultProjects: AdminProject[] = [
-        {
-          id: 1,
-          title: "Site E-commerce Fashion",
-          description: "Développement d'une plateforme e-commerce complète avec système de paiement intégré",
-          technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-          client: "Fashion Boutique",
-          duration: "3 mois",
-          status: "Terminé",
-          image: null,
-          imagePreview: null,
-          date: "15/06/2024",
-          url: "https://fashion-boutique.com"
-        },
-        {
-          id: 2,
-          title: "Application Mobile Banking",
-          description: "Application mobile sécurisée pour la gestion bancaire avec authentification biométrique",
-          technologies: ["React Native", "Firebase", "Redux"],
-          client: "BankTech Solutions",
-          duration: "6 mois",
-          status: "En cours",
-          image: null,
-          imagePreview: null,
-          date: "01/07/2024"
-        }
-      ];
-      setProjects(defaultProjects);
-      saveProjectsToStorage(defaultProjects);
-    }
+    // Forcer le rechargement des projets originaux
+    const defaultProjects = getDefaultAdminProjects();
+    setProjects(defaultProjects);
+    saveAllAdminProjects(defaultProjects);
   }, []);
 
   // Sauvegarder automatiquement les projets quand ils changent
   useEffect(() => {
     if (projects.length > 0) {
-      saveProjectsToStorage(projects);
+      saveAllAdminProjects(projects);
     }
   }, [projects]);
   const [messages, setMessages] = useState<CustomerMessage[]>([
