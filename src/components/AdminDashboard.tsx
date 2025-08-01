@@ -627,9 +627,16 @@ const AdminDashboard = () => {
                             <h3 className="text-xl font-bold text-orange-400 transition duration-300 hover:text-orange-300">
                               {project.title}
                             </h3>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
-                              {project.status}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
+                                {project.status}
+                              </span>
+                              {project.status === 'Terminé' && (
+                                <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
+                                  🌐 Publié sur le site
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-400 mb-2">
                             <span>📅 Créé le {project.date}</span>
@@ -669,6 +676,25 @@ const AdminDashboard = () => {
                             </span>
                           ))}
                         </div>
+
+                        {/* Indication de publication */}
+                        {project.status === 'Terminé' && (
+                          <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                            <p className="text-green-400 text-sm flex items-center gap-2">
+                              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                              Ce projet est visible sur la page publique "Nos Réalisations"
+                            </p>
+                          </div>
+                        )}
+
+                        {project.status !== 'Terminé' && (
+                          <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                            <p className="text-yellow-400 text-sm flex items-center gap-2">
+                              <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
+                              Changez le statut en "Terminé" pour publier ce projet sur le site
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       {project.url && (
