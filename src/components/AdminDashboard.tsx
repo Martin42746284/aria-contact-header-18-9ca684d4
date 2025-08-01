@@ -523,56 +523,156 @@ const AdminDashboard = () => {
                           {message.content}
                         </p>
                       </div>
+                      <div className="mt-4 flex justify-between items-center">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => setSelectedMessageId(selectedMessageId === message.id ? null : message.id)}
+                            className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                          >
+                            {selectedMessageId === message.id ? '▲ Masquer' : '✉ Répondre'}
+                          </button>
+                          <button
+                            onClick={() => handleMarkAsRead(message.id)}
+                            className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
+                          >
+                            ✓ Marquer lu
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMessage(message.id)}
+                            className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
+                          >
+                            🗑 Supprimer
+                          </button>
+                        </div>
+                        <a
+                          href={`mailto:${message.email}?subject=Re: ${message.subject}`}
+                          className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                        >
+                          📧 Email direct
+                        </a>
+                      </div>
+                      {selectedMessageId === message.id && (
+                        <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700 animate-fadeIn">
+                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.from}</h4>
+                          <textarea
+                            value={messageReply}
+                            onChange={(e) => setMessageReply(e.target.value)}
+                            rows={4}
+                            className="w-full px-4 py-3 bg-black text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300 focus:border-orange-500 hover:border-gray-600 resize-none"
+                            placeholder="Tapez votre réponse..."
+                          />
+                          <div className="flex justify-end space-x-2 mt-3">
+                            <button
+                              onClick={() => {
+                                setSelectedMessageId(null);
+                                setMessageReply("");
+                              }}
+                              className="bg-gray-700 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300 font-medium"
+                            >
+                              Annuler
+                            </button>
+                            <button
+                              onClick={() => {
+                                // Ici vous pourriez ajouter la logique d'envoi d'email
+                                alert(`Réponse envoyée à ${message.email}`);
+                                setSelectedMessageId(null);
+                                setMessageReply("");
+                              }}
+                              className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-2 px-4 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300"
+                            >
+                              Envoyer réponse
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Blog Posts */}
+            {/* Projects */}
             <div className="bg-gray-900 p-6 rounded-xl shadow-2xl animate-fadeInRight border border-gray-800">
               <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-1">
-                 Publications
+                 Projets (Nos réalisations)
               </h2>
-              {posts.length === 0 ? (
-                <p className="text-gray-400 animate-pulse text-center py-8">Aucune publication pour le moment</p>
+              {projects.length === 0 ? (
+                <p className="text-gray-400 animate-pulse text-center py-8">Aucun projet pour le moment</p>
               ) : (
                 <div className="space-y-6">
-                  {posts.map((post) => (
+                  {projects.map((project) => (
                     <div
-                      id={`post-${post.id}`}
-                      key={post.id}
+                      id={`project-${project.id}`}
+                      key={project.id}
                       className="bg-black border border-gray-800 rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn"
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-orange-400 transition duration-300 hover:text-orange-300">
-                          {post.title}
-                        </h3>
-                        <div className="flex space-x-3">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-xl font-bold text-orange-400 transition duration-300 hover:text-orange-300">
+                              {project.title}
+                            </h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
+                              {project.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-400 mb-2">
+                            <span>📅 Créé le {project.date}</span>
+                            <span>�� Client: {project.client}</span>
+                            <span>⏳ Durée: {project.duration}</span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
                           <button
-                            onClick={() => handleEdit(post)}
-                            className="text-orange-400 hover:text-orange-300 transition duration-300 transform hover:scale-110 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                            onClick={() => handleEdit(project)}
+                            className="text-orange-400 hover:text-orange-300 transition duration-300 transform hover:scale-110 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black text-sm"
                           >
                             ✏️ Modifier
                           </button>
                           <button
-                            onClick={() => handleDelete(post.id)}
-                            className="text-red-400 hover:text-red-300 transition duration-300 transform hover:scale-110 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
+                            onClick={() => handleDelete(project.id)}
+                            className="text-red-400 hover:text-red-300 transition duration-300 transform hover:scale-110 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black text-sm"
                           >
-                             Supprimer
+                            🗑 Supprimer
                           </button>
                         </div>
                       </div>
-                      <p className="text-gray-400 text-sm mb-4 bg-gray-800 px-3 py-1 rounded-full inline-block">
-                         Publié le {post.date}
-                      </p>
+
                       <p className="text-gray-300 mb-4 leading-relaxed transition duration-300 hover:text-white">
-                        {post.content}
+                        {project.description}
                       </p>
-                      {post.imagePreview && (
+
+                      <div className="mb-4">
+                        <h4 className="text-orange-300 font-medium mb-2">Technologies utilisées:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {project.technologies.map((tech) => (
+                            <span
+                              key={tech}
+                              className="px-3 py-1 bg-orange-500/20 text-orange-300 rounded-full border border-orange-500/50 text-sm"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {project.url && (
+                        <div className="mb-4">
+                          <a
+                            href={project.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                          >
+                            🔗 Voir le projet
+                          </a>
+                        </div>
+                      )}
+
+                      {project.imagePreview && (
                         <img
-                          src={post.imagePreview}
-                          alt="Publication"
+                          src={project.imagePreview}
+                          alt={project.title}
                           className="h-64 w-full object-cover rounded-lg border-2 border-orange-500 transition duration-300 hover:scale-[1.01] shadow-lg"
                         />
                       )}
