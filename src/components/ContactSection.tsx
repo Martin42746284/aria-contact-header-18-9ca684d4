@@ -17,7 +17,7 @@ const ContactForm = () => {
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const { elementRef, isVisible } = useScrollAnimation({ threshold: 0.1 });
-  const { containerRef, visibleItems } = useStaggeredAnimation(6, 150);
+  const { containerRef, visibleItems } = useStaggeredAnimation<HTMLFormElement>(6, 150);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,19 +250,19 @@ const ContactSection = () => {
     {
       icon: Mail,
       title: "Email",
-      content: "contact@aria-digital.com",
+      content: "aria.madacom@gmail.com",
       description: "Réponse sous 24h"
     },
     {
       icon: Phone,
       title: "Téléphone",
-      content: "+33 1 23 45 67 89",
+      content: "+262 693 52 16 26",
       description: "Lun-Ven 9h-18h"
     },
     {
       icon: MapPin,
       title: "Localisation",
-      content: "Paris, France",
+      content: "Antananarivo, Madagascar",
       description: "Sur rendez-vous"
     },
     {

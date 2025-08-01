@@ -9,7 +9,7 @@ import "@/styles/animations.css";
 const ProjectsSection = () => {
   const [projects, setProjects] = useState<ClientProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { elementRef, isVisible } = useScrollAnimation({ threshold: 0.1 });
+  const { elementRef, isVisible } = useScrollAnimation<HTMLDivElement>();
   const { containerRef, visibleItems } = useStaggeredAnimation(projects.length, 200);
 
   useEffect(() => {

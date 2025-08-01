@@ -4,20 +4,6 @@ const Footer = () => {
   return (
     <footer id="contact" className="bg-black text-white">
       <div className="container mx-auto px-6 py-16">
-        {/* Contact Form Section */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-orange-500">
-              Prêt à transformer vos défis digitaux ?
-            </h2>
-            <p className="text-white/80 text-lg max-w-2xl mx-auto">
-              Découvrez comment ARIA peut donner vie à votre vision et créer des solutions qui dépassent les attentes.
-            </p>
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <ContactForm />
-          </div>
-        </div>
 
         {/* Footer Content */}
         <div className="border-t border-white/20 pt-12">

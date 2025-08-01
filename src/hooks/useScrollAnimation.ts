@@ -7,7 +7,9 @@ interface UseScrollAnimationOptions {
   delay?: number;
 }
 
-export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
+export const useScrollAnimation = <T extends HTMLElement = HTMLDivElement>(
+  options: UseScrollAnimationOptions = {}
+) => {
   const {
     threshold = 0.1,
     rootMargin = '0px',
@@ -15,7 +17,7 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
     delay = 0
   } = options;
 
-  const elementRef = useRef<HTMLElement>(null);
+  const elementRef = useRef<T>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
 
@@ -64,9 +66,12 @@ export const useScrollAnimation = (options: UseScrollAnimationOptions = {}) => {
 };
 
 // Hook pour les animations staggered (en cascade)
-export const useStaggeredAnimation = (itemCount: number, staggerDelay: number = 100) => {
+export const useStaggeredAnimation = <T extends HTMLElement = HTMLDivElement>(
+  itemCount: number,
+  staggerDelay: number = 100
+) => {
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set());
-  const containerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<T>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -75,7 +80,6 @@ export const useStaggeredAnimation = (itemCount: number, staggerDelay: number = 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Animer les éléments un par un avec un délai
           for (let i = 0; i < itemCount; i++) {
             setTimeout(() => {
               setVisibleItems(prev => new Set([...prev, i]));
@@ -83,22 +87,15 @@ export const useStaggeredAnimation = (itemCount: number, staggerDelay: number = 
           }
         }
       },
-      {
-        threshold: 0.1,
-      }
+      { threshold: 0.1 }
     );
 
     observer.observe(container);
 
-    return () => {
-      observer.unobserve(container);
-    };
+    return () => observer.unobserve(container);
   }, [itemCount, staggerDelay]);
 
-  return {
-    containerRef,
-    visibleItems
-  };
+  return { containerRef, visibleItems };
 };
 
 // Hook pour les animations de parallax
