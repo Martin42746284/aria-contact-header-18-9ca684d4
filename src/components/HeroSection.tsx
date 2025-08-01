@@ -1,64 +1,298 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
+import { useScrollAnimation, useTypewriter, useParallax } from "@/hooks/useScrollAnimation";
+import { ChevronDown, Sparkles, Zap, Rocket } from 'lucide-react';
+import "@/styles/animations.css";
 
 const HeroSection = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const { offset } = useParallax(0.3);
+
+  const dynamicWords = [
+    "défis digitaux",
+    "idées innovantes",
+    "projets ambitieux",
+    "visions créatives"
+  ];
+
+  const { displayText, isComplete } = useTypewriter(
+    "Transformons vos " + dynamicWords[currentWordIndex] + " en opportunités de croissance",
+    30,
+    true
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWordIndex((prev) => (prev + 1) % dynamicWords.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      if (rect) {
+        setMousePosition({
+          x: (e.clientX - rect.left) / rect.width,
+          y: (e.clientY - rect.top) / rect.height,
+        });
+      }
+    };
+
+    const section = sectionRef.current;
+    if (section) {
+      section.addEventListener('mousemove', handleMouseMove);
+      return () => section.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, []);
+
   return (
     <>
-      {/* Styles d'animation globaux */}
+      {/* Styles avancés */}
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+        .hero-gradient {
+          background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.9) 0%,
+            rgba(15, 15, 15, 0.8) 25%,
+            rgba(30, 30, 30, 0.7) 50%,
+            rgba(15, 15, 15, 0.8) 75%,
+            rgba(0, 0, 0, 0.9) 100%
+          );
         }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+
+        .floating-elements {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          pointer-events: none;
         }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
+
+        .floating-element {
+          position: absolute;
+          border-radius: 50%;
+          background: linear-gradient(45deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.1));
+          animation: floatingElement 6s ease-in-out infinite;
         }
-        .animate-fadeIn {
-          animation: fadeIn 0.8s ease-out forwards;
+
+        @keyframes floatingElement {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          33% { transform: translateY(-30px) rotate(120deg); }
+          66% { transform: translateY(-10px) rotate(240deg); }
         }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
+
+        .text-shadow-glow {
+          text-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+        }
+
+        .interactive-button {
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(45deg, #f97316, #ea580c);
+          transition: all 0.3s ease;
+        }
+
+        .interactive-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+          transition: left 0.5s ease;
+        }
+
+        .interactive-button:hover::before {
+          left: 100%;
+        }
+
+        .scroll-indicator {
+          animation: bounceScroll 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceScroll {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+
+        .logo-container {
+          position: relative;
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo-container:hover {
+          transform: scale(1.1) rotate(5deg);
+        }
+
+        .logo-container::after {
+          content: '';
+          position: absolute;
+          top: -10px;
+          left: -10px;
+          right: -10px;
+          bottom: -10px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, #f97316, #ea580c);
+          opacity: 0;
+          z-index: -1;
+          transition: opacity 0.3s ease;
+        }
+
+        .logo-container:hover::after {
+          opacity: 0.2;
+          animation: pulse 1.5s ease-in-out infinite;
+        }
       `}</style>
 
-      {/* Section Hero avec image de fond */}
-      <section 
-        id="accueil" 
-        className="relative py-32 text-white"
+      {/* Section Hero avec fond interactif */}
+      <section
+        ref={sectionRef}
+        id="accueil"
+        className="relative min-h-screen flex items-center justify-center text-white overflow-hidden"
         style={{
-          background: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/cover.webp')",
+          background: "linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('/images/cover.webp')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          transform: `translateY(${offset * 0.5}px)`
         }}
       >
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-8 animate-float">
-              <img 
-                src="/images/aria-logo.png" 
-                alt="ARIA Logo" 
-                className="h-40 w-34"
-              />
+        {/* Overlay interactif avec gradient dynamique */}
+        <div
+          className="absolute inset-0 hero-gradient"
+          style={{
+            background: `radial-gradient(circle at ${mousePosition.x * 100}% ${mousePosition.y * 100}%, rgba(249, 115, 22, 0.2) 0%, transparent 50%)`
+          }}
+        />
+
+        {/* Éléments flottants interactifs */}
+        <div className="floating-elements">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="floating-element"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                width: `${Math.random() * 100 + 50}px`,
+                height: `${Math.random() * 100 + 50}px`,
+                animationDelay: `${Math.random() * 6}s`,
+                transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px)`
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Logo avec effets avancés */}
+            <div className="flex justify-center mb-12">
+              <div className="logo-container animate-bounce-in">
+                <img
+                  src="/images/aria-logo.png"
+                  alt="ARIA Logo"
+                  className="h-48 w-auto filter drop-shadow-2xl"
+                  style={{
+                    filter: `drop-shadow(0 0 20px rgba(249, 115, 22, 0.6))`
+                  }}
+                />
+                <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-full blur-xl opacity-75 animate-pulse-custom" />
+              </div>
             </div>
-            <h1 className="text-5xl font-bold mb-6 animate-fadeIn">
-              Transformons vos défis digitaux en opportunités de croissance
-            </h1>
-            <p className="text-xl text-white/90 mb-8 leading-relaxed animate-fadeIn delay-100">
-              Chaque projet est pour nous une aventure unique où créativité et technologie se rencontrent 
-              pour donner vie à votre vision. Découvrez nos réalisations qui témoignent de notre capacité 
-              à concevoir des solutions digitales qui dépassent les attentes.
+
+            {/* Titre avec effet de machine à écrire et icons dynamiques */}
+            <div className="relative mb-8">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-shadow-glow leading-tight">
+                <span className="block mb-4">
+                  {displayText}
+                  <span className="inline-block w-1 h-16 bg-orange-500 ml-2 animate-pulse" />
+                </span>
+              </h1>
+
+              {/* Icons décoratifs animés */}
+              <div className="absolute -top-8 -left-8 animate-float delay-200">
+                <Sparkles className="w-8 h-8 text-orange-400 opacity-70" />
+              </div>
+              <div className="absolute -top-4 -right-12 animate-float delay-500">
+                <Zap className="w-6 h-6 text-yellow-400 opacity-60" />
+              </div>
+              <div className="absolute -bottom-4 left-1/4 animate-float delay-700">
+                <Rocket className="w-7 h-7 text-orange-500 opacity-50" />
+              </div>
+            </div>
+
+            {/* Description avec animations staggerées */}
+            <p className="text-xl md:text-2xl text-gray-200 mb-12 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
+              <span className="block animate-fade-in-left delay-500">
+                Chaque projet est pour nous une aventure unique où
+              </span>
+              <span className="block animate-fade-in-right delay-700 text-orange-300 font-semibold">
+                créativité et technologie se rencontrent
+              </span>
+              <span className="block animate-fade-in-left delay-1000">
+                pour donner vie à votre vision et dépasser vos attentes.
+              </span>
             </p>
-            <Button 
-              className="text-lg px-8 py-4 bg-orange-600 hover:bg-orange-700 transition-all duration-300 animate-fadeIn delay-200"
-            >
-              Découvrir nos réalisations
-            </Button>
+
+            {/* Boutons d'action avec effets avancés */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up delay-1000">
+              <Button
+                className="interactive-button group text-lg px-10 py-6 rounded-full font-bold text-black shadow-2xl transform hover:scale-105 transition-all duration-300 hover-lift"
+                style={{
+                  boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4)'
+                }}
+              >
+                <span className="flex items-center space-x-2">
+                  <Rocket className="w-5 h-5 group-hover:animate-bounce" />
+                  <span>Découvrir nos réalisations</span>
+                </span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="border-2 border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-black px-8 py-6 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm bg-black/20"
+              >
+                <span className="flex items-center space-x-2">
+                  <span>En savoir plus</span>
+                  <ChevronDown className="w-4 h-4" />
+                </span>
+              </Button>
+            </div>
+
+            {/* Statistiques rapides avec compteurs animés */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 animate-fade-in-up delay-1000">
+              {[
+                { number: "50+", label: "Projets réalisés" },
+                { number: "5+", label: "Années d'expérience" },
+                { number: "98%", label: "Clients satisfaits" },
+                { number: "24/7", label: "Support client" }
+              ].map((stat, index) => (
+                <div
+                  key={index}
+                  className="text-center group cursor-pointer"
+                  style={{ animationDelay: `${1200 + index * 100}ms` }}
+                >
+                  <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                    {stat.number}
+                  </div>
+                  <p className="text-gray-300 text-sm uppercase tracking-wider">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Indicateur de scroll animé */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-fade-in-up delay-1000">
+          <div className="scroll-indicator cursor-pointer" onClick={() => {
+            document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+          }}>
+            <ChevronDown className="w-8 h-8 text-orange-400 hover:text-orange-300 transition-colors" />
           </div>
         </div>
       </section>
