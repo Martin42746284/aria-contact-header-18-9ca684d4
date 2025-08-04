@@ -21,14 +21,18 @@ const projectSchema = Joi.object({
 // GET /api/projects - Récupérer tous les projets (publics)
 router.get('/', async (req, res) => {
   try {
-    const projects = await readProjects();
-    
-    // Filtrer seulement les projets terminés pour l'affichage public
-    const publishedProjects = projects.filter(project => project.status === 'Terminé');
-    
+    const projects = await prisma.project.findMany({
+      where: {
+        status: 'TERMINE'
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
     res.json({
       success: true,
-      projects: publishedProjects
+      projects: projects
     });
   } catch (error) {
     console.error('Error fetching projects:', error);
@@ -39,8 +43,12 @@ router.get('/', async (req, res) => {
 // GET /api/projects/admin - Récupérer tous les projets (admin seulement)
 router.get('/admin', authenticateToken, async (req, res) => {
   try {
-    const projects = await readProjects();
-    
+    const projects = await prisma.project.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
     res.json({
       success: true,
       projects: projects
@@ -54,13 +62,16 @@ router.get('/admin', authenticateToken, async (req, res) => {
 // GET /api/projects/:id - Récupérer un projet spécifique
 router.get('/:id', async (req, res) => {
   try {
-    const projects = await readProjects();
-    const project = projects.find(p => p.id === parseInt(req.params.id));
-    
+    const project = await prisma.project.findUnique({
+      where: {
+        id: req.params.id
+      }
+    });
+
     if (!project) {
       return res.status(404).json({ error: 'Projet non trouvé' });
     }
-    
+
     res.json({
       success: true,
       project: project
@@ -83,24 +94,17 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
-    const projects = await readProjects();
-    
-    // Générer un nouvel ID
-    const newId = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
-    
-    const newProject = {
-      id: newId,
+    const projectData = {
       ...value,
-      date: new Date().toLocaleDateString('fr-FR'),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      date: value.date || new Date().toLocaleDateString('fr-FR')
     };
-    
-    projects.push(newProject);
-    await writeProjects(projects);
-    
+
+    const newProject = await prisma.project.create({
+      data: projectData
+    });
+
     console.log(`📝 New project created: ${newProject.title} by ${req.user.email}`);
-    
+
     res.status(201).json({
       success: true,
       message: 'Projet créé avec succès',
@@ -124,30 +128,24 @@ router.put('/:id', authenticateToken, async (req, res) => {
       });
     }
 
-    const projects = await readProjects();
-    const projectIndex = projects.findIndex(p => p.id === parseInt(req.params.id));
-    
-    if (projectIndex === -1) {
-      return res.status(404).json({ error: 'Projet non trouvé' });
-    }
-    
-    const updatedProject = {
-      ...projects[projectIndex],
-      ...value,
-      updatedAt: new Date().toISOString()
-    };
-    
-    projects[projectIndex] = updatedProject;
-    await writeProjects(projects);
-    
+    const updatedProject = await prisma.project.update({
+      where: {
+        id: req.params.id
+      },
+      data: value
+    });
+
     console.log(`📝 Project updated: ${updatedProject.title} by ${req.user.email}`);
-    
+
     res.json({
       success: true,
       message: 'Projet mis à jour avec succès',
       project: updatedProject
     });
   } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Projet non trouvé' });
+    }
     console.error('Error updating project:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour du projet' });
   }
@@ -156,24 +154,22 @@ router.put('/:id', authenticateToken, async (req, res) => {
 // DELETE /api/projects/:id - Supprimer un projet (admin seulement)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
-    const projects = await readProjects();
-    const projectIndex = projects.findIndex(p => p.id === parseInt(req.params.id));
-    
-    if (projectIndex === -1) {
-      return res.status(404).json({ error: 'Projet non trouvé' });
-    }
-    
-    const deletedProject = projects[projectIndex];
-    projects.splice(projectIndex, 1);
-    await writeProjects(projects);
-    
+    const deletedProject = await prisma.project.delete({
+      where: {
+        id: req.params.id
+      }
+    });
+
     console.log(`🗑️ Project deleted: ${deletedProject.title} by ${req.user.email}`);
-    
+
     res.json({
       success: true,
       message: 'Projet supprimé avec succès'
     });
   } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Projet non trouvé' });
+    }
     console.error('Error deleting project:', error);
     res.status(500).json({ error: 'Erreur lors de la suppression du projet' });
   }
@@ -183,31 +179,31 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 router.post('/:id/status', authenticateToken, async (req, res) => {
   try {
     const { status } = req.body;
-    
-    if (!['En cours', 'Terminé', 'En attente'].includes(status)) {
+
+    if (!['EN_COURS', 'TERMINE', 'EN_ATTENTE'].includes(status)) {
       return res.status(400).json({ error: 'Statut invalide' });
     }
-    
-    const projects = await readProjects();
-    const projectIndex = projects.findIndex(p => p.id === parseInt(req.params.id));
-    
-    if (projectIndex === -1) {
-      return res.status(404).json({ error: 'Projet non trouvé' });
-    }
-    
-    projects[projectIndex].status = status;
-    projects[projectIndex].updatedAt = new Date().toISOString();
-    
-    await writeProjects(projects);
-    
-    console.log(`📊 Project status updated: ${projects[projectIndex].title} -> ${status} by ${req.user.email}`);
-    
+
+    const updatedProject = await prisma.project.update({
+      where: {
+        id: req.params.id
+      },
+      data: {
+        status: status
+      }
+    });
+
+    console.log(`📊 Project status updated: ${updatedProject.title} -> ${status} by ${req.user.email}`);
+
     res.json({
       success: true,
       message: 'Statut mis à jour avec succès',
-      project: projects[projectIndex]
+      project: updatedProject
     });
   } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Projet non trouvé' });
+    }
     console.error('Error updating project status:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
   }
