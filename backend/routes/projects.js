@@ -1,17 +1,9 @@
 import express from 'express';
-import fs from 'fs/promises';
-import path from 'path';
 import Joi from 'joi';
 import { authenticateToken } from './admin.js';
-import { fileURLToPath } from 'url';
+import { prisma } from '../lib/prisma.js';
 
 const router = express.Router();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Chemin vers le fichier de stockage des projets
-const PROJECTS_FILE = path.join(__dirname, '../data/projects.json');
-const DATA_DIR = path.join(__dirname, '../data');
 
 // Validation schema pour les projets
 const projectSchema = Joi.object({
@@ -20,91 +12,11 @@ const projectSchema = Joi.object({
   technologies: Joi.array().items(Joi.string()).min(1).required(),
   client: Joi.string().min(2).max(100).required(),
   duration: Joi.string().min(2).max(50).required(),
-  status: Joi.string().valid('En cours', 'Terminé', 'En attente').required(),
+  status: Joi.string().valid('EN_COURS', 'TERMINE', 'EN_ATTENTE').required(),
   url: Joi.string().uri().allow('').optional(),
-  imageUrl: Joi.string().allow('').optional()
+  imageUrl: Joi.string().allow('').optional(),
+  date: Joi.string().optional()
 });
-
-// Utilitaires pour la gestion des fichiers
-const ensureDataDirectory = async () => {
-  try {
-    await fs.access(DATA_DIR);
-  } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  }
-};
-
-const readProjects = async () => {
-  try {
-    await ensureDataDirectory();
-    const data = await fs.readFile(PROJECTS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      // Fichier n'existe pas, retourner projets par défaut
-      return getDefaultProjects();
-    }
-    throw error;
-  }
-};
-
-const writeProjects = async (projects) => {
-  await ensureDataDirectory();
-  await fs.writeFile(PROJECTS_FILE, JSON.stringify(projects, null, 2));
-};
-
-const getDefaultProjects = () => {
-  return [
-    {
-      id: 1,
-      title: "CGEPRO",
-      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
-      technologies: ["WordPress", "PHP", "MySQL", "SEO"],
-      client: "CGEPRO",
-      duration: "2 mois",
-      status: "Terminé",
-      imageUrl: "/uploads/projects/cgepro.jpg",
-      date: "15/03/2024",
-      url: "https://cgepro.com"
-    },
-    {
-      id: 2,
-      title: "ERIC RABY",
-      description: "Coaching en compétences sociales et émotionnelles",
-      technologies: ["React", "Node.js", "Stripe", "Calendar API"],
-      client: "Eric Raby Coaching",
-      duration: "3 mois",
-      status: "Terminé",
-      imageUrl: "/uploads/projects/eric.jpg",
-      date: "22/04/2024",
-      url: "https://eric-raby.com"
-    },
-    {
-      id: 3,
-      title: "CONNECT TALENT",
-      description: "Plateforme de mise en relation entre entreprises et talents africains",
-      technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
-      client: "Connect Talent Inc",
-      duration: "5 mois",
-      status: "Terminé",
-      imageUrl: "/uploads/projects/connect.png",
-      date: "10/05/2024",
-      url: "https://connecttalent.cc"
-    },
-    {
-      id: 4,
-      title: "SOA DIA TRAVEL",
-      description: "Transport & Logistique à Madagascar",
-      technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
-      client: "SOA DIA TRAVEL",
-      duration: "4 mois",
-      status: "Terminé",
-      imageUrl: "/uploads/projects/soa.jpg",
-      date: "28/06/2024",
-      url: "https://soatransplus.mg"
-    }
-  ];
-};
 
 // GET /api/projects - Récupérer tous les projets (publics)
 router.get('/', async (req, res) => {
