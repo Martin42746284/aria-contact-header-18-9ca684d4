@@ -86,7 +86,7 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
@@ -95,6 +95,12 @@ class ApiClient {
       return await response.json();
     } catch (error) {
       console.error(`API Error [${endpoint}]:`, error);
+
+      // Si c'est une erreur de réseau, ajouter un message plus explicite
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        throw new Error(`Backend non disponible. Vérifiez que le serveur backend est démarré sur ${API_BASE_URL.replace('/api', '')}`);
+      }
+
       throw error;
     }
   }
