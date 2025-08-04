@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveAllAdminProjects, getAllAdminProjects, getDefaultAdminProjects, type AdminProject } from "@/services/projectsService";
+import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
+import { adminApi, uploadApi } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface CustomerMessage {
   id: number;
@@ -18,6 +20,9 @@ interface CustomerMessage {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<AdminProject[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const { toast } = useToast();
 
   // Charger les projets depuis localStorage au montage du composant
   useEffect(() => {
