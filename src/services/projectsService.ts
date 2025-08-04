@@ -30,34 +30,6 @@ export interface ClientProject {
   websiteUrl?: string;
 }
 
-// Fonction pour convertir les statuts de l'API vers l'ancien format
-const convertStatusToLegacy = (status: Project['status']): string => {
-  switch (status) {
-    case 'EN_COURS':
-      return 'En cours';
-    case 'TERMINE':
-      return 'Terminé';
-    case 'EN_ATTENTE':
-      return 'En attente';
-    default:
-      return 'En attente';
-  }
-};
-
-// Fonction pour convertir les statuts vers l'API
-const convertStatusToApi = (status: string): Project['status'] => {
-  switch (status) {
-    case 'En cours':
-      return 'EN_COURS';
-    case 'Terminé':
-      return 'TERMINE';
-    case 'En attente':
-      return 'EN_ATTENTE';
-    default:
-      return 'EN_ATTENTE';
-  }
-};
-
 // Fonction pour convertir un projet API vers AdminProject
 const convertApiToAdminProject = (project: Project): AdminProject => {
   return {
@@ -78,7 +50,7 @@ const convertApiToAdminProject = (project: Project): AdminProject => {
 };
 
 // Fonction pour convertir un AdminProject vers le format API
-const convertAdminToApiProject = (adminProject: AdminProject): Partial<Project> => {
+const convertAdminToApiProject = (adminProject: AdminProject): Omit<Project, 'id' | 'createdAt' | 'updatedAt'> => {
   return {
     title: adminProject.title,
     description: adminProject.description,
@@ -90,6 +62,60 @@ const convertAdminToApiProject = (adminProject: AdminProject): Partial<Project> 
     url: adminProject.url,
     date: adminProject.date
   };
+};
+
+// Récupérer les projets par défaut en format AdminProject
+const getDefaultAdminProjects = (): AdminProject[] => {
+  return [
+    {
+      id: "1",
+      title: "CGEPRO",
+      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
+      technologies: ["WordPress", "PHP", "MySQL", "SEO"],
+      client: "CGEPRO",
+      duration: "2 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/go.jpg",
+      date: "15/03/2024",
+      url: "https://cgepro.com"
+    },
+    {
+      id: "2",
+      title: "ERIC RABY",
+      description: "Coaching en compétences sociales et émotionnelles",
+      technologies: ["React", "Node.js", "Stripe", "Calendar API"],
+      client: "Eric Raby Coaching",
+      duration: "3 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/eric.jpg",
+      date: "22/04/2024",
+      url: "https://eric-raby.com"
+    },
+    {
+      id: "3",
+      title: "CONNECT TALENT",
+      description: "Plateforme de mise en relation entre entreprises et talents africains",
+      technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
+      client: "Connect Talent Inc",
+      duration: "5 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/connect.png",
+      date: "10/05/2024",
+      url: "https://connecttalent.cc"
+    },
+    {
+      id: "4",
+      title: "SOA DIA TRAVEL",
+      description: "Transport & Logistique à Madagascar",
+      technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
+      client: "SOA DIA TRAVEL",
+      duration: "4 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/soa.jpg",
+      date: "28/06/2024",
+      url: "https://soatransplus.mg"
+    }
+  ];
 };
 
 // Fonction pour convertir un projet admin en projet client
@@ -189,15 +215,15 @@ export const getAllAdminProjects = async (): Promise<AdminProject[]> => {
     if (response.success && response.data) {
       return response.data.projects.map(convertApiToAdminProject);
     }
-    return [];
+    return getDefaultAdminProjects();
   } catch (error) {
     console.error('Erreur lors de la récupération des projets admin:', error);
-    // Fallback vers les projets par défaut si l'API est indisponible
     console.log('Utilisation des projets par défaut (API indisponible)');
     return getDefaultAdminProjects();
   }
 };
 
+<<<<<<< HEAD
 // Récupérer les projets par défaut en format AdminProject
 const getDefaultAdminProjects = (): AdminProject[] => {
   return [
@@ -256,6 +282,8 @@ const getDefaultAdminProjects = (): AdminProject[] => {
   ];
 };
 
+=======
+>>>>>>> 6c85566b2c928149f161a86ce0810fb60228e60a
 // Récupérer les projets depuis l'API (publics seulement)
 export const getProjectsFromStorage = async (): Promise<AdminProject[]> => {
   try {
@@ -263,10 +291,10 @@ export const getProjectsFromStorage = async (): Promise<AdminProject[]> => {
     if (response.success && response.data) {
       return response.data.projects.map(convertApiToAdminProject);
     }
-    return [];
+    return getDefaultAdminProjects().filter(p => p.status === 'TERMINE');
   } catch (error) {
     console.error('Erreur lors de la récupération des projets:', error);
-    return [];
+    return getDefaultAdminProjects().filter(p => p.status === 'TERMINE');
   }
 };
 
@@ -280,26 +308,13 @@ export const getClientProjects = async (): Promise<ClientProject[]> => {
   } catch (error) {
     console.error('Erreur lors de la récupération des projets clients:', error);
     console.log('Utilisation des projets par défaut (API indisponible)');
-    return getDefaultProjects(); // Fallback vers les projets par défaut
+    return getDefaultProjects();
   }
-};
-
-// Sauvegarder les projets (maintenant via API)
-export const saveProjectsToStorage = async (projects: AdminProject[]): Promise<void> => {
-  // Cette fonction n'est plus nécessaire avec l'API backend
-  // Garde pour compatibilité
-  console.log('saveProjectsToStorage: Cette fonction est obsolète avec l\'API backend');
-};
-
-// Sauvegarder la liste complète des projets admin (via API)
-export const saveAllAdminProjects = async (projects: AdminProject[]): Promise<void> => {
-  // Cette fonction n'est plus nécessaire avec l'API backend
-  // Garde pour compatibilité
-  console.log('saveAllAdminProjects: Cette fonction est obsolète avec l\'API backend');
 };
 
 // Projets par défaut (fallback en cas d'erreur API)
 export const getDefaultProjects = (): ClientProject[] => {
+<<<<<<< HEAD
   return [
     {
       title: "CGEPRO",
@@ -378,6 +393,20 @@ export const getDefaultProjects = (): ClientProject[] => {
       websiteUrl: "https://soatransplus.mg"
     }
   ];
+=======
+  const defaultAdminProjects = getDefaultAdminProjects();
+  return defaultAdminProjects.map(convertAdminToClientProject);
+};
+
+// Sauvegarder les projets (fonction obsolète mais gardée pour compatibilité)
+export const saveProjectsToStorage = async (projects: AdminProject[]): Promise<void> => {
+  console.log('saveProjectsToStorage: Cette fonction est obsolète avec l\'API backend');
+};
+
+// Sauvegarder la liste complète des projets admin (fonction obsolète mais gardée pour compatibilité)
+export const saveAllAdminProjects = async (projects: AdminProject[]): Promise<void> => {
+  console.log('saveAllAdminProjects: Cette fonction est obsolète avec l\'API backend');
+>>>>>>> 6c85566b2c928149f161a86ce0810fb60228e60a
 };
 
 // Nouvelles fonctions pour l'API
@@ -385,8 +414,13 @@ export const getDefaultProjects = (): ClientProject[] => {
 // Créer un nouveau projet
 export const createProject = async (project: Omit<AdminProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<AdminProject | null> => {
   try {
-    const apiProject = convertAdminToApiProject(project);
-    const response = await projectsApi.createProject(apiProject as any);
+    const apiProject = convertAdminToApiProject({
+      ...project,
+      id: '', // Sera ignoré par l'API
+      createdAt: '',
+      updatedAt: ''
+    });
+    const response = await projectsApi.createProject(apiProject);
     if (response.success && response.data) {
       return convertApiToAdminProject(response.data.project);
     }
@@ -400,7 +434,17 @@ export const createProject = async (project: Omit<AdminProject, 'id' | 'createdA
 // Mettre à jour un projet
 export const updateProject = async (id: string, project: Partial<AdminProject>): Promise<AdminProject | null> => {
   try {
-    const apiProject = convertAdminToApiProject(project as AdminProject);
+    const apiProject = convertAdminToApiProject({
+      id: id,
+      title: project.title || '',
+      description: project.description || '',
+      technologies: project.technologies || [],
+      client: project.client || '',
+      duration: project.duration || '',
+      status: project.status || 'EN_ATTENTE',
+      date: project.date || '',
+      ...project
+    });
     const response = await projectsApi.updateProject(id, apiProject);
     if (response.success && response.data) {
       return convertApiToAdminProject(response.data.project);
