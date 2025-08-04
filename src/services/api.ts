@@ -17,13 +17,6 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-// Debug: afficher l'URL API utilisée
-console.log('🔧 Configuration API:', {
-  hostname: window.location.hostname,
-  isDev: !import.meta.env.PROD,
-  apiUrl: API_BASE_URL
-});
-
 // Types pour TypeScript
 export interface ApiResponse<T = any> {
   success: boolean;
