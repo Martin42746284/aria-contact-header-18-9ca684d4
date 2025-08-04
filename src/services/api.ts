@@ -1,9 +1,16 @@
 // Configuration de l'URL API adaptée à l'environnement
 const getApiBaseUrl = () => {
+  // Détection d'environnement cloud/production
+  const isCloudEnv = window.location.hostname !== 'localhost' &&
+                     window.location.hostname !== '127.0.0.1' &&
+                     !window.location.hostname.startsWith('192.168.') &&
+                     !window.location.hostname.startsWith('10.');
+
   // En production ou environnement cloud, utiliser une URL relative vers le proxy
-  if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
+  if (import.meta.env.PROD || isCloudEnv) {
     return '/api';
   }
+
   // En développement local, utiliser la variable d'environnement ou localhost
   return import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 };
