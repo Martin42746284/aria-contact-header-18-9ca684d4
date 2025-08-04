@@ -223,67 +223,6 @@ export const getAllAdminProjects = async (): Promise<AdminProject[]> => {
   }
 };
 
-<<<<<<< HEAD
-// Récupérer les projets par défaut en format AdminProject
-const getDefaultAdminProjects = (): AdminProject[] => {
-  return [
-    {
-      id: "1",
-      title: "CGEPRO",
-      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
-      technologies: ["WordPress", "PHP", "MySQL", "SEO"],
-      client: "CGEPRO",
-      duration: "2 mois",
-      status: "Terminé",
-      image: null,
-      imagePreview: "/src/assets/go.jpg",
-      date: "15/03/2024",
-      url: "https://cgepro.com"
-    },
-    {
-      id: "2",
-      title: "ERIC RABY",
-      description: "Coaching en compétences sociales et émotionnelles",
-      technologies: ["React", "Node.js", "Stripe", "Calendar API"],
-      client: "Eric Raby Coaching",
-      duration: "3 mois",
-      status: "Terminé",
-      image: null,
-      imagePreview: "/src/assets/eric.jpg",
-      date: "22/04/2024",
-      url: "https://eric-raby.com"
-    },
-    {
-      id: "3",
-      title: "CONNECT TALENT",
-      description: "Plateforme de mise en relation entre entreprises et talents africains",
-      technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
-      client: "Connect Talent Inc",
-      duration: "5 mois",
-      status: "Terminé",
-      image: null,
-      imagePreview: "/src/assets/connect.png",
-      date: "10/05/2024",
-      url: "https://connecttalent.cc"
-    },
-    {
-      id: "4",
-      title: "SOA DIA TRAVEL",
-      description: "Transport & Logistique à Madagascar",
-      technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
-      client: "SOA DIA TRAVEL",
-      duration: "4 mois",
-      status: "Terminé",
-      image: null,
-      imagePreview: "/src/assets/soa.jpg",
-      date: "28/06/2024",
-      url: "https://soatransplus.mg"
-    }
-  ];
-};
-
-=======
->>>>>>> 6c85566b2c928149f161a86ce0810fb60228e60a
 // Récupérer les projets depuis l'API (publics seulement)
 export const getProjectsFromStorage = async (): Promise<AdminProject[]> => {
   try {
@@ -314,86 +253,6 @@ export const getClientProjects = async (): Promise<ClientProject[]> => {
 
 // Projets par défaut (fallback en cas d'erreur API)
 export const getDefaultProjects = (): ClientProject[] => {
-<<<<<<< HEAD
-  return [
-    {
-      title: "CGEPRO",
-      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
-      sector: "BTP / Équipements professionnels",
-      objectives: [
-        "Présenter l'expertise de CGEPRO dans le domaine des équipements techniques",
-        "Renforcer la crédibilité de la marque auprès des partenaires industriels",
-        "Proposer un catalogue clair des produits"
-      ],
-      solutions: [
-        "Site vitrine professionnel avec une identité sobre et élégante",
-        "Fiches produits accessibles et consultables facilement",
-        "Design responsive et contenu optimisé SEO",
-        "Back-office simple pour mise à jour autonome du client"
-      ],
-      imageUrl: "/images/go.jpg",
-      websiteUrl: "https://cgepro.com"
-    },
-    {
-      title: "ERIC RABY",
-      description: "Coaching en compétences sociales et émotionnelles",
-      sector: "Coaching / Formation",
-      objectives: [
-        "Présenter clairement l'expertise du coach",
-        "Renforcer la visibilité en ligne du coach",
-        "Faciliter la prise de contact et la réservation de séances",
-        "Proposer du contenu à valeur ajoutée",
-        "Créer un lien de confiance avec les clients potentiels"
-      ],
-      solutions: [
-        "Site vitrine moderne et responsive",
-        "Développement d'un parcours utilisateur optimisé",
-        "Intégration d'outils de réservation ou de prise de rendez-vous en ligne",
-        "Proposition des différentes expertises et des expériences professionnelles",
-        "Mise en place d'un blog intégré",
-        "SEO et hébergement optimaux"
-      ],
-      imageUrl: "/images/eric.jpg",
-      websiteUrl: "https://eric-raby.com"
-    },
-    {
-      title: "CONNECT TALENT",
-      description: "Plateforme de mise en relation entre entreprises et talents africains",
-      sector: "Recrutement & Talents internationaux",
-      objectives: [
-        "Créer une plateforme de mise en relation entre entreprises et talents africains",
-        "Valoriser la dimension humaine et l'impact social du projet",
-        "Faciliter l'enregistrement et la candidature en ligne"
-      ],
-      solutions: [
-        "UI/UX épuré pour une navigation intuitive",
-        "Formulaires interactifs pour les candidats et recruteurs",
-        "Intégration d'un espace sécurisé pour les profils",
-        "Site multilingue prêt à l'internationalisation"
-      ],
-      imageUrl: "/images/connect.png",
-      websiteUrl: "https://connecttalent.cc"
-    },
-    {
-      title: "SOA DIA TRAVEL",
-      description: "Transport & Logistique à Madagascar",
-      sector: "Transport & Logistique",
-      objectives: [
-        "Mettre en avant la flotte de transport et les services logistiques",
-        "Créer une plateforme responsive et professionnelle",
-        "Intégrer une navigation simple et une identité visuelle forte"
-      ],
-      solutions: [
-        "Design moderne centré sur la fiabilité",
-        "Structure claire et hiérarchisée pour les services",
-        "Intégration d'un formulaire de demande de devis",
-        "Site rapide et optimisé mobile"
-      ],
-      imageUrl: "/images/soa.jpg",
-      websiteUrl: "https://soatransplus.mg"
-    }
-  ];
-=======
   const defaultAdminProjects = getDefaultAdminProjects();
   return defaultAdminProjects.map(convertAdminToClientProject);
 };
@@ -406,7 +265,6 @@ export const saveProjectsToStorage = async (projects: AdminProject[]): Promise<v
 // Sauvegarder la liste complète des projets admin (fonction obsolète mais gardée pour compatibilité)
 export const saveAllAdminProjects = async (projects: AdminProject[]): Promise<void> => {
   console.log('saveAllAdminProjects: Cette fonction est obsolète avec l\'API backend');
->>>>>>> 6c85566b2c928149f161a86ce0810fb60228e60a
 };
 
 // Nouvelles fonctions pour l'API
