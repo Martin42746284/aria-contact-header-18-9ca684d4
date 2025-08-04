@@ -192,8 +192,64 @@ export const getAllAdminProjects = async (): Promise<AdminProject[]> => {
     return [];
   } catch (error) {
     console.error('Erreur lors de la récupération des projets admin:', error);
-    return [];
+    // Fallback vers les projets par défaut si l'API est indisponible
+    console.log('Utilisation des projets par défaut (API indisponible)');
+    return getDefaultAdminProjects();
   }
+};
+
+// Récupérer les projets par défaut en format AdminProject
+const getDefaultAdminProjects = (): AdminProject[] => {
+  return [
+    {
+      id: "1",
+      title: "CGEPRO",
+      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
+      technologies: ["WordPress", "PHP", "MySQL", "SEO"],
+      client: "CGEPRO",
+      duration: "2 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/go.jpg",
+      date: "15/03/2024",
+      url: "https://cgepro.com"
+    },
+    {
+      id: "2",
+      title: "ERIC RABY",
+      description: "Coaching en compétences sociales et émotionnelles",
+      technologies: ["React", "Node.js", "Stripe", "Calendar API"],
+      client: "Eric Raby Coaching",
+      duration: "3 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/eric.jpg",
+      date: "22/04/2024",
+      url: "https://eric-raby.com"
+    },
+    {
+      id: "3",
+      title: "CONNECT TALENT",
+      description: "Plateforme de mise en relation entre entreprises et talents africains",
+      technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
+      client: "Connect Talent Inc",
+      duration: "5 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/connect.png",
+      date: "10/05/2024",
+      url: "https://connecttalent.cc"
+    },
+    {
+      id: "4",
+      title: "SOA DIA TRAVEL",
+      description: "Transport & Logistique à Madagascar",
+      technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
+      client: "SOA DIA TRAVEL",
+      duration: "4 mois",
+      status: "TERMINE",
+      imageUrl: "/src/assets/soa.jpg",
+      date: "28/06/2024",
+      url: "https://soatransplus.mg"
+    }
+  ];
 };
 
 // Récupérer les projets depuis l'API (publics seulement)
@@ -219,6 +275,7 @@ export const getClientProjects = async (): Promise<ClientProject[]> => {
     return publishedProjects.map(convertAdminToClientProject);
   } catch (error) {
     console.error('Erreur lors de la récupération des projets clients:', error);
+    console.log('Utilisation des projets par défaut (API indisponible)');
     return getDefaultProjects(); // Fallback vers les projets par défaut
   }
 };
