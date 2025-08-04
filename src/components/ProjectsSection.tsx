@@ -14,27 +14,33 @@ const ProjectsSection = () => {
 
   
   useEffect(() => {
-    // Charger les projets depuis le dashboard admin
-    const loadProjects = () => {
+    // Charger les projets depuis l'API backend
+    const loadProjects = async () => {
       setIsLoading(true);
 
-      // Récupérer les projets du dashboard admin
-      const adminProjects = getClientProjects();
+      try {
+        // Récupérer les projets depuis l'API
+        const clientProjects = await getClientProjects();
 
-      if (adminProjects.length > 0) {
-        setProjects(adminProjects);
-      } else {
-        // Fallback vers les projets par défaut s'il n'y en a aucun dans le dashboard
+        if (clientProjects.length > 0) {
+          setProjects(clientProjects);
+        } else {
+          // Fallback vers les projets par défaut s'il n'y en a aucun dans l'API
+          setProjects(getDefaultProjects());
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des projets:', error);
+        // Fallback vers les projets par défaut en cas d'erreur
         setProjects(getDefaultProjects());
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     loadProjects();
 
-    // Recharger les projets toutes les 5 secondes pour sync avec le dashboard
-    const interval = setInterval(loadProjects, 5000);
+    // Recharger les projets toutes les 30 secondes pour sync avec l'API
+    const interval = setInterval(loadProjects, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -65,10 +71,10 @@ const ProjectsSection = () => {
             de chaque secteur et à concevoir des solutions sur mesure.
           </p>
 
-          {/* Indicateur de synchronisation avec le dashboard */}
+          {/* Indicateur de synchronisation avec l'API */}
           <div className="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-400">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span>Synchronisé avec le dashboard admin • {projects.length} projets publiés</span>
+            <span>Synchronisé avec l'API backend • {projects.length} projets publiés</span>
           </div>
         </div>
 
@@ -111,7 +117,7 @@ const ProjectsSection = () => {
             <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 backdrop-blur-xl p-6 rounded-2xl border border-orange-500/30 max-w-2xl mx-auto">
               <p className="text-gray-300 text-sm">
                 📝 <strong>Pour les administrateurs :</strong> Ces projets sont automatiquement synchronisés
-                depuis le dashboard admin. Seuls les projets avec le statut "Terminé" sont affichés ici.
+                depuis l'API backend. Seuls les projets avec le statut "Terminé" sont affichés ici.
               </p>
             </div>
           </div>
