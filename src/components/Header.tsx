@@ -230,11 +230,11 @@ const Header = () => {
             {/* Navigation Desktop */}
             <nav className="hidden lg:flex items-center space-x-1">
               {[
-                { href: '#accueil', label: 'Accueil', icon: '🏠' },
-                { href: '#about', label: 'À Propos', icon: '✨' },
-                { href: '#realisations', label: 'Réalisations', icon: '🚀' },
-                { href: '#services', label: 'Services', icon: '⚡' },
-                { href: '#contact', label: 'Contact', icon: '📧' }
+                { href: '#accueil', label: 'Accueil', icon: '' },
+                { href: '#about', label: 'À Propos', icon: '' },
+                { href: '#realisations', label: 'Réalisations', icon: '' },
+                { href: '#services', label: 'Services', icon: '' },
+                { href: '#contact', label: 'Contact', icon: '' }
               ].map((item, index) => (
                 <a
                   key={item.href}

@@ -38,14 +38,14 @@ if [ ! -f backend/.env ]; then
         cat > backend/.env << EOF
 PORT=3001
 NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:8081
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 EMAIL_SERVICE=gmail
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
 ADMIN_EMAIL=admin@aria-creative.com
 ADMIN_PASSWORD=admin123
-DATABASE_URL="postgresql://username:password@localhost:5432/aria_creative?schema=public"
+DATABASE_URL="postgresql://neondb_owner:npg_oFOxVsz8nv4N@ep-steep-paper-adheem47-pooler.c-2.us-east-1.aws.neon.tech/aria-db?sslmode=require&channel_binding=require"
 MAX_FILE_SIZE=10485760
 UPLOAD_PATH=./uploads
 EOF

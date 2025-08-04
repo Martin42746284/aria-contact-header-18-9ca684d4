@@ -1,5 +1,3 @@
-import ContactForm from "./ContactForm";
-
 const Footer = () => {
   return (
     <footer id="contact" className="bg-black text-white">
@@ -52,15 +50,15 @@ const Footer = () => {
               <div className="space-y-3 text-white/80">
                 <div>
                   <p className="font-medium text-white">Email</p>
-                  <p className="hover:text-orange-400 transition-colors">contact@aria-digital.com</p>
+                  <p className="hover:text-orange-400 transition-colors">aria.madacom@gmail.com</p>
                 </div>
                 <div>
                   <p className="font-medium text-white">Téléphone</p>
-                  <p>+33 (0)1 23 45 67 89</p>
+                  <p>+262 693 52 16 26</p>
                 </div>
                 <div>
                   <p className="font-medium text-white">Adresse</p>
-                  <p>123 Avenue de l'Innovation<br />75001 Paris, France</p>
+                  <p>................<br />Antananarivo, Madagascar</p>
                 </div>
               </div>
             </div>
@@ -69,7 +67,7 @@ const Footer = () => {
           {/* Bottom */}
           <div className="border-t border-white/20 mt-12 pt-8 text-center">
             <p className="text-white/60">
-              © 2024 ARIA - Agence de développement digital. Tous droits réservés.
+              © 2025 ARIA - Agence de développement digital. Tous droits réservés.
             </p>
             <p className="text-white/40 mt-2 text-sm">
               Notre approche unique et notre engagement envers l'excellence nous permettent

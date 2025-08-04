@@ -196,7 +196,7 @@ const HeroSection = () => {
                 <img
                   src="/images/aria-logo.png"
                   alt="ARIA Logo"
-                  className="h-72 md:h-80 lg:h-96 w-auto filter drop-shadow-2xl"
+                  className="h-52 md:h-60 lg:h-76 w-auto filter drop-shadow-2xl"
                   style={{
                     filter: `drop-shadow(0 0 30px rgba(249, 115, 22, 0.8))`
                   }}

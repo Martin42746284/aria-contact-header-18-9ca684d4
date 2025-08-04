@@ -71,11 +71,11 @@ const ProjectsSection = () => {
             de chaque secteur et à concevoir des solutions sur mesure.
           </p>
 
-          {/* Indicateur de synchronisation avec l'API */}
+          {/* Indicateur de synchronisation avec l'API
           <div className="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-400">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <span>Synchronisé avec l'API backend • {projects.length} projets publiés</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Grille des projets */}
@@ -114,12 +114,12 @@ const ProjectsSection = () => {
           <div className={`text-center mt-12 transform transition-all duration-700 ${
             isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'
           }`}>
-            <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 backdrop-blur-xl p-6 rounded-2xl border border-orange-500/30 max-w-2xl mx-auto">
+            {/* <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 backdrop-blur-xl p-6 rounded-2xl border border-orange-500/30 max-w-2xl mx-auto">
               <p className="text-gray-300 text-sm">
                 📝 <strong>Pour les administrateurs :</strong> Ces projets sont automatiquement synchronisés
                 depuis l'API backend. Seuls les projets avec le statut "Terminé" sont affichés ici.
               </p>
-            </div>
+            </div> */}
           </div>
         )}
       </div>

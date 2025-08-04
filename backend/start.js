@@ -66,15 +66,13 @@ const installDependencies = () => {
 // Créer le fichier .env s'il n'existe pas
 const createEnvFile = async () => {
   const envPath = path.join(__dirname, '.env');
-  const envExamplePath = path.join(__dirname, '.env.example');
 
   try {
     await fs.access(envPath);
     log('✅ Fichier .env trouvé', 'green');
   } catch {
     try {
-      const envExample = await fs.readFile(envExamplePath, 'utf8');
-      await fs.writeFile(envPath, envExample);
+      await fs.writeFile(envPath);
       log('📝 Fichier .env créé à partir de .env.example', 'yellow');
       log('⚠️  N\'oubliez pas de configurer vos variables d\'environnement dans .env', 'yellow');
     } catch (error) {
