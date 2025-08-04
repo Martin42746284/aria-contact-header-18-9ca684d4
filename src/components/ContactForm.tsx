@@ -5,30 +5,51 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { contactApi, type ContactMessage } from "@/services/api";
 
 const ContactForm = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactMessage>({
     name: "",
     email: "",
     company: "",
     subject: "",
     message: ""
   });
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Message envoyé !",
-      description: "Nous vous recontacterons dans les plus brefs délais.",
-    });
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      subject: "",
-      message: ""
-    });
+    setIsLoading(true);
+
+    try {
+      const response = await contactApi.sendMessage(formData);
+
+      if (response.success) {
+        toast({
+          title: "Message envoyé !",
+          description: response.message || "Nous vous recontacterons dans les plus brefs délais.",
+        });
+
+        // Réinitialiser le formulaire
+        setFormData({
+          name: "",
+          email: "",
+          company: "",
+          subject: "",
+          message: ""
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message:', error);
+      toast({
+        title: "Erreur lors de l'envoi",
+        description: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -111,8 +132,14 @@ const ContactForm = () => {
             />
           </div>
 
-          <Button type="submit" variant="sunset" size="lg" className="w-full">
-            Envoyer le message
+          <Button
+            type="submit"
+            variant="sunset"
+            size="lg"
+            className="w-full"
+            disabled={isLoading}
+          >
+            {isLoading ? "Envoi en cours..." : "Envoyer le message"}
           </Button>
         </form>
       </CardContent>
