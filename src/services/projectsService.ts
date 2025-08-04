@@ -106,7 +106,7 @@ const getDefaultAdminProjects = (): AdminProject[] => {
     {
       id: "4",
       title: "SOA DIA TRAVEL",
-      description: "Transport & Logistique à Madagascar",
+      description: "Transport & Logistique �� Madagascar",
       technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
       client: "SOA DIA TRAVEL",
       duration: "4 mois",
@@ -308,4 +308,25 @@ export const updateProjectStatus = async (id: string, status: AdminProject['stat
     console.error('Erreur lors de la mise à jour du statut:', error);
     throw error;
   }
+};
+
+// Functions needed by ProjectsSection component
+
+// Récupérer les projets au format client depuis l'API
+export const getClientProjects = async (): Promise<ClientProject[]> => {
+  try {
+    const adminProjects = await getProjectsFromStorage();
+    return adminProjects.map(convertAdminToClientProject);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des projets clients:', error);
+    return getDefaultProjects();
+  }
+};
+
+// Récupérer les projets par défaut au format client
+export const getDefaultProjects = (): ClientProject[] => {
+  const defaultAdminProjects = getDefaultAdminProjects();
+  return defaultAdminProjects
+    .filter(project => project.status === 'TERMINE')
+    .map(convertAdminToClientProject);
 };
