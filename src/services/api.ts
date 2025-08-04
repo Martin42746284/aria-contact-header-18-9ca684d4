@@ -1,4 +1,14 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Configuration de l'URL API adaptée à l'environnement
+const getApiBaseUrl = () => {
+  // En production ou environnement cloud, utiliser une URL relative vers le proxy
+  if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
+    return '/api';
+  }
+  // En développement local, utiliser la variable d'environnement ou localhost
+  return import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Types pour TypeScript
 export interface ApiResponse<T = any> {
