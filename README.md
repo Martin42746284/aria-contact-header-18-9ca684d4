@@ -35,19 +35,19 @@ npm install
 cd backend && npm install && cd ..
 ```
 
-### 2. Configuration de la base de données PostgreSQL
+### 2. Configuration de la base de données avec Neon
 
+**🎯 Option A: Neon Database (Recommandé)**
+1. Aller sur [Neon.tech](https://neon.tech) et se connecter avec GitHub
+2. Créer un nouveau projet `aria-creative`
+3. Connecter votre repo GitHub dans les intégrations
+4. Copier l'URL de connexion PostgreSQL
+
+**📋 Option B: PostgreSQL local**
 ```bash
-# Installer PostgreSQL (Ubuntu/Debian)
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-
-# Créer la base de données
-sudo -u postgres psql
-CREATE DATABASE aria_creative;
-CREATE USER aria_user WITH PASSWORD 'secure_password';
-GRANT ALL PRIVILEGES ON DATABASE aria_creative TO aria_user;
-\q
+# Si vous préférez une installation locale
+sudo apt update && sudo apt install postgresql postgresql-contrib
+sudo -u postgres createdb aria_creative
 ```
 
 ### 3. Configuration des variables d'environnement
@@ -68,15 +68,30 @@ EMAIL_USER=votre-email@gmail.com
 EMAIL_PASS=votre-mot-de-passe-application
 ADMIN_EMAIL=admin@aria-creative.com
 ADMIN_PASSWORD=admin123
-DATABASE_URL="postgresql://aria_user:secure_password@localhost:5432/aria_creative?schema=public"
+
+# 🎯 Neon Database (remplacer par votre URL Neon)
+DATABASE_URL="postgresql://username:password@ep-xxx.neon.tech/aria_creative?sslmode=require"
+
+# 📋 OU PostgreSQL local
+# DATABASE_URL="postgresql://aria_user:secure_password@localhost:5432/aria_creative?schema=public"
 ```
 
 ### 4. Initialiser la base de données
 
+**🎯 Avec Neon (production-ready)**
 ```bash
 cd backend
 npx prisma generate
-npx prisma migrate dev --name init
+npx prisma migrate deploy  # Pour Neon
+npm run db:seed
+cd ..
+```
+
+**📋 Avec PostgreSQL local (développement)**
+```bash
+cd backend
+npx prisma generate
+npx prisma migrate dev --name init  # Pour local
 npm run db:seed
 cd ..
 ```
