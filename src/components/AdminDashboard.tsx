@@ -78,7 +78,7 @@ const AdminDashboard = () => {
     url: "",
   });
 
-  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [currentTechnology, setCurrentTechnology] = useState("");
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
   const [messageReply, setMessageReply] = useState("");
