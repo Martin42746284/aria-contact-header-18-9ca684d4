@@ -640,7 +640,7 @@ const AdminDashboard = () => {
                    Projets (Nos réalisations)
                 </h2>
                 <div className="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full">
-                  {projects.filter(p => p.status === 'Terminé').length} publiés sur le site
+                  {projects.filter(p => p.status === 'TERMINE' || p.status === 'Terminé').length} publiés sur le site
                 </div>
               </div>
               {projects.length === 0 ? (
