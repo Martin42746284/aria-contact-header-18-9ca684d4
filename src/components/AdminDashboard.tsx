@@ -89,6 +89,40 @@ const AdminDashboard = () => {
     navigate("/admin");
   };
 
+  const handleTestConnection = async () => {
+    console.log('🧪 Démarrage des tests de connexion...');
+
+    // Test de la connexion de base
+    const backendTest = await testBackendConnection();
+    if (backendTest.success) {
+      toast({
+        title: "✅ Backend connecté",
+        description: "La connexion au backend fonctionne correctement.",
+      });
+    } else {
+      toast({
+        title: "❌ Erreur backend",
+        description: backendTest.error || "Impossible de se connecter au backend.",
+        variant: "destructive",
+      });
+    }
+
+    // Test de l'API admin
+    const adminTest = await testAdminAPI();
+    if (adminTest.success) {
+      toast({
+        title: "✅ API Admin OK",
+        description: "L'authentification admin fonctionne correctement.",
+      });
+    } else {
+      toast({
+        title: "❌ Erreur API Admin",
+        description: adminTest.error || "Problème avec l'API admin.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewProject({ ...newProject, [name]: value });
