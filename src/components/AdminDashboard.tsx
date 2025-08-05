@@ -213,14 +213,70 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteMessage = (messageId: number) => {
-    setMessages(messages.filter((message) => message.id !== messageId));
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const response = await contactApi.deleteMessage(messageId);
+      if (response.success) {
+        setMessages(messages.filter((message) => message.id !== messageId));
+        toast({
+          title: "Succès",
+          description: "Message supprimé avec succès",
+        });
+        // Recharger les statistiques
+        loadMessages();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le message",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleMarkAsRead = (messageId: number) => {
-    setMessages(messages.map(msg =>
-      msg.id === messageId ? { ...msg, read: true } : msg
-    ));
+  const handleUpdateMessageStatus = async (messageId: string, status: AdminContactMessage['status']) => {
+    try {
+      const response = await contactApi.updateMessageStatus(messageId, status);
+      if (response.success) {
+        setMessages(messages.map(msg =>
+          msg.id === messageId ? { ...msg, status } : msg
+        ));
+        toast({
+          title: "Succès",
+          description: `Statut modifié en "${status}"`,
+        });
+        // Recharger les statistiques
+        loadMessages();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la modification du statut:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le statut",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusLabel = (status: AdminContactMessage['status']) => {
+    const statusLabels = {
+      'NOUVEAU': 'Nouveau',
+      'LU': 'Lu',
+      'TRAITE': 'Traité',
+      'ARCHIVE': 'Archivé'
+    };
+    return statusLabels[status] || status;
+  };
+
+  const getStatusColor = (status: AdminContactMessage['status']) => {
+    const statusColors = {
+      'NOUVEAU': 'text-red-400 bg-red-900/20 border-red-500',
+      'LU': 'text-blue-400 bg-blue-900/20 border-blue-500',
+      'TRAITE': 'text-green-400 bg-green-900/20 border-green-500',
+      'ARCHIVE': 'text-gray-400 bg-gray-900/20 border-gray-500'
+    };
+    return statusColors[status] || 'text-gray-400 bg-gray-900/20 border-gray-500';
   };
 
   const getStatusColor = (status: string) => {
