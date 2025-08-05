@@ -92,16 +92,18 @@ async function main() {
     }
   ];
 
-  for (const projectData of projects) {
-    const project = await prisma.project.upsert({
-      where: { 
-        // Utiliser une combinaison unique pour éviter les doublons
-        title: projectData.title
-      },
-      update: {},
-      create: projectData
+  // Vérifier si des projets existent déjà
+  const existingProjects = await prisma.project.count();
+
+  if (existingProjects === 0) {
+    // Créer tous les projets en une fois si aucun n'existe
+    const createdProjects = await prisma.project.createMany({
+      data: projects,
+      skipDuplicates: true
     });
-    console.log(`📄 Projet créé: ${project.title}`);
+    console.log(`📄 ${createdProjects.count} projets créés`);
+  } else {
+    console.log(`📄 ${existingProjects} projets existent déjà dans la base`);
   }
 
   console.log('✅ Seeding terminé !');
