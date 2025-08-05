@@ -279,7 +279,7 @@ const AdminDashboard = () => {
     return statusColors[status] || 'text-gray-400 bg-gray-900/20 border-gray-500';
   };
 
-  const getStatusColor = (status: string) => {
+  const getProjectStatusColor = (status: string) => {
     switch (status) {
       case 'Terminé': return 'text-green-400 bg-green-900/20 border-green-500';
       case 'En cours': return 'text-blue-400 bg-blue-900/20 border-blue-500';
