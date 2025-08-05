@@ -125,57 +125,69 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingProjectId !== null) {
-      setProjects(
-        projects.map((project) =>
-          project.id === editingProjectId
-            ? {
-                ...project,
-                title: newProject.title,
-                description: newProject.description,
-                technologies: newProject.technologies,
-                client: newProject.client,
-                duration: newProject.duration,
-                status: newProject.status,
-                image: newProject.image,
-                imagePreview: newProject.imagePreview,
-                url: newProject.url,
-              }
-            : project
-        )
-      );
-      setEditingProjectId(null);
-    } else {
-      setProjects([
-        ...projects,
-        {
-          id: Date.now(),
-          title: newProject.title,
-          description: newProject.description,
-          technologies: newProject.technologies,
-          client: newProject.client,
-          duration: newProject.duration,
-          status: newProject.status,
-          image: newProject.image,
-          imagePreview: newProject.imagePreview,
-          date: new Date().toLocaleDateString(),
-          url: newProject.url,
-        },
-      ]);
+    setIsLoading(true);
+
+    try {
+      const projectData = {
+        title: newProject.title,
+        description: newProject.description,
+        technologies: newProject.technologies,
+        client: newProject.client,
+        duration: newProject.duration,
+        status: newProject.status === "En cours" ? 'EN_COURS' as const :
+               newProject.status === "Terminé" ? 'TERMINE' as const : 'EN_ATTENTE' as const,
+        imageUrl: newProject.imagePreview || '',
+        url: newProject.url,
+        date: new Date().toLocaleDateString('fr-FR'),
+      };
+
+      if (editingProjectId !== null) {
+        // Mise à jour d'un projet existant
+        const updatedProject = await updateProject(editingProjectId.toString(), projectData);
+        if (updatedProject) {
+          setProjects(projects.map(p => p.id === editingProjectId ? updatedProject : p));
+          toast({
+            title: "Projet modifié",
+            description: "Le projet a été mis à jour avec succès.",
+          });
+        }
+        setEditingProjectId(null);
+      } else {
+        // Création d'un nouveau projet
+        const newProjectCreated = await createProject(projectData);
+        if (newProjectCreated) {
+          setProjects([...projects, newProjectCreated]);
+          toast({
+            title: "Projet créé",
+            description: "Le nouveau projet a été créé avec succès.",
+          });
+        }
+      }
+
+      // Réinitialiser le formulaire
+      setNewProject({
+        title: "",
+        description: "",
+        technologies: [],
+        client: "",
+        duration: "",
+        status: "En attente",
+        image: null,
+        imagePreview: null,
+        url: "",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du projet:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder le projet. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setNewProject({
-      title: "",
-      description: "",
-      technologies: [],
-      client: "",
-      duration: "",
-      status: "En attente",
-      image: null,
-      imagePreview: null,
-      url: "",
-    });
   };
 
   const handleEdit = (project: AdminProject) => {
