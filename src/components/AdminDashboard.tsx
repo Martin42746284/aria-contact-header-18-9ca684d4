@@ -24,23 +24,27 @@ const AdminDashboard = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const { toast } = useToast();
 
-  // Charger les projets depuis localStorage au montage du composant
+  // Charger les projets depuis l'API au montage du composant
   useEffect(() => {
-    // Forcer le rechargement des projets originaux avec les vraies images
-    const defaultProjects = getDefaultAdminProjects();
-    setProjects(defaultProjects);
-    saveAllAdminProjects(defaultProjects);
+    const loadProjects = async () => {
+      setIsLoading(true);
+      try {
+        const adminProjects = await getAllAdminProjects();
+        setProjects(adminProjects);
+      } catch (error) {
+        console.error('Erreur lors du chargement des projets:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les projets depuis l'API. Utilisation des données par défaut.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Effacer l'ancien cache pour forcer le rechargement
-    localStorage.removeItem('aria_admin_projects');
+    loadProjects();
   }, []);
-
-  // Sauvegarder automatiquement les projets quand ils changent
-  useEffect(() => {
-    if (projects.length > 0) {
-      saveAllAdminProjects(projects);
-    }
-  }, [projects]);
   const [messages, setMessages] = useState<CustomerMessage[]>([
     {
       id: 1,
