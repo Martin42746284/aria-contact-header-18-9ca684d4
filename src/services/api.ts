@@ -32,6 +32,18 @@ export interface ContactMessage {
   message: string;
 }
 
+export interface AdminContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+  subject: string;
+  message: string;
+  status: 'NOUVEAU' | 'LU' | 'TRAITE' | 'ARCHIVE';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
   email: string;
   name: string;
@@ -162,6 +174,44 @@ export const contactApi = {
 
   async testEmailConfig(): Promise<ApiResponse> {
     return ApiClient.get('/contact/test');
+  },
+
+  // === CRUD ADMIN ===
+  async getAllMessages(params?: { status?: string; page?: number; limit?: number }): Promise<ApiResponse<{
+    messages: AdminContactMessage[],
+    pagination: { total: number; page: number; limit: number; pages: number }
+  }>> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+
+    const query = searchParams.toString();
+    return ApiClient.get(`/contact/admin${query ? `?${query}` : ''}`);
+  },
+
+  async getMessage(id: string): Promise<ApiResponse<{ message: AdminContactMessage }>> {
+    return ApiClient.get(`/contact/admin/${id}`);
+  },
+
+  async updateMessageStatus(id: string, status: AdminContactMessage['status']): Promise<ApiResponse<{ message: AdminContactMessage }>> {
+    return ApiClient.put(`/contact/admin/${id}/status`, { status });
+  },
+
+  async deleteMessage(id: string): Promise<ApiResponse> {
+    return ApiClient.delete(`/contact/admin/${id}`);
+  },
+
+  async getStats(): Promise<ApiResponse<{
+    stats: {
+      total: number;
+      nouveau: number;
+      lu: number;
+      traite: number;
+      archive: number
+    }
+  }>> {
+    return ApiClient.get('/contact/admin/stats');
   }
 };
 

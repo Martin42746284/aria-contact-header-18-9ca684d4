@@ -1,18 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
-import { adminApi, uploadApi } from "@/services/api";
+import { adminApi, uploadApi, contactApi, type AdminContactMessage } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-
-interface CustomerMessage {
-  id: number;
-  subject: string;
-  from: string;
-  email: string;
-  company: string;
-  content: string;
-  date: string;
-}
 
 // Interface déplacée vers projectsService.ts
 // Nous utilisons maintenant AdminProject du service
@@ -41,26 +31,15 @@ const AdminDashboard = () => {
       saveAllAdminProjects(projects);
     }
   }, [projects]);
-  const [messages, setMessages] = useState<CustomerMessage[]>([
-    {
-      id: 1,
-      subject: "Demande de partenariat",
-      from: "Jean Dupont",
-      email: "jean.dupont@example.com",
-      company: "ABC Corp",
-      content: "Bonjour, je souhaiterais discuter d'un possible partenariat avec votre entreprise.",
-      date: "30/07/2025",
-    },
-    {
-      id: 2,
-      subject: "Question sur vos services",
-      from: "Marie Martin",
-      email: "marie.martin@example.com",
-      company: "XYZ Ltd",
-      content: "Pourriez-vous me donner plus d'informations sur vos services premium?",
-      date: "30/07/2025",
-    },
-  ]);
+  const [messages, setMessages] = useState<AdminContactMessage[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messageStats, setMessageStats] = useState({
+    total: 0,
+    nouveau: 0,
+    lu: 0,
+    traite: 0,
+    archive: 0
+  });
 
   const [newProject, setNewProject] = useState({
     title: "",
@@ -76,8 +55,41 @@ const AdminDashboard = () => {
 
   const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [currentTechnology, setCurrentTechnology] = useState("");
-  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messageReply, setMessageReply] = useState("");
+
+  // Charger les messages depuis l'API
+  const loadMessages = async () => {
+    setMessagesLoading(true);
+    try {
+      const [messagesResponse, statsResponse] = await Promise.all([
+        contactApi.getAllMessages({ limit: 50 }),
+        contactApi.getStats()
+      ]);
+
+      if (messagesResponse.success && messagesResponse.data) {
+        setMessages(messagesResponse.data.messages);
+      }
+
+      if (statsResponse.success && statsResponse.data) {
+        setMessageStats(statsResponse.data.stats);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des messages:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les messages",
+        variant: "destructive",
+      });
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  // Charger les messages au montage du composant
+  useEffect(() => {
+    loadMessages();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
@@ -201,17 +213,73 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteMessage = (messageId: number) => {
-    setMessages(messages.filter((message) => message.id !== messageId));
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const response = await contactApi.deleteMessage(messageId);
+      if (response.success) {
+        setMessages(messages.filter((message) => message.id !== messageId));
+        toast({
+          title: "Succès",
+          description: "Message supprimé avec succès",
+        });
+        // Recharger les statistiques
+        loadMessages();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le message",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleMarkAsRead = (messageId: number) => {
-    setMessages(messages.map(msg =>
-      msg.id === messageId ? { ...msg, read: true } : msg
-    ));
+  const handleUpdateMessageStatus = async (messageId: string, status: AdminContactMessage['status']) => {
+    try {
+      const response = await contactApi.updateMessageStatus(messageId, status);
+      if (response.success) {
+        setMessages(messages.map(msg =>
+          msg.id === messageId ? { ...msg, status } : msg
+        ));
+        toast({
+          title: "Succès",
+          description: `Statut modifié en "${status}"`,
+        });
+        // Recharger les statistiques
+        loadMessages();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la modification du statut:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le statut",
+        variant: "destructive",
+      });
+    }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusLabel = (status: AdminContactMessage['status']) => {
+    const statusLabels = {
+      'NOUVEAU': 'Nouveau',
+      'LU': 'Lu',
+      'TRAITE': 'Traité',
+      'ARCHIVE': 'Archivé'
+    };
+    return statusLabels[status] || status;
+  };
+
+  const getStatusColor = (status: AdminContactMessage['status']) => {
+    const statusColors = {
+      'NOUVEAU': 'text-red-400 bg-red-900/20 border-red-500',
+      'LU': 'text-blue-400 bg-blue-900/20 border-blue-500',
+      'TRAITE': 'text-green-400 bg-green-900/20 border-green-500',
+      'ARCHIVE': 'text-gray-400 bg-gray-900/20 border-gray-500'
+    };
+    return statusColors[status] || 'text-gray-400 bg-gray-900/20 border-gray-500';
+  };
+
+  const getProjectStatusColor = (status: string) => {
     switch (status) {
       case 'Terminé': return 'text-green-400 bg-green-900/20 border-green-500';
       case 'En cours': return 'text-blue-400 bg-blue-900/20 border-blue-500';
@@ -464,7 +532,12 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Messages clients</p>
-                  <p className="text-2xl font-bold text-white">{messages.length}</p>
+                  <p className="text-2xl font-bold text-white">{messageStats.total}</p>
+                  {messageStats.nouveau > 0 && (
+                    <p className="text-sm text-red-400">
+                      {messageStats.nouveau} nouveau{messageStats.nouveau > 1 ? 'x' : ''}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -477,8 +550,10 @@ const AdminDashboard = () => {
               <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-1">
                  Messages des clients
               </h2>
-              {messages.length === 0 ? (
-                <p className="text-gray-400 animate-pulse text-center py-8">Aucun message pour le moment</p>
+              {messagesLoading ? (
+                <p className="text-gray-400 animate-pulse text-center py-8">Chargement des messages...</p>
+              ) : messages.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">Aucun message pour le moment</p>
               ) : (
                 <div className="space-y-6">
                   {messages.map((message) => (
@@ -487,60 +562,83 @@ const AdminDashboard = () => {
                       className="bg-black border border-gray-800 rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-orange-400">
-                          {message.subject}
-                        </h3>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-bold text-orange-400">
+                            {message.subject}
+                          </h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(message.status)}`}>
+                            {getStatusLabel(message.status)}
+                          </span>
+                        </div>
                         <span className="text-gray-400 text-sm bg-gray-800 px-3 py-1 rounded-full">
-                          {message.date}
+                          {new Date(message.createdAt).toLocaleDateString('fr-FR')}
                         </span>
                       </div>
                       <div className="mb-3">
                         <p className="text-gray-300">
-                          <span className="text-orange-300 font-medium">De:</span> {message.from}
+                          <span className="text-orange-300 font-medium">De:</span> {message.name}
                         </p>
                         <p className="text-gray-300">
-                          <span className="text-orange-300 font-medium">Entreprise:</span> {message.company}
+                          <span className="text-orange-300 font-medium">Entreprise:</span> {message.company || 'Non spécifiée'}
                         </p>
                         <p className="text-gray-300">
                           <span className="text-orange-300 font-medium">Email:</span> {message.email}
                         </p>
                       </div>
                       <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-orange-500">
-                        <p className="text-white leading-relaxed">
-                          {message.content}
+                        <p className="text-white leading-relaxed whitespace-pre-wrap">
+                          {message.message}
                         </p>
                       </div>
                       <div className="mt-4 flex justify-between items-center">
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 flex-wrap gap-2">
                           <button
                             onClick={() => setSelectedMessageId(selectedMessageId === message.id ? null : message.id)}
-                            className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                            className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black text-sm"
                           >
                             {selectedMessageId === message.id ? '▲ Masquer' : '✉ Répondre'}
                           </button>
-                          <button
-                            onClick={() => handleMarkAsRead(message.id)}
-                            className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
-                          >
-                            ✓ Marquer lu
-                          </button>
+                          {message.status === 'NOUVEAU' && (
+                            <button
+                              onClick={() => handleUpdateMessageStatus(message.id, 'LU')}
+                              className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black text-sm"
+                            >
+                              ✓ Marquer lu
+                            </button>
+                          )}
+                          {message.status === 'LU' && (
+                            <button
+                              onClick={() => handleUpdateMessageStatus(message.id, 'TRAITE')}
+                              className="text-green-400 hover:text-green-300 transition duration-300 font-medium px-3 py-1 rounded border border-green-500 hover:bg-green-500 hover:text-black text-sm"
+                            >
+                              ✓ Marquer traité
+                            </button>
+                          )}
+                          {(message.status === 'LU' || message.status === 'TRAITE') && (
+                            <button
+                              onClick={() => handleUpdateMessageStatus(message.id, 'ARCHIVE')}
+                              className="text-gray-400 hover:text-gray-300 transition duration-300 font-medium px-3 py-1 rounded border border-gray-500 hover:bg-gray-500 hover:text-black text-sm"
+                            >
+                              📁 Archiver
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteMessage(message.id)}
-                            className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
+                            className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black text-sm"
                           >
                             🗑 Supprimer
                           </button>
                         </div>
                         <a
                           href={`mailto:${message.email}?subject=Re: ${message.subject}`}
-                          className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                          className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black text-sm"
                         >
                           📧 Email direct
                         </a>
                       </div>
                       {selectedMessageId === message.id && (
                         <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700 animate-fadeIn">
-                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.from}</h4>
+                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.name}</h4>
                           <textarea
                             value={messageReply}
                             onChange={(e) => setMessageReply(e.target.value)}
@@ -605,9 +703,9 @@ const AdminDashboard = () => {
                               {project.title}
                             </h3>
                             <div className="flex items-center gap-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
-                                {project.status}
-                              </span>
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getProjectStatusColor(project.status)}`}>
+                              {project.status}
+                            </span>
                               {project.status === 'Terminé' && (
                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
                                   🌐 Publié sur le site

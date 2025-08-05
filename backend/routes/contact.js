@@ -2,6 +2,8 @@ import express from 'express';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
 import rateLimit from 'express-rate-limit';
+import { prisma } from '../lib/prisma.js';
+import { authenticateToken } from './admin.js';
 
 const router = express.Router();
 
@@ -114,6 +116,18 @@ router.post('/', contactLimiter, async (req, res) => {
       `
     };
 
+    // Sauvegarder le message dans la base de données
+    const contactMessage = await prisma.contactMessage.create({
+      data: {
+        name,
+        email,
+        company: company || null,
+        subject,
+        message,
+        status: 'NOUVEAU'
+      }
+    });
+
     // Envoi des emails
     await Promise.all([
       transporter.sendMail(adminMailOptions),
@@ -121,11 +135,12 @@ router.post('/', contactLimiter, async (req, res) => {
     ]);
 
     // Log pour le monitoring
-    console.log(`📧 Contact message sent from: ${email} - Subject: ${subject}`);
+    console.log(`📧 Contact message sent from: ${email} - Subject: ${subject} - ID: ${contactMessage.id}`);
 
     res.status(200).json({
       success: true,
-      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.'
+      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.',
+      data: { id: contactMessage.id }
     });
 
   } catch (error) {
@@ -143,7 +158,7 @@ router.get('/test', async (req, res) => {
   try {
     const transporter = createTransporter();
     await transporter.verify();
-    
+
     res.json({
       success: true,
       message: 'Configuration email OK'
@@ -153,6 +168,180 @@ router.get('/test', async (req, res) => {
       success: false,
       message: 'Erreur de configuration email',
       error: error.message
+    });
+  }
+});
+
+// === ROUTES ADMIN (CRUD) ===
+
+// GET /api/contact/admin - Récupérer tous les messages (admin)
+router.get('/admin', authenticateToken, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const where = status ? { status } : {};
+
+    const [messages, total] = await Promise.all([
+      prisma.contactMessage.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: parseInt(limit)
+      }),
+      prisma.contactMessage.count({ where })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        messages,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / parseInt(limit))
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching contact messages:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des messages'
+    });
+  }
+});
+
+// GET /api/contact/admin/:id - Récupérer un message spécifique (admin)
+router.get('/admin/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const message = await prisma.contactMessage.findUnique({
+      where: { id }
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        error: 'Message non trouvé'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { message }
+    });
+
+  } catch (error) {
+    console.error('Error fetching contact message:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération du message'
+    });
+  }
+});
+
+// PUT /api/contact/admin/:id/status - Modifier le statut d'un message (admin)
+router.put('/admin/:id/status', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validation du statut
+    const validStatuses = ['NOUVEAU', 'LU', 'TRAITE', 'ARCHIVE'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: 'Statut invalide',
+        validStatuses
+      });
+    }
+
+    const message = await prisma.contactMessage.update({
+      where: { id },
+      data: {
+        status,
+        updatedAt: new Date()
+      }
+    });
+
+    console.log(`📝 Message ${id} status updated to ${status} by ${req.user.email}`);
+
+    res.json({
+      success: true,
+      message: `Statut modifié en "${status}"`,
+      data: { message }
+    });
+
+  } catch (error) {
+    console.error('Error updating message status:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({
+        error: 'Message non trouvé'
+      });
+    }
+    res.status(500).json({
+      error: 'Erreur lors de la modification du statut'
+    });
+  }
+});
+
+// DELETE /api/contact/admin/:id - Supprimer un message (admin)
+router.delete('/admin/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.contactMessage.delete({
+      where: { id }
+    });
+
+    console.log(`🗑️ Message ${id} deleted by ${req.user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Message supprimé avec succès'
+    });
+
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({
+        error: 'Message non trouvé'
+      });
+    }
+    res.status(500).json({
+      error: 'Erreur lors de la suppression du message'
+    });
+  }
+});
+
+// GET /api/contact/admin/stats - Statistiques des messages (admin)
+router.get('/admin/stats', authenticateToken, async (req, res) => {
+  try {
+    const [total, nouveau, lu, traite, archive] = await Promise.all([
+      prisma.contactMessage.count(),
+      prisma.contactMessage.count({ where: { status: 'NOUVEAU' } }),
+      prisma.contactMessage.count({ where: { status: 'LU' } }),
+      prisma.contactMessage.count({ where: { status: 'TRAITE' } }),
+      prisma.contactMessage.count({ where: { status: 'ARCHIVE' } })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        stats: {
+          total,
+          nouveau,
+          lu,
+          traite,
+          archive
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching message stats:', error);
+    res.status(500).json({
+      error: 'Erreur lors de la récupération des statistiques'
     });
   }
 });
