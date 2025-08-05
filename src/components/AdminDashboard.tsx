@@ -318,12 +318,20 @@ const AdminDashboard = () => {
           <h1 className="text-4xl font-bold text-white transform transition duration-500 hover:scale-105">
             <span className="text-orange-400">Dashboard</span> <span className="text-white">Admin</span>
           </h1>
-          <button
-            onClick={handleLogout}
-            className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-3 px-6 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-orange-500/50 border border-orange-400"
-          >
-            Déconnexion
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleTestConnection}
+              className="bg-gradient-to-r from-blue-500 to-blue-400 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-400 hover:to-blue-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-blue-500/50 border border-blue-400"
+            >
+              🧪 Test API
+            </button>
+            <button
+              onClick={handleLogout}
+              className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-3 px-6 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-orange-500/50 border border-orange-400"
+            >
+              Déconnexion
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -706,7 +714,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-400 mb-2">
-                            <span>📅 Créé le {project.date}</span>
+                            <span>📅 Cré�� le {project.date}</span>
                             <span>�� Client: {project.client}</span>
                             <span>⏳ Durée: {project.duration}</span>
                           </div>
