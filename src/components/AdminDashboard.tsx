@@ -507,11 +507,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Projets terminés</p>
-                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'Terminé').length}</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'TERMINE' || p.status === 'Terminé').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Projets en cours</p>
-                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'En cours').length}</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'EN_COURS' || p.status === 'En cours').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Visiteurs aujourd'hui</p>
