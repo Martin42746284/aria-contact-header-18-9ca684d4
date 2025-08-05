@@ -532,7 +532,12 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Messages clients</p>
-                  <p className="text-2xl font-bold text-white">{messages.length}</p>
+                  <p className="text-2xl font-bold text-white">{messageStats.total}</p>
+                  {messageStats.nouveau > 0 && (
+                    <p className="text-sm text-red-400">
+                      {messageStats.nouveau} nouveau{messageStats.nouveau > 1 ? 'x' : ''}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
