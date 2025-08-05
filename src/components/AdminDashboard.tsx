@@ -722,9 +722,16 @@ const AdminDashboard = () => {
                               {project.title}
                             </h3>
                             <div className="flex items-center gap-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
-                                {formatStatus(project.status)}
-                              </span>
+                              {/* Dropdown pour changer le statut */}
+                              <select
+                                value={project.status}
+                                onChange={(e) => handleStatusChange(project.id, e.target.value as AdminProject['status'])}
+                                className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)} bg-transparent cursor-pointer`}
+                              >
+                                <option value="EN_ATTENTE" className="bg-gray-900 text-yellow-400">En attente</option>
+                                <option value="EN_COURS" className="bg-gray-900 text-blue-400">En cours</option>
+                                <option value="TERMINE" className="bg-gray-900 text-green-400">Terminé</option>
+                              </select>
                               {(project.status === 'TERMINE' || project.status === 'Terminé') && (
                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
                                   🌐 Publié sur le site
