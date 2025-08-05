@@ -252,10 +252,17 @@ const AdminDashboard = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Terminé': return 'text-green-400 bg-green-900/20 border-green-500';
-      case 'En cours': return 'text-blue-400 bg-blue-900/20 border-blue-500';
-      case 'En attente': return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
-      default: return 'text-gray-400 bg-gray-900/20 border-gray-500';
+      case 'TERMINE':
+      case 'Terminé':
+        return 'text-green-400 bg-green-900/20 border-green-500';
+      case 'EN_COURS':
+      case 'En cours':
+        return 'text-blue-400 bg-blue-900/20 border-blue-500';
+      case 'EN_ATTENTE':
+      case 'En attente':
+        return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
+      default:
+        return 'text-gray-400 bg-gray-900/20 border-gray-500';
     }
   };
 
@@ -567,7 +574,7 @@ const AdminDashboard = () => {
                             onClick={() => handleDeleteMessage(message.id)}
                             className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
                           >
-                            �� Supprimer
+                            🗑 Supprimer
                           </button>
                         </div>
                         <a
