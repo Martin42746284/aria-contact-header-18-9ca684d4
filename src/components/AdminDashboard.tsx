@@ -251,7 +251,7 @@ const AdminDashboard = () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
       return;
     }
-    
+
     try {
       const success = await deleteProject(projectId);
       if (success) {
@@ -266,6 +266,26 @@ const AdminDashboard = () => {
       toast({
         title: "Erreur",
         description: "Erreur lors de la suppression du projet",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStatusChange = async (projectId: string, newStatus: AdminProject['status']) => {
+    try {
+      const updatedProject = await updateProjectStatus(projectId, newStatus);
+      if (updatedProject) {
+        setProjects(projects.map(p => p.id === projectId ? updatedProject : p));
+        toast({
+          title: "Succès",
+          description: `Statut changé vers "${formatStatus(newStatus)}"`,
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors du changement de statut:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du changement de statut",
         variant: "destructive",
       });
     }
