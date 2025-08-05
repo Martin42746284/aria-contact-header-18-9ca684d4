@@ -98,17 +98,17 @@ const ContactForm = () => {
             <div className="relative">
               <input
                 type="text"
-                name="nom"
-                value={formData.nom}
+                name="name"
+                value={formData.name}
                 onChange={handleInputChange}
-                onFocus={() => setFocusedField('nom')}
+                onFocus={() => setFocusedField('name')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full p-4 bg-black/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-400 transition-all duration-300"
                 placeholder="Votre nom complet"
                 required
               />
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 opacity-0 transition-opacity duration-300 pointer-events-none ${
-                focusedField === 'nom' ? 'opacity-100' : ''
+                focusedField === 'name' ? 'opacity-100' : ''
               }`} />
             </div>
           </div>
