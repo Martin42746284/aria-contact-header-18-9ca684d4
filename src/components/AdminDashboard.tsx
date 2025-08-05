@@ -1,66 +1,89 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
-import { adminApi, uploadApi } from "@/services/api";
+import { adminApi, uploadApi, contactApi, healthApi } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface CustomerMessage {
-  id: number;
+  id: string;
   subject: string;
-  from: string;
+  name: string;
   email: string;
-  company: string;
-  content: string;
-  date: string;
+  company?: string;
+  message: string;
+  status: 'NOUVEAU' | 'LU' | 'TRAITE' | 'ARCHIVE';
+  createdAt: string;
+  updatedAt: string;
 }
-
-// Interface déplacée vers projectsService.ts
-// Nous utilisons maintenant AdminProject du service
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<AdminProject[]>([]);
+  const [messages, setMessages] = useState<CustomerMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const { toast } = useToast();
 
-  // Charger les projets depuis localStorage au montage du composant
+  // Charger les projets et vérifier la connexion à la base de données
   useEffect(() => {
-    // Forcer le rechargement des projets originaux avec les vraies images
-    const defaultProjects = getDefaultAdminProjects();
-    setProjects(defaultProjects);
-    saveAllAdminProjects(defaultProjects);
-
-    // Effacer l'ancien cache pour forcer le rechargement
-    localStorage.removeItem('aria_admin_projects');
+    loadData();
   }, []);
 
-  // Sauvegarder automatiquement les projets quand ils changent
-  useEffect(() => {
-    if (projects.length > 0) {
-      saveAllAdminProjects(projects);
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      // Vérifier la connexion à la base de données
+      await checkDatabaseConnection();
+      
+      // Charger les projets depuis l'API
+      await loadProjects();
+      
+      // Charger les messages (simulation pour l'instant)
+      setMessages([]);
+      
+    } catch (error) {
+      console.error('Erreur lors du chargement des données:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des données. Utilisation des données locales.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-  }, [projects]);
-  const [messages, setMessages] = useState<CustomerMessage[]>([
-    {
-      id: 1,
-      subject: "Demande de partenariat",
-      from: "Jean Dupont",
-      email: "jean.dupont@example.com",
-      company: "ABC Corp",
-      content: "Bonjour, je souhaiterais discuter d'un possible partenariat avec votre entreprise.",
-      date: "30/07/2025",
-    },
-    {
-      id: 2,
-      subject: "Question sur vos services",
-      from: "Marie Martin",
-      email: "marie.martin@example.com",
-      company: "XYZ Ltd",
-      content: "Pourriez-vous me donner plus d'informations sur vos services premium?",
-      date: "30/07/2025",
-    },
-  ]);
+  };
+
+  const checkDatabaseConnection = async () => {
+    try {
+      const response = await healthApi.checkHealth();
+      if (response.success) {
+        setDbStatus('connected');
+        toast({
+          title: "Base de données",
+          description: "✅ Connexion à la base de données réussie",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      setDbStatus('disconnected');
+      console.error('Erreur de connexion à la base de données:', error);
+    }
+  };
+
+  const loadProjects = async () => {
+    try {
+      const adminProjects = await getAllAdminProjects();
+      setProjects(adminProjects);
+    } catch (error) {
+      console.error('Erreur lors du chargement des projets:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les projets depuis l'API",
+        variant: "destructive",
+      });
+    }
+  };
 
   const [newProject, setNewProject] = useState({
     title: "",
@@ -74,13 +97,14 @@ const AdminDashboard = () => {
     url: "",
   });
 
-  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [currentTechnology, setCurrentTechnology] = useState("");
-  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messageReply, setMessageReply] = useState("");
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
+    adminApi.logout();
     navigate("/admin");
   };
 
@@ -121,57 +145,91 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingProjectId !== null) {
-      setProjects(
-        projects.map((project) =>
-          project.id === editingProjectId
-            ? {
-                ...project,
-                title: newProject.title,
-                description: newProject.description,
-                technologies: newProject.technologies,
-                client: newProject.client,
-                duration: newProject.duration,
-                status: newProject.status,
-                image: newProject.image,
-                imagePreview: newProject.imagePreview,
-                url: newProject.url,
-              }
-            : project
-        )
-      );
-      setEditingProjectId(null);
-    } else {
-      setProjects([
-        ...projects,
-        {
-          id: Date.now(),
-          title: newProject.title,
-          description: newProject.description,
-          technologies: newProject.technologies,
-          client: newProject.client,
-          duration: newProject.duration,
-          status: newProject.status,
-          image: newProject.image,
-          imagePreview: newProject.imagePreview,
-          date: new Date().toLocaleDateString(),
-          url: newProject.url,
-        },
-      ]);
+    setIsLoading(true);
+    
+    try {
+      let imageUrl = newProject.imagePreview;
+      
+      // Upload de l'image si nécessaire
+      if (newProject.image) {
+        setIsUploadingImage(true);
+        try {
+          const uploadResponse = await uploadApi.uploadImage(newProject.image);
+          if (uploadResponse.success && uploadResponse.data) {
+            imageUrl = uploadResponse.data.imageUrl;
+          }
+        } catch (uploadError) {
+          console.error('Erreur lors de l\'upload:', uploadError);
+          toast({
+            title: "Erreur",
+            description: "Erreur lors de l'upload de l'image. Le projet sera créé sans image.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
+      const projectData = {
+        title: newProject.title,
+        description: newProject.description,
+        technologies: newProject.technologies,
+        client: newProject.client,
+        duration: newProject.duration,
+        status: newProject.status === "En attente" ? "EN_ATTENTE" as const : 
+                newProject.status === "En cours" ? "EN_COURS" as const : "TERMINE" as const,
+        imageUrl: imageUrl,
+        url: newProject.url,
+        date: new Date().toLocaleDateString('fr-FR')
+      };
+
+      if (editingProjectId !== null) {
+        // Mise à jour
+        const updatedProject = await updateProject(editingProjectId, projectData);
+        if (updatedProject) {
+          setProjects(projects.map(p => p.id === editingProjectId ? updatedProject : p));
+          toast({
+            title: "Succès",
+            description: "Projet mis à jour avec succès",
+          });
+        }
+        setEditingProjectId(null);
+      } else {
+        // Création
+        const newCreatedProject = await createProject(projectData);
+        if (newCreatedProject) {
+          setProjects([newCreatedProject, ...projects]);
+          toast({
+            title: "Succès",
+            description: "Projet créé avec succès",
+          });
+        }
+      }
+
+      // Reset du formulaire
+      setNewProject({
+        title: "",
+        description: "",
+        technologies: [],
+        client: "",
+        duration: "",
+        status: "En attente",
+        image: null,
+        imagePreview: null,
+        url: "",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la soumission:', error);
+      toast({
+        title: "Erreur",
+        description: error instanceof Error ? error.message : "Erreur lors de la soumission",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    setNewProject({
-      title: "",
-      description: "",
-      technologies: [],
-      client: "",
-      duration: "",
-      status: "En attente",
-      image: null,
-      imagePreview: null,
-      url: "",
-    });
   };
 
   const handleEdit = (project: AdminProject) => {
@@ -181,42 +239,66 @@ const AdminDashboard = () => {
       technologies: project.technologies,
       client: project.client,
       duration: project.duration,
-      status: project.status,
-      image: project.image,
-      imagePreview: project.imagePreview,
+      status: formatStatus(project.status) as 'En cours' | 'Terminé' | 'En attente',
+      image: null,
+      imagePreview: project.imagePreview || project.imageUrl,
       url: project.url || "",
     });
     setEditingProjectId(project.id);
   };
 
-  const handleDelete = (projectId: number) => {
-    const projectElement = document.getElementById(`project-${projectId}`);
-    if (projectElement) {
-      projectElement.classList.add("opacity-0", "scale-95", "transition-all", "duration-300");
-      setTimeout(() => {
+  const handleDelete = async (projectId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce projet ?')) {
+      return;
+    }
+    
+    try {
+      const success = await deleteProject(projectId);
+      if (success) {
         setProjects(projects.filter((project) => project.id !== projectId));
-      }, 300);
-    } else {
-      setProjects(projects.filter((project) => project.id !== projectId));
+        toast({
+          title: "Succès",
+          description: "Projet supprimé avec succès",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression du projet",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleDeleteMessage = (messageId: number) => {
+  const handleDeleteMessage = (messageId: string) => {
     setMessages(messages.filter((message) => message.id !== messageId));
   };
 
-  const handleMarkAsRead = (messageId: number) => {
+  const handleMarkAsRead = (messageId: string) => {
     setMessages(messages.map(msg =>
-      msg.id === messageId ? { ...msg, read: true } : msg
+      msg.id === messageId ? { ...msg, status: 'LU' as const } : msg
     ));
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'TERMINE': 
       case 'Terminé': return 'text-green-400 bg-green-900/20 border-green-500';
+      case 'EN_COURS':
       case 'En cours': return 'text-blue-400 bg-blue-900/20 border-blue-500';
+      case 'EN_ATTENTE':
       case 'En attente': return 'text-yellow-400 bg-yellow-900/20 border-yellow-500';
       default: return 'text-gray-400 bg-gray-900/20 border-gray-500';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    switch (status) {
+      case 'TERMINE': return 'Terminé';
+      case 'EN_COURS': return 'En cours';
+      case 'EN_ATTENTE': return 'En attente';
+      default: return status;
     }
   };
 
@@ -225,9 +307,20 @@ const AdminDashboard = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8 animate-fadeInDown">
-          <h1 className="text-4xl font-bold text-white transform transition duration-500 hover:scale-105">
-            <span className="text-orange-400">Dashboard</span> <span className="text-white">Admin</span>
-          </h1>
+          <div>
+            <h1 className="text-4xl font-bold text-white transform transition duration-500 hover:scale-105">
+              <span className="text-orange-400">Dashboard</span> <span className="text-white">Admin</span>
+            </h1>
+            <div className="flex items-center gap-2 mt-2">
+              <div className={`w-3 h-3 rounded-full ${dbStatus === 'connected' ? 'bg-green-500' : dbStatus === 'disconnected' ? 'bg-red-500' : 'bg-yellow-500'} animate-pulse`}></div>
+              <span className="text-sm text-gray-400">
+                Base de données: {
+                  dbStatus === 'connected' ? 'Connectée' :
+                  dbStatus === 'disconnected' ? 'Déconnectée' : 'Vérification...'
+                }
+              </span>
+            </div>
+          </div>
           <button
             onClick={handleLogout}
             className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-3 px-6 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-orange-500/50 border border-orange-400"
@@ -432,9 +525,11 @@ const AdminDashboard = () => {
                   )}
                   <button
                     type="submit"
-                    className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-3 px-6 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-orange-500/50"
+                    disabled={isLoading || isUploadingImage}
+                    className="bg-gradient-to-r from-orange-500 to-orange-400 text-black font-semibold py-3 px-6 rounded-lg hover:from-orange-400 hover:to-orange-300 transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {editingProjectId !== null ? "Modifier" : "Créer le projet"}
+                    {isLoading ? (isUploadingImage ? "Upload en cours..." : "Traitement...") : 
+                     editingProjectId !== null ? "Modifier" : "Créer le projet"}
                   </button>
                 </div>
               </form>
@@ -452,11 +547,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Projets terminés</p>
-                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'Terminé').length}</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'TERMINE' || p.status === 'Terminé').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Projets en cours</p>
-                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'En cours').length}</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'EN_COURS' || p.status === 'En cours').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Visiteurs aujourd'hui</p>
@@ -491,15 +586,15 @@ const AdminDashboard = () => {
                           {message.subject}
                         </h3>
                         <span className="text-gray-400 text-sm bg-gray-800 px-3 py-1 rounded-full">
-                          {message.date}
+                          {new Date(message.createdAt).toLocaleDateString('fr-FR')}
                         </span>
                       </div>
                       <div className="mb-3">
                         <p className="text-gray-300">
-                          <span className="text-orange-300 font-medium">De:</span> {message.from}
+                          <span className="text-orange-300 font-medium">De:</span> {message.name}
                         </p>
                         <p className="text-gray-300">
-                          <span className="text-orange-300 font-medium">Entreprise:</span> {message.company}
+                          <span className="text-orange-300 font-medium">Entreprise:</span> {message.company || 'Non spécifiée'}
                         </p>
                         <p className="text-gray-300">
                           <span className="text-orange-300 font-medium">Email:</span> {message.email}
@@ -507,7 +602,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-orange-500">
                         <p className="text-white leading-relaxed">
-                          {message.content}
+                          {message.message}
                         </p>
                       </div>
                       <div className="mt-4 flex justify-between items-center">
@@ -540,7 +635,7 @@ const AdminDashboard = () => {
                       </div>
                       {selectedMessageId === message.id && (
                         <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700 animate-fadeIn">
-                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.from}</h4>
+                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.name}</h4>
                           <textarea
                             value={messageReply}
                             onChange={(e) => setMessageReply(e.target.value)}
@@ -585,11 +680,13 @@ const AdminDashboard = () => {
                    Projets (Nos réalisations)
                 </h2>
                 <div className="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full">
-                  {projects.filter(p => p.status === 'Terminé').length} publiés sur le site
+                  {projects.filter(p => p.status === 'TERMINE' || p.status === 'Terminé').length} publiés sur le site
                 </div>
               </div>
               {projects.length === 0 ? (
-                <p className="text-gray-400 animate-pulse text-center py-8">Aucun projet pour le moment</p>
+                <p className="text-gray-400 animate-pulse text-center py-8">
+                  {isLoading ? "Chargement des projets..." : "Aucun projet pour le moment"}
+                </p>
               ) : (
                 <div className="space-y-6">
                   {projects.map((project) => (
@@ -606,9 +703,9 @@ const AdminDashboard = () => {
                             </h3>
                             <div className="flex items-center gap-2">
                               <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
-                                {project.status}
+                                {formatStatus(project.status)}
                               </span>
-                              {project.status === 'Terminé' && (
+                              {(project.status === 'TERMINE' || project.status === 'Terminé') && (
                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
                                   🌐 Publié sur le site
                                 </span>
@@ -617,7 +714,7 @@ const AdminDashboard = () => {
                           </div>
                           <div className="flex items-center gap-4 text-sm text-gray-400 mb-2">
                             <span>📅 Créé le {project.date}</span>
-                            <span>�� Client: {project.client}</span>
+                            <span>👤 Client: {project.client}</span>
                             <span>⏳ Durée: {project.duration}</span>
                           </div>
                         </div>
@@ -655,7 +752,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Indication de publication */}
-                        {project.status === 'Terminé' && (
+                        {(project.status === 'TERMINE' || project.status === 'Terminé') && (
                           <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                             <p className="text-green-400 text-sm flex items-center gap-2">
                               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -664,7 +761,7 @@ const AdminDashboard = () => {
                           </div>
                         )}
 
-                        {project.status !== 'Terminé' && (
+                        {project.status !== 'TERMINE' && project.status !== 'Terminé' && (
                           <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                             <p className="text-yellow-400 text-sm flex items-center gap-2">
                               <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
@@ -687,9 +784,9 @@ const AdminDashboard = () => {
                         </div>
                       )}
 
-                      {project.imagePreview && (
+                      {(project.imagePreview || project.imageUrl) && (
                         <img
-                          src={project.imagePreview}
+                          src={project.imagePreview || project.imageUrl}
                           alt={project.title}
                           className="h-64 w-full object-cover rounded-lg border-2 border-orange-500 transition duration-300 hover:scale-[1.01] shadow-lg"
                         />
