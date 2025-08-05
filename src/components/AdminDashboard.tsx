@@ -550,8 +550,10 @@ const AdminDashboard = () => {
               <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-1">
                  Messages des clients
               </h2>
-              {messages.length === 0 ? (
-                <p className="text-gray-400 animate-pulse text-center py-8">Aucun message pour le moment</p>
+              {messagesLoading ? (
+                <p className="text-gray-400 animate-pulse text-center py-8">Chargement des messages...</p>
+              ) : messages.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">Aucun message pour le moment</p>
               ) : (
                 <div className="space-y-6">
                   {messages.map((message) => (
@@ -560,60 +562,83 @@ const AdminDashboard = () => {
                       className="bg-black border border-gray-800 rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-orange-400">
-                          {message.subject}
-                        </h3>
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-bold text-orange-400">
+                            {message.subject}
+                          </h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(message.status)}`}>
+                            {getStatusLabel(message.status)}
+                          </span>
+                        </div>
                         <span className="text-gray-400 text-sm bg-gray-800 px-3 py-1 rounded-full">
-                          {message.date}
+                          {new Date(message.createdAt).toLocaleDateString('fr-FR')}
                         </span>
                       </div>
                       <div className="mb-3">
                         <p className="text-gray-300">
-                          <span className="text-orange-300 font-medium">De:</span> {message.from}
+                          <span className="text-orange-300 font-medium">De:</span> {message.name}
                         </p>
                         <p className="text-gray-300">
-                          <span className="text-orange-300 font-medium">Entreprise:</span> {message.company}
+                          <span className="text-orange-300 font-medium">Entreprise:</span> {message.company || 'Non spécifiée'}
                         </p>
                         <p className="text-gray-300">
                           <span className="text-orange-300 font-medium">Email:</span> {message.email}
                         </p>
                       </div>
                       <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-orange-500">
-                        <p className="text-white leading-relaxed">
-                          {message.content}
+                        <p className="text-white leading-relaxed whitespace-pre-wrap">
+                          {message.message}
                         </p>
                       </div>
                       <div className="mt-4 flex justify-between items-center">
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 flex-wrap gap-2">
                           <button
                             onClick={() => setSelectedMessageId(selectedMessageId === message.id ? null : message.id)}
-                            className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                            className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black text-sm"
                           >
                             {selectedMessageId === message.id ? '▲ Masquer' : '✉ Répondre'}
                           </button>
-                          <button
-                            onClick={() => handleMarkAsRead(message.id)}
-                            className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
-                          >
-                            ✓ Marquer lu
-                          </button>
+                          {message.status === 'NOUVEAU' && (
+                            <button
+                              onClick={() => handleUpdateMessageStatus(message.id, 'LU')}
+                              className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black text-sm"
+                            >
+                              ✓ Marquer lu
+                            </button>
+                          )}
+                          {message.status === 'LU' && (
+                            <button
+                              onClick={() => handleUpdateMessageStatus(message.id, 'TRAITE')}
+                              className="text-green-400 hover:text-green-300 transition duration-300 font-medium px-3 py-1 rounded border border-green-500 hover:bg-green-500 hover:text-black text-sm"
+                            >
+                              ✓ Marquer traité
+                            </button>
+                          )}
+                          {(message.status === 'LU' || message.status === 'TRAITE') && (
+                            <button
+                              onClick={() => handleUpdateMessageStatus(message.id, 'ARCHIVE')}
+                              className="text-gray-400 hover:text-gray-300 transition duration-300 font-medium px-3 py-1 rounded border border-gray-500 hover:bg-gray-500 hover:text-black text-sm"
+                            >
+                              📁 Archiver
+                            </button>
+                          )}
                           <button
                             onClick={() => handleDeleteMessage(message.id)}
-                            className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
+                            className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black text-sm"
                           >
                             🗑 Supprimer
                           </button>
                         </div>
                         <a
                           href={`mailto:${message.email}?subject=Re: ${message.subject}`}
-                          className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
+                          className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black text-sm"
                         >
                           📧 Email direct
                         </a>
                       </div>
                       {selectedMessageId === message.id && (
                         <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700 animate-fadeIn">
-                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.from}</h4>
+                          <h4 className="text-orange-400 font-medium mb-3">Répondre à {message.name}</h4>
                           <textarea
                             value={messageReply}
                             onChange={(e) => setMessageReply(e.target.value)}
