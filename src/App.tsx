@@ -9,7 +9,7 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ApiStatusNotification from "./components/ApiStatusNotification";
+import DatabaseStatus from "./components/DatabaseStatus";
 
 const queryClient = new QueryClient();
 
