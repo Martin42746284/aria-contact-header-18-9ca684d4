@@ -1,18 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
-import { adminApi, uploadApi } from "@/services/api";
+import { adminApi, uploadApi, contactApi, type AdminContactMessage } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-
-interface CustomerMessage {
-  id: number;
-  subject: string;
-  from: string;
-  email: string;
-  company: string;
-  content: string;
-  date: string;
-}
 
 // Interface déplacée vers projectsService.ts
 // Nous utilisons maintenant AdminProject du service
