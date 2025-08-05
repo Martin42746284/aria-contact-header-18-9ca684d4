@@ -191,13 +191,17 @@ const AdminDashboard = () => {
   };
 
   const handleEdit = (project: AdminProject) => {
+    // Convertir le statut API vers le format du formulaire
+    const formStatus = project.status === 'EN_COURS' ? 'En cours' :
+                      project.status === 'TERMINE' ? 'Terminé' : 'En attente';
+
     setNewProject({
       title: project.title,
       description: project.description,
       technologies: project.technologies,
       client: project.client,
       duration: project.duration,
-      status: project.status,
+      status: formStatus as 'En cours' | 'Terminé' | 'En attente',
       image: project.image,
       imagePreview: project.imagePreview,
       url: project.url || "",
@@ -563,7 +567,7 @@ const AdminDashboard = () => {
                             onClick={() => handleDeleteMessage(message.id)}
                             className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
                           >
-                            🗑 Supprimer
+                            �� Supprimer
                           </button>
                         </div>
                         <a
