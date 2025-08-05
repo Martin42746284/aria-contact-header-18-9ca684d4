@@ -266,6 +266,15 @@ const AdminDashboard = () => {
     }
   };
 
+  const getStatusDisplayName = (status: string) => {
+    switch (status) {
+      case 'TERMINE': return 'Terminé';
+      case 'EN_COURS': return 'En cours';
+      case 'EN_ATTENTE': return 'En attente';
+      default: return status;
+    }
+  };
+
   return (
     <div className="p-6 min-h-screen bg-black">
       <div className="max-w-6xl mx-auto">
@@ -656,7 +665,7 @@ const AdminDashboard = () => {
                               </span>
                               {project.status === 'Terminé' && (
                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
-                                  🌐 Publié sur le site
+                                  �� Publié sur le site
                                 </span>
                               )}
                             </div>
