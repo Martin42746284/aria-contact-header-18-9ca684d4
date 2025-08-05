@@ -24,18 +24,36 @@ const ContactForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Simulation d'envoi
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Préparer les données pour l'API
+      const messageData: ContactMessage = {
+        name: formData.name,
+        email: formData.email,
+        company: formData.company,
+        subject: formData.subject || 'Nouveau projet', // Valeur par défaut si vide
+        message: formData.message
+      };
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      const response = await contactApi.sendMessage(messageData);
 
-    // Reset après 3 secondes
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ nom: '', email: '', entreprise: '', projet: '', message: '' });
-    }, 3000);
+      if (response.success) {
+        setIsSubmitted(true);
+        console.log('📧 Message envoyé avec succès:', response.message);
+
+        // Reset après 5 secondes
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({ name: '', email: '', company: '', subject: '', message: '' });
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
