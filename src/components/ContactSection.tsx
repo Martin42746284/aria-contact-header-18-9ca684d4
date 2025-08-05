@@ -216,6 +216,13 @@ const ContactForm = () => {
             </div>
           </div>
 
+          {/* Affichage d'erreur */}
+          {submitError && (
+            <div className="md:col-span-2 bg-gradient-to-br from-red-500/10 to-red-600/10 p-4 rounded-xl border border-red-500/30 text-center animate-scale-in">
+              <p className="text-red-400 font-medium">❌ {submitError}</p>
+            </div>
+          )}
+
           {/* Bouton d'envoi */}
           <div className={`md:col-span-2 transform transition-all duration-500 ${
             visibleItems.has(5) ? 'animate-fade-in-up' : 'opacity-0 translate-y-4'
