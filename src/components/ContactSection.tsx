@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, Mail, Phone, MapPin, Clock, CheckCircle, Sparkles } from 'lucide-react';
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/useScrollAnimation";
+import { contactApi, type ContactMessage } from '@/services/api';
 import "@/styles/animations.css";
 
 // Composant formulaire de contact avancé
