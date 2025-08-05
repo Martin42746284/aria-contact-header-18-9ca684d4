@@ -32,6 +32,18 @@ export interface ContactMessage {
   message: string;
 }
 
+export interface AdminContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+  subject: string;
+  message: string;
+  status: 'NOUVEAU' | 'LU' | 'TRAITE' | 'ARCHIVE';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
   email: string;
   name: string;
