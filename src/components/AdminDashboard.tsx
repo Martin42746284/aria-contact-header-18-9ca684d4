@@ -55,8 +55,41 @@ const AdminDashboard = () => {
 
   const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [currentTechnology, setCurrentTechnology] = useState("");
-  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [messageReply, setMessageReply] = useState("");
+
+  // Charger les messages depuis l'API
+  const loadMessages = async () => {
+    setMessagesLoading(true);
+    try {
+      const [messagesResponse, statsResponse] = await Promise.all([
+        contactApi.getAllMessages({ limit: 50 }),
+        contactApi.getStats()
+      ]);
+
+      if (messagesResponse.success && messagesResponse.data) {
+        setMessages(messagesResponse.data.messages);
+      }
+
+      if (statsResponse.success && statsResponse.data) {
+        setMessageStats(statsResponse.data.stats);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des messages:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les messages",
+        variant: "destructive",
+      });
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  // Charger les messages au montage du composant
+  useEffect(() => {
+    loadMessages();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
