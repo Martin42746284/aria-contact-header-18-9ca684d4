@@ -46,12 +46,7 @@ const ApiStatusNotification = () => {
         <div className="bg-yellow-900/90 border border-yellow-500/50 backdrop-blur-lg rounded-lg p-4 max-w-sm shadow-lg">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-            <div>
-              <h4 className="text-yellow-200 font-medium text-sm">Mode Démo</h4>
-              <p className="text-yellow-100 text-xs">
-                Backend indisponible. Affichage des données par défaut.
-              </p>
-            </div>
+          
             <button
               onClick={() => setShowNotification(false)}
               className="text-yellow-400 hover:text-yellow-300 transition-colors"

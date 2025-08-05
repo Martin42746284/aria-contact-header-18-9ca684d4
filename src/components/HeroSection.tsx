@@ -188,104 +188,89 @@ const HeroSection = () => {
           ))}
         </div>
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-5xl mx-auto text-center">
-            {/* Logo avec effets avancés */}
-            <div className="flex justify-center mb-16">
-              <div className="logo-container animate-bounce-in">
-                <img
-                  src="/images/aria-logo.png"
-                  alt="ARIA Logo"
-                  className="h-52 md:h-60 lg:h-76 w-auto filter drop-shadow-2xl"
-                  style={{
-                    filter: `drop-shadow(0 0 30px rgba(249, 115, 22, 0.8))`
-                  }}
-                />
-                <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/30 to-orange-600/30 rounded-full blur-2xl opacity-85 animate-pulse-custom" />
-              </div>
-            </div>
+        <div className="max-w-5xl mx-auto text-center">
+  <div className="max-w-5xl mx-auto text-center">
+  {/* Logo avec effets avancés - remonter vers le header */}
+  <div className="flex justify-center mb-6">
+    <div className="logo-container animate-bounce-in mt-8 md:mt-10 relative">
+      <img
+        src="/images/aria-logo.png"
+        alt="ARIA Logo"
+        className="h-48 md:h-56 lg:h-64 w-auto filter drop-shadow-2xl"
+        style={{
+          filter: `drop-shadow(0 0 30px rgba(249, 115, 22, 0.8))`
+        }}
+      />
+      <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/30 to-orange-600/30 rounded-full blur-2xl opacity-85 animate-pulse-custom" />
+    </div>
+  </div>
 
-            {/* Titre avec effet de machine à écrire et icons dynamiques */}
-            <div className="relative mb-8">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-shadow-glow leading-tight">
-                <span className="block mb-4">
-                  {displayText}
-                  <span className="inline-block w-1 h-16 bg-orange-500 ml-2 animate-pulse" />
-                </span>
-              </h1>
+  
 
-              {/* Icons décoratifs animés */}
-              <div className="absolute -top-8 -left-8 animate-float delay-200">
-                <Sparkles className="w-8 h-8 text-orange-400 opacity-70" />
-              </div>
-              <div className="absolute -top-4 -right-12 animate-float delay-500">
-                <Zap className="w-6 h-6 text-yellow-400 opacity-60" />
-              </div>
-              <div className="absolute -bottom-4 left-1/4 animate-float delay-700">
-                <Rocket className="w-7 h-7 text-orange-500 opacity-50" />
-              </div>
-            </div>
+  {/* Texte de présentation */}
+  <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
+    <span className="block animate-fade-in-left delay-500">
+      Chaque projet est pour nous une aventure unique où
+    </span>
+    <span className="block animate-fade-in-right delay-700 text-orange-300 font-semibold">
+      créativité et technologie se rencontrent
+    </span>
+    <span className="block animate-fade-in-left delay-1000">
+      pour donner vie à votre vision et dépasser vos attentes.
+    </span>
+  </p>
 
-            {/* Description avec animations staggerées */}
-            <p className="text-xl md:text-2xl text-gray-200 mb-12 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
-              <span className="block animate-fade-in-left delay-500">
-                Chaque projet est pour nous une aventure unique où
-              </span>
-              <span className="block animate-fade-in-right delay-700 text-orange-300 font-semibold">
-                créativité et technologie se rencontrent
-              </span>
-              <span className="block animate-fade-in-left delay-1000">
-                pour donner vie à votre vision et dépasser vos attentes.
-              </span>
-            </p>
-
-            {/* Boutons d'action avec effets avancés */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up delay-1000">
-              <Button
-                className="interactive-button group text-lg px-10 py-6 rounded-full font-bold text-black shadow-2xl transform hover:scale-105 transition-all duration-300 hover-lift"
-                style={{
-                  boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4)'
-                }}
-              >
-                <span className="flex items-center space-x-2">
-                  <Rocket className="w-5 h-5 group-hover:animate-bounce" />
-                  <span>Découvrir nos réalisations</span>
-                </span>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="border-2 border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-black px-8 py-6 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm bg-black/20"
-              >
-                <span className="flex items-center space-x-2">
-                  <span>En savoir plus</span>
-                  <ChevronDown className="w-4 h-4" />
-                </span>
-              </Button>
-            </div>
-
-            {/* Statistiques rapides avec compteurs animés */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 animate-fade-in-up delay-1000">
-              {[
-                { number: "50+", label: "Projets réalisés" },
-                { number: "5+", label: "Années d'expérience" },
-                { number: "98%", label: "Clients satisfaits" },
-                { number: "24/7", label: "Support client" }
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className="text-center group cursor-pointer"
-                  style={{ animationDelay: `${1200 + index * 100}ms` }}
-                >
-                  <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                    {stat.number}
-                  </div>
-                  <p className="text-gray-300 text-sm uppercase tracking-wider">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+  {/* Statistiques animées */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6 mb-12 animate-fade-in-up delay-1000">
+    {[
+      { number: "+50", label: "Projets réalisés" },
+      { number: "+5", label: "Années d'expérience" },
+      { number: "98%", label: "Clients satisfaits" },
+      { number: "24/7", label: "Support client" }
+    ].map((stat, index) => (
+      <div
+        key={index}
+        className="text-center group cursor-pointer"
+        style={{ animationDelay: `${1200 + index * 100}ms` }}
+      >
+        <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+          {stat.number}
         </div>
+        <p className="text-gray-300 text-sm uppercase tracking-wider">{stat.label}</p>
+      </div>
+    ))}
+  </div>
+
+  {/* Boutons CTA */}
+  <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up delay-1000">
+    <Button
+      className="interactive-button group text-lg px-10 py-6 rounded-full font-bold text-black shadow-2xl transform hover:scale-105 transition-all duration-300 hover-lift"
+      style={{
+        boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4)'
+      }}
+    >
+      <span className="flex items-center space-x-2">
+        <Rocket className="w-5 h-5 group-hover:animate-bounce" />
+        <span>Découvrir nos réalisations</span>
+      </span>
+    </Button>
+
+    <Button
+      variant="outline"
+      className="border-2 border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-black px-8 py-6 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm bg-black/20"
+    >
+      <span className="flex items-center space-x-2">
+        <span>En savoir plus</span>
+        <ChevronDown className="w-4 h-4" />
+      </span>
+    </Button>
+  </div>
+</div>
+
+
+</div>
+
+
 
         {/* Indicateur de scroll animé */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-fade-in-up delay-1000">
