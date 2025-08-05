@@ -31,26 +31,15 @@ const AdminDashboard = () => {
       saveAllAdminProjects(projects);
     }
   }, [projects]);
-  const [messages, setMessages] = useState<CustomerMessage[]>([
-    {
-      id: 1,
-      subject: "Demande de partenariat",
-      from: "Jean Dupont",
-      email: "jean.dupont@example.com",
-      company: "ABC Corp",
-      content: "Bonjour, je souhaiterais discuter d'un possible partenariat avec votre entreprise.",
-      date: "30/07/2025",
-    },
-    {
-      id: 2,
-      subject: "Question sur vos services",
-      from: "Marie Martin",
-      email: "marie.martin@example.com",
-      company: "XYZ Ltd",
-      content: "Pourriez-vous me donner plus d'informations sur vos services premium?",
-      date: "30/07/2025",
-    },
-  ]);
+  const [messages, setMessages] = useState<AdminContactMessage[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messageStats, setMessageStats] = useState({
+    total: 0,
+    nouveau: 0,
+    lu: 0,
+    traite: 0,
+    archive: 0
+  });
 
   const [newProject, setNewProject] = useState({
     title: "",
