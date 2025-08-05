@@ -397,7 +397,7 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <label className="block text-orange-300 mb-2 font-medium">
-                    Technologies utilis��es
+                    Technologies utilisées
                   </label>
                   <div className="flex gap-2 mb-3">
                     <input
@@ -710,7 +710,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Indication de publication */}
-                        {project.status === 'Terminé' && (
+                        {(project.status === 'TERMINE' || project.status === 'Terminé') && (
                           <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                             <p className="text-green-400 text-sm flex items-center gap-2">
                               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -719,7 +719,7 @@ const AdminDashboard = () => {
                           </div>
                         )}
 
-                        {project.status !== 'Terminé' && (
+                        {(project.status !== 'TERMINE' && project.status !== 'Terminé') && (
                           <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                             <p className="text-yellow-400 text-sm flex items-center gap-2">
                               <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
