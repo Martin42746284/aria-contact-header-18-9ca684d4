@@ -70,6 +70,7 @@ const ContactForm = () => {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4 animate-pulse-custom" />
           <h3 className="text-2xl font-bold text-green-400 mb-2">Message envoyé !</h3>
           <p className="text-gray-300">Nous vous recontacterons très bientôt.</p>
+          <p className="text-sm text-green-400 mt-2">✉️ Un email de confirmation vous a été envoyé</p>
         </div>
       </div>
     );
