@@ -205,15 +205,34 @@ const AdminDashboard = () => {
     setEditingProjectId(project.id);
   };
 
-  const handleDelete = (projectId: number) => {
-    const projectElement = document.getElementById(`project-${projectId}`);
-    if (projectElement) {
-      projectElement.classList.add("opacity-0", "scale-95", "transition-all", "duration-300");
-      setTimeout(() => {
-        setProjects(projects.filter((project) => project.id !== projectId));
-      }, 300);
-    } else {
-      setProjects(projects.filter((project) => project.id !== projectId));
+  const handleDelete = async (projectId: string | number) => {
+    const id = projectId.toString();
+
+    try {
+      const success = await deleteProject(id);
+      if (success) {
+        const projectElement = document.getElementById(`project-${projectId}`);
+        if (projectElement) {
+          projectElement.classList.add("opacity-0", "scale-95", "transition-all", "duration-300");
+          setTimeout(() => {
+            setProjects(projects.filter((project) => project.id !== id));
+          }, 300);
+        } else {
+          setProjects(projects.filter((project) => project.id !== id));
+        }
+
+        toast({
+          title: "Projet supprimé",
+          description: "Le projet a été supprimé avec succès.",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression du projet:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le projet. Veuillez réessayer.",
+        variant: "destructive",
+      });
     }
   };
 
