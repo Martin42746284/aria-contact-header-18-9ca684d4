@@ -2,6 +2,8 @@ import express from 'express';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
 import rateLimit from 'express-rate-limit';
+import { prisma } from '../lib/prisma.js';
+import { authenticateToken } from './admin.js';
 
 const router = express.Router();
 
