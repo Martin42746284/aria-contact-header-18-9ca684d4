@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Send, Mail, Phone, MapPin, Clock, CheckCircle, Sparkles } from 'lucide-react';
 import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/useScrollAnimation";
+import { contactApi, type ContactMessage } from '@/services/api';
 import "@/styles/animations.css";
 
 // Composant formulaire de contact avancé
 const ContactForm = () => {
-  const [formData, setFormData] = useState({
-    nom: '',
+  const [formData, setFormData] = useState<ContactMessage>({
+    name: '',
     email: '',
-    entreprise: '',
-    projet: '',
+    company: '',
+    subject: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const { elementRef, isVisible } = useScrollAnimation({ threshold: 0.1 });
@@ -22,18 +24,36 @@ const ContactForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
 
-    // Simulation d'envoi
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Préparer les données pour l'API
+      const messageData: ContactMessage = {
+        name: formData.name,
+        email: formData.email,
+        company: formData.company,
+        subject: formData.subject || 'Nouveau projet', // Valeur par défaut si vide
+        message: formData.message
+      };
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      const response = await contactApi.sendMessage(messageData);
 
-    // Reset après 3 secondes
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ nom: '', email: '', entreprise: '', projet: '', message: '' });
-    }, 3000);
+      if (response.success) {
+        setIsSubmitted(true);
+        console.log('📧 Message envoyé avec succès:', response.message);
+
+        // Reset après 5 secondes
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({ name: '', email: '', company: '', subject: '', message: '' });
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -50,6 +70,7 @@ const ContactForm = () => {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4 animate-pulse-custom" />
           <h3 className="text-2xl font-bold text-green-400 mb-2">Message envoyé !</h3>
           <p className="text-gray-300">Nous vous recontacterons très bientôt.</p>
+          <p className="text-sm text-green-400 mt-2">✉️ Un email de confirmation vous a été envoyé</p>
         </div>
       </div>
     );
@@ -78,17 +99,17 @@ const ContactForm = () => {
             <div className="relative">
               <input
                 type="text"
-                name="nom"
-                value={formData.nom}
+                name="name"
+                value={formData.name}
                 onChange={handleInputChange}
-                onFocus={() => setFocusedField('nom')}
+                onFocus={() => setFocusedField('name')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full p-4 bg-black/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-400 transition-all duration-300"
                 placeholder="Votre nom complet"
                 required
               />
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 opacity-0 transition-opacity duration-300 pointer-events-none ${
-                focusedField === 'nom' ? 'opacity-100' : ''
+                focusedField === 'name' ? 'opacity-100' : ''
               }`} />
             </div>
           </div>
@@ -128,43 +149,43 @@ const ContactForm = () => {
             <div className="relative">
               <input
                 type="text"
-                name="entreprise"
-                value={formData.entreprise}
+                name="company"
+                value={formData.company}
                 onChange={handleInputChange}
-                onFocus={() => setFocusedField('entreprise')}
+                onFocus={() => setFocusedField('company')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full p-4 bg-black/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white placeholder-gray-400 transition-all duration-300"
                 placeholder="Nom de votre entreprise"
               />
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 opacity-0 transition-opacity duration-300 pointer-events-none ${
-                focusedField === 'entreprise' ? 'opacity-100' : ''
+                focusedField === 'company' ? 'opacity-100' : ''
               }`} />
             </div>
           </div>
 
-          {/* Type de projet */}
+          {/* Sujet */}
           <div className={`transform transition-all duration-500 ${
             visibleItems.has(3) ? 'animate-fade-in-right' : 'opacity-0 translate-x-4'
           }`}>
             <label className="block text-orange-300 font-medium mb-2">Type de projet</label>
             <div className="relative">
               <select
-                name="projet"
-                value={formData.projet}
+                name="subject"
+                value={formData.subject}
                 onChange={handleInputChange}
-                onFocus={() => setFocusedField('projet')}
+                onFocus={() => setFocusedField('subject')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full p-4 bg-black/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white transition-all duration-300"
               >
                 <option value="">Sélectionnez un type</option>
-                <option value="site-web">Site web / E-commerce</option>
-                <option value="app-mobile">Application mobile</option>
-                <option value="design">Design UI/UX</option>
-                <option value="marketing">Marketing digital</option>
-                <option value="autre">Autre</option>
+                <option value="Site web / E-commerce">Site web / E-commerce</option>
+                <option value="Application mobile">Application mobile</option>
+                <option value="Design UI/UX">Design UI/UX</option>
+                <option value="Marketing digital">Marketing digital</option>
+                <option value="Autre projet">Autre</option>
               </select>
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 opacity-0 transition-opacity duration-300 pointer-events-none ${
-                focusedField === 'projet' ? 'opacity-100' : ''
+                focusedField === 'subject' ? 'opacity-100' : ''
               }`} />
             </div>
           </div>
@@ -194,6 +215,13 @@ const ContactForm = () => {
               }`} />
             </div>
           </div>
+
+          {/* Affichage d'erreur */}
+          {submitError && (
+            <div className="md:col-span-2 bg-gradient-to-br from-red-500/10 to-red-600/10 p-4 rounded-xl border border-red-500/30 text-center animate-scale-in">
+              <p className="text-red-400 font-medium">❌ {submitError}</p>
+            </div>
+          )}
 
           {/* Bouton d'envoi */}
           <div className={`md:col-span-2 transform transition-all duration-500 ${

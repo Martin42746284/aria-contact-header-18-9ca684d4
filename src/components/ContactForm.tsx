@@ -39,27 +39,12 @@ const ContactForm = () => {
           subject: "",
           message: ""
         });
-      } else {
-        throw new Error(response.message || "Erreur lors de l'envoi");
       }
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
-      
-      let errorMessage = "Une erreur est survenue. Veuillez réessayer.";
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Backend non disponible')) {
-          errorMessage = "Service temporairement indisponible. Veuillez réessayer plus tard ou nous contacter directement.";
-        } else if (error.message.includes('Trop de messages')) {
-          errorMessage = "Vous avez envoyé trop de messages récemment. Veuillez attendre avant de réessayer.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
       toast({
         title: "Erreur lors de l'envoi",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {
@@ -74,39 +59,12 @@ const ContactForm = () => {
     });
   };
 
-  const testEmailConfig = async () => {
-    try {
-      const response = await contactApi.testEmailConfig();
-      if (response.success) {
-        toast({
-          title: "Configuration email",
-          description: "✅ Configuration email validée",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Configuration email",
-        description: "❌ Problème de configuration email",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Card className="bg-white shadow-card border-aria-cream">
       <CardHeader>
         <CardTitle className="text-aria-teal text-center">
           Contactez-nous pour votre projet
         </CardTitle>
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={testEmailConfig}
-            className="text-xs text-gray-500 hover:text-aria-sunset transition-colors"
-          >
-            🔍 Tester la configuration email
-          </button>
-        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,7 +78,6 @@ const ContactForm = () => {
                 onChange={handleChange}
                 required
                 className="border-aria-cream focus:ring-aria-sunset"
-                placeholder="Votre nom et prénom"
               />
             </div>
             <div className="space-y-2">
@@ -133,7 +90,6 @@ const ContactForm = () => {
                 onChange={handleChange}
                 required
                 className="border-aria-cream focus:ring-aria-sunset"
-                placeholder="votre@email.com"
               />
             </div>
           </div>
@@ -147,7 +103,6 @@ const ContactForm = () => {
                 value={formData.company}
                 onChange={handleChange}
                 className="border-aria-cream focus:ring-aria-sunset"
-                placeholder="Nom de votre entreprise (optionnel)"
               />
             </div>
             <div className="space-y-2">
@@ -159,7 +114,6 @@ const ContactForm = () => {
                 onChange={handleChange}
                 required
                 className="border-aria-cream focus:ring-aria-sunset"
-                placeholder="Objet de votre demande"
               />
             </div>
           </div>
@@ -185,19 +139,8 @@ const ContactForm = () => {
             className="w-full"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span>Envoi en cours...</span>
-              </div>
-            ) : (
-              "Envoyer le message"
-            )}
+            {isLoading ? "Envoi en cours..." : "Envoyer le message"}
           </Button>
-          
-          <div className="text-xs text-gray-500 text-center mt-2">
-            💌 Nous vous répondrons dans les 24-48h
-          </div>
         </form>
       </CardContent>
     </Card>

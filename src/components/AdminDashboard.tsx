@@ -24,6 +24,29 @@ const AdminDashboard = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const { toast } = useToast();
+  type StatutBackend = 'EN_COURS' | 'TERMINE' | 'EN_ATTENTE';
+  type StatutFrontend = 'En cours' | 'Terminé' | 'En attente'
+
+    // Fonctions de conversion
+  const formaterStatut = (statut: StatutBackend | StatutFrontend): StatutFrontend => {
+    switch (statut) {
+      case 'TERMINE': return 'Terminé';
+      case 'EN_COURS': return 'En cours';
+      case 'EN_ATTENTE': return 'En attente';
+      case 'Terminé': return 'Terminé';
+      case 'En cours': return 'En cours';
+      case 'En attente': return 'En attente';
+      default: return 'En attente';
+    }
+  };
+
+  const versStatutBackend = (statut: StatutFrontend): StatutBackend => {
+    switch (statut) {
+      case 'Terminé': return 'TERMINE';
+      case 'En cours': return 'EN_COURS';
+      case 'En attente': return 'EN_ATTENTE';
+    }
+  };
 
   // Charger les projets et vérifier la connexion à la base de données
   useEffect(() => {
@@ -91,7 +114,7 @@ const AdminDashboard = () => {
     technologies: [] as string[],
     client: "",
     duration: "",
-    status: "En attente" as 'En cours' | 'Terminé' | 'En attente',
+    status: "En attente" as StatutFrontend,
     image: null as File | null,
     imagePreview: null as string | null,
     url: "",
@@ -178,8 +201,7 @@ const AdminDashboard = () => {
         technologies: newProject.technologies,
         client: newProject.client,
         duration: newProject.duration,
-        status: newProject.status === "En attente" ? "EN_ATTENTE" as const : 
-                newProject.status === "En cours" ? "EN_COURS" as const : "TERMINE" as const,
+        status: versStatutBackend(newProject.status),
         imageUrl: imageUrl,
         url: newProject.url,
         date: new Date().toLocaleDateString('fr-FR')
@@ -278,7 +300,7 @@ const AdminDashboard = () => {
         setProjects(projects.map(p => p.id === projectId ? updatedProject : p));
         toast({
           title: "Succès",
-          description: `Statut changé vers "${formatStatus(newStatus)}"`,
+          description: `Statut changé vers "${formaterStatut(newStatus)}"`,
         });
       }
     } catch (error) {
@@ -567,11 +589,11 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Projets terminés</p>
-                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'TERMINE' || p.status === 'Terminé').length}</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => formaterStatut(p.status) === 'Terminé').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Projets en cours</p>
-                  <p className="text-2xl font-bold text-white">{projects.filter(p => p.status === 'EN_COURS' || p.status === 'En cours').length}</p>
+                  <p className="text-2xl font-bold text-white">{projects.filter(p => formaterStatut(p.status) === 'Terminé').length}</p>
                 </div>
                 <div className="bg-black p-4 rounded-lg border border-gray-800 transition duration-300 hover:border-orange-500">
                   <p className="text-orange-300 font-medium">Visiteurs aujourd'hui</p>
@@ -700,7 +722,7 @@ const AdminDashboard = () => {
                    Projets (Nos réalisations)
                 </h2>
                 <div className="text-sm text-gray-400 bg-gray-800 px-3 py-1 rounded-full">
-                  {projects.filter(p => p.status === 'TERMINE' || p.status === 'Terminé').length} publiés sur le site
+                  {projects.filter(p => formaterStatut(p.status) === 'Terminé').length} publiés sur le site
                 </div>
               </div>
               {projects.length === 0 ? (
@@ -725,14 +747,20 @@ const AdminDashboard = () => {
                               {/* Dropdown pour changer le statut */}
                               <select
                                 value={project.status}
-                                onChange={(e) => handleStatusChange(project.id, e.target.value as AdminProject['status'])}
+                                onChange={(e) => handleStatusChange(project.id, e.target.value as StatutBackend)}
                                 className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)} bg-transparent cursor-pointer`}
                               >
-                                <option value="EN_ATTENTE" className="bg-gray-900 text-yellow-400">En attente</option>
-                                <option value="EN_COURS" className="bg-gray-900 text-blue-400">En cours</option>
-                                <option value="TERMINE" className="bg-gray-900 text-green-400">Terminé</option>
+                                <option value="EN_ATTENTE" className="bg-gray-900 text-yellow-400">
+                                  {formaterStatut('EN_ATTENTE')} {/* Affiche "En attente" */}
+                                </option>
+                                <option value="EN_COURS" className="bg-gray-900 text-blue-400">
+                                  {formaterStatut('EN_COURS')} {/* Affiche "En cours" */}
+                                </option>
+                                <option value="TERMINE" className="bg-gray-900 text-green-400">
+                                  {formaterStatut('TERMINE')} {/* Affiche "Terminé" */}
+                                </option>
                               </select>
-                              {(project.status === 'TERMINE' || project.status === 'Terminé') && (
+                              {(projects.filter(p => formaterStatut(p.status) === 'Terminé').length) && (
                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
                                   🌐 Publié sur le site
                                 </span>
@@ -779,7 +807,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Indication de publication */}
-                        {(project.status === 'TERMINE' || project.status === 'Terminé') && (
+                        {(projects.filter(p => formaterStatut(p.status) === 'Terminé').length) && (
                           <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                             <p className="text-green-400 text-sm flex items-center gap-2">
                               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -788,7 +816,7 @@ const AdminDashboard = () => {
                           </div>
                         )}
 
-                        {project.status !== 'TERMINE' && project.status !== 'Terminé' && (
+                        {projects.filter(p => formaterStatut(p.status) === 'Terminé').length && (
                           <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                             <p className="text-yellow-400 text-sm flex items-center gap-2">
                               <span className="w-2 h-2 bg-yellow-400 rounded-full"></span>
