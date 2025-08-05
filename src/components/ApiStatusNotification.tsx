@@ -1,81 +1,144 @@
 import { useState, useEffect } from 'react';
 import { healthApi } from '@/services/api';
 
+interface ApiStatus {
+  status: 'connected' | 'disconnected' | 'checking';
+  message: string;
+  uptime?: number;
+  lastCheck?: Date;
+}
+
 const ApiStatusNotification = () => {
-  const [isApiAvailable, setIsApiAvailable] = useState<boolean | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
+  const [apiStatus, setApiStatus] = useState<ApiStatus>({
+    status: 'checking',
+    message: 'Vérification en cours...'
+  });
+  const [isVisible, setIsVisible] = useState(false);
+
+  const checkApiHealth = async () => {
+    try {
+      const response = await healthApi.checkHealth();
+      if (response.success && response.data) {
+        setApiStatus({
+          status: 'connected',
+          message: 'Base de données connectée',
+          uptime: response.data.uptime,
+          lastCheck: new Date()
+        });
+      } else {
+        throw new Error('API non disponible');
+      }
+    } catch (error) {
+      setApiStatus({
+        status: 'disconnected',
+        message: 'Base de données déconnectée',
+        lastCheck: new Date()
+      });
+    }
+  };
 
   useEffect(() => {
-    const checkApiStatus = async () => {
-      try {
-        await healthApi.checkHealth();
-        setIsApiAvailable(true);
-        setShowNotification(false);
-      } catch (error) {
-        setIsApiAvailable(false);
-        setShowNotification(true);
-      }
+    // Vérification initiale
+    checkApiHealth();
+    
+    // Vérification périodique toutes les 30 secondes
+    const interval = setInterval(checkApiHealth, 30000);
+    
+    // Afficher la notification temporairement
+    setIsVisible(true);
+    const hideTimer = setTimeout(() => setIsVisible(false), 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(hideTimer);
     };
-
-    // Vérifier immédiatement
-    checkApiStatus();
-
-    // Vérifier toutes les 30 secondes
-    const interval = setInterval(checkApiStatus, 30000);
-
-    return () => clearInterval(interval);
   }, []);
 
-  // Auto-hide après 10 secondes si l'API devient disponible
+  // Ré-afficher la notification en cas de changement de statut
   useEffect(() => {
-    if (isApiAvailable && showNotification) {
-      const timer = setTimeout(() => {
-        setShowNotification(false);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [isApiAvailable, showNotification]);
+    setIsVisible(true);
+    const hideTimer = setTimeout(() => setIsVisible(false), 3000);
+    return () => clearTimeout(hideTimer);
+  }, [apiStatus.status]);
 
-  if (!showNotification || isApiAvailable === null) {
-    return null;
+  const getStatusIcon = () => {
+    switch (apiStatus.status) {
+      case 'connected': return '✅';
+      case 'disconnected': return '❌';
+      case 'checking': return '🔄';
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (apiStatus.status) {
+      case 'connected': return 'bg-green-500/20 border-green-500/50 text-green-400';
+      case 'disconnected': return 'bg-red-500/20 border-red-500/50 text-red-400';
+      case 'checking': return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400';
+    }
+  };
+
+  const formatUptime = (uptime?: number) => {
+    if (!uptime) return '';
+    const hours = Math.floor(uptime / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
+  if (!isVisible) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={() => setIsVisible(true)}
+          className={`w-4 h-4 rounded-full ${apiStatus.status === 'connected' ? 'bg-green-500' : apiStatus.status === 'disconnected' ? 'bg-red-500' : 'bg-yellow-500'} animate-pulse`}
+          title="Statut de l'API"
+        />
+      </div>
+    );
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-fade-in">
-      {!isApiAvailable ? (
-        <div className="bg-yellow-900/90 border border-yellow-500/50 backdrop-blur-lg rounded-lg p-4 max-w-sm shadow-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-          
-            <button
-              onClick={() => setShowNotification(false)}
-              className="text-yellow-400 hover:text-yellow-300 transition-colors"
-              aria-label="Fermer"
-            >
-              ×
-            </button>
-          </div>
+    <div className="fixed bottom-4 right-4 z-50 animate-fadeInUp">
+      <div className={`px-4 py-3 rounded-lg border backdrop-blur-sm ${getStatusColor()} max-w-sm`}>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">{getStatusIcon()}</span>
+          <span className="font-medium text-sm">{apiStatus.message}</span>
+          <button
+            onClick={() => setIsVisible(false)}
+            className="ml-auto text-xs opacity-70 hover:opacity-100"
+          >
+            ×
+          </button>
         </div>
-      ) : (
-        <div className="bg-green-900/90 border border-green-500/50 backdrop-blur-lg rounded-lg p-4 max-w-sm shadow-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <div>
-              <h4 className="text-green-200 font-medium text-sm">Backend Connecté</h4>
-              <p className="text-green-100 text-xs">
-                API disponible et fonctionnelle.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowNotification(false)}
-              className="text-green-400 hover:text-green-300 transition-colors"
-              aria-label="Fermer"
-            >
-              ×
-            </button>
+        
+        {apiStatus.uptime && (
+          <div className="text-xs opacity-80">
+            Serveur actif depuis {formatUptime(apiStatus.uptime)}
           </div>
+        )}
+        
+        {apiStatus.lastCheck && (
+          <div className="text-xs opacity-60">
+            Dernière vérification: {apiStatus.lastCheck.toLocaleTimeString()}
+          </div>
+        )}
+        
+        <div className="mt-2 flex gap-2">
+          <button
+            onClick={checkApiHealth}
+            className="text-xs px-2 py-1 rounded border border-current opacity-70 hover:opacity-100 transition-opacity"
+          >
+            🔄 Vérifier
+          </button>
+          {apiStatus.status === 'disconnected' && (
+            <button
+              onClick={() => window.location.reload()}
+              className="text-xs px-2 py-1 rounded border border-current opacity-70 hover:opacity-100 transition-opacity"
+            >
+              🔄 Recharger
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
