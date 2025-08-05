@@ -116,6 +116,18 @@ router.post('/', contactLimiter, async (req, res) => {
       `
     };
 
+    // Sauvegarder le message dans la base de données
+    const contactMessage = await prisma.contactMessage.create({
+      data: {
+        name,
+        email,
+        company: company || null,
+        subject,
+        message,
+        status: 'NOUVEAU'
+      }
+    });
+
     // Envoi des emails
     await Promise.all([
       transporter.sendMail(adminMailOptions),
@@ -123,11 +135,12 @@ router.post('/', contactLimiter, async (req, res) => {
     ]);
 
     // Log pour le monitoring
-    console.log(`📧 Contact message sent from: ${email} - Subject: ${subject}`);
+    console.log(`📧 Contact message sent from: ${email} - Subject: ${subject} - ID: ${contactMessage.id}`);
 
     res.status(200).json({
       success: true,
-      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.'
+      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.',
+      data: { id: contactMessage.id }
     });
 
   } catch (error) {
