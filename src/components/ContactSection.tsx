@@ -111,7 +111,28 @@ const ContactSection = () => {
 
           {/* Formulaire de contact */}
           <div className="lg:col-span-2">
-            <ContactForm />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-orange-600/5 rounded-2xl" />
+              <div className="relative z-10">
+                <ContactForm />
+              </div>
+
+              {/* Particules décoratives */}
+              <div className="absolute inset-0 pointer-events-none">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-1 h-1 bg-orange-400 rounded-full animate-float opacity-50"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 3}s`,
+                      animationDuration: `${3 + Math.random() * 2}s`
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
