@@ -397,7 +397,7 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <label className="block text-orange-300 mb-2 font-medium">
-                    Technologies utilisées
+                    Technologies utilis��es
                   </label>
                   <div className="flex gap-2 mb-3">
                     <input
@@ -661,11 +661,11 @@ const AdminDashboard = () => {
                             </h3>
                             <div className="flex items-center gap-2">
                               <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(project.status)}`}>
-                                {project.status}
+                                {getStatusDisplayName(project.status)}
                               </span>
-                              {project.status === 'Terminé' && (
+                              {(project.status === 'TERMINE' || project.status === 'Terminé') && (
                                 <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium border border-green-500/30 flex items-center gap-1">
-                                  �� Publié sur le site
+                                  🌐 Publié sur le site
                                 </span>
                               )}
                             </div>
