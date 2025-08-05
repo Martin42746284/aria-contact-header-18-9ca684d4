@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
 import { adminApi, uploadApi } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { testBackendConnection, testAdminAPI } from "@/utils/testConnection";
 
 interface CustomerMessage {
   id: number;
