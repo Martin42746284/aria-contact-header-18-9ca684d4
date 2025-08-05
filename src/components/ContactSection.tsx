@@ -162,29 +162,29 @@ const ContactForm = () => {
             </div>
           </div>
 
-          {/* Type de projet */}
+          {/* Sujet */}
           <div className={`transform transition-all duration-500 ${
             visibleItems.has(3) ? 'animate-fade-in-right' : 'opacity-0 translate-x-4'
           }`}>
             <label className="block text-orange-300 font-medium mb-2">Type de projet</label>
             <div className="relative">
               <select
-                name="projet"
-                value={formData.projet}
+                name="subject"
+                value={formData.subject}
                 onChange={handleInputChange}
-                onFocus={() => setFocusedField('projet')}
+                onFocus={() => setFocusedField('subject')}
                 onBlur={() => setFocusedField(null)}
                 className="w-full p-4 bg-black/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white transition-all duration-300"
               >
                 <option value="">Sélectionnez un type</option>
-                <option value="site-web">Site web / E-commerce</option>
-                <option value="app-mobile">Application mobile</option>
-                <option value="design">Design UI/UX</option>
-                <option value="marketing">Marketing digital</option>
-                <option value="autre">Autre</option>
+                <option value="Site web / E-commerce">Site web / E-commerce</option>
+                <option value="Application mobile">Application mobile</option>
+                <option value="Design UI/UX">Design UI/UX</option>
+                <option value="Marketing digital">Marketing digital</option>
+                <option value="Autre projet">Autre</option>
               </select>
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-r from-orange-500/20 to-orange-600/20 opacity-0 transition-opacity duration-300 pointer-events-none ${
-                focusedField === 'projet' ? 'opacity-100' : ''
+                focusedField === 'subject' ? 'opacity-100' : ''
               }`} />
             </div>
           </div>
