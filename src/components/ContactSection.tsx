@@ -6,15 +6,16 @@ import "@/styles/animations.css";
 
 // Composant formulaire de contact avancé
 const ContactForm = () => {
-  const [formData, setFormData] = useState({
-    nom: '',
+  const [formData, setFormData] = useState<ContactMessage>({
+    name: '',
     email: '',
-    entreprise: '',
-    projet: '',
+    company: '',
+    subject: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const { elementRef, isVisible } = useScrollAnimation({ threshold: 0.1 });
