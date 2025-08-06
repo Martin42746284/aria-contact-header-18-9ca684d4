@@ -62,6 +62,41 @@ const HeroSection = () => {
             rgba(0, 0, 0, 0.9) 100%
           );
         }
+          @keyframes typewriter {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blinkCaret {
+  0%, 100% { border-color: transparent }
+  50% { border-color: orange }
+}
+
+@keyframes typewriter {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes textColorShift {
+  0%   { color: #ffffff; }
+  50%  { color: #f97316; }
+  100% { color: #ffffff; }
+}
+
+.typewriter-text {
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.05em;
+  width: fit-content;
+  display: inline-block;
+  animation: 
+    typewriter 4s steps(60, end),
+    textColorShift 2s ease-in-out infinite;
+}
+
+
+
 
         .floating-elements {
           position: absolute;
@@ -208,7 +243,7 @@ const HeroSection = () => {
   
 
   {/* Texte de présentation */}
-  <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
+  {/* <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
     <span className="block animate-fade-in-left delay-500">
       Chaque projet est pour nous une aventure unique où
     </span>
@@ -218,28 +253,17 @@ const HeroSection = () => {
     <span className="block animate-fade-in-left delay-1000">
       pour donner vie à votre vision et dépasser vos attentes.
     </span>
-  </p>
+  </p> */}
+  <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto">
+  <span className="typewriter-text block text-orange-300 font-semibold">
+    Chaque projet est pour nous une aventure unique où créativité et <br />
+    technologie se rencontrent pour donner vie à votre vision et dépasser vos
+    <br /> attentes.
+  </span>
+</p>
 
-  {/* Statistiques animées */}
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6 mb-12 animate-fade-in-up delay-1000">
-    {[
-      { number: "+50", label: "Projets réalisés" },
-      { number: "+5", label: "Années d'expérience" },
-      { number: "98%", label: "Clients satisfaits" },
-      { number: "24/7", label: "Support client" }
-    ].map((stat, index) => (
-      <div
-        key={index}
-        className="text-center group cursor-pointer"
-        style={{ animationDelay: `${1200 + index * 100}ms` }}
-      >
-        <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-          {stat.number}
-        </div>
-        <p className="text-gray-300 text-sm uppercase tracking-wider">{stat.label}</p>
-      </div>
-    ))}
-  </div>
+
+ 
 
   {/* Boutons CTA */}
   <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up delay-1000">
@@ -264,6 +288,26 @@ const HeroSection = () => {
         <ChevronDown className="w-4 h-4" />
       </span>
     </Button>
+  </div>
+   {/* Statistiques animées */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6 mb-12 animate-fade-in-up delay-1000">
+    {[
+      { number: "+50", label: "Projets réalisés" },
+      { number: "+5", label: "Années d'expérience" },
+      { number: "98%", label: "Clients satisfaits" },
+      { number: "24/7", label: "Support client" }
+    ].map((stat, index) => (
+      <div
+        key={index}
+        className="text-center group cursor-pointer"
+        style={{ animationDelay: `${1200 + index * 100}ms` }}
+      >
+        <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+          {stat.number}
+        </div>
+        <p className="text-gray-300 text-sm uppercase tracking-wider">{stat.label}</p>
+      </div>
+    ))}
   </div>
 </div>
 

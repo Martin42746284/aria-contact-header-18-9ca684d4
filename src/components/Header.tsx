@@ -40,7 +40,7 @@ const Header = () => {
 
   return (
     <>
-      <style >{`
+      <style>{`
         @keyframes logoSpin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -75,52 +75,11 @@ const Header = () => {
         .nav-link.active::before {
           width: 100%;
         }
-        .nav-link::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
-          transition: left 0.5s ease;
-        }
-        .nav-link:hover::after {
-          left: 100%;
-        }
-
-        .mobile-menu {
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-          opacity: 0;
-        }
-        .mobile-menu.open {
-          max-height: 400px;
-          opacity: 1;
-        }
-
-        .hamburger-line {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hamburger-open .line1 {
-          transform: rotate(45deg) translate(6px, 6px);
-        }
-
-        .hamburger-open .line2 {
-          opacity: 0;
-        }
-
-        .hamburger-open .line3 {
-          transform: rotate(-45deg) translate(6px, -6px);
-        }
 
         .nav-item {
           position: relative;
           transition: all 0.3s ease;
         }
-
         .nav-item::before {
           content: '';
           position: absolute;
@@ -133,7 +92,6 @@ const Header = () => {
           transform: translateX(-50%);
           border-radius: 2px;
         }
-
         .nav-item:hover::before,
         .nav-item.active::before {
           width: 100%;
@@ -151,7 +109,6 @@ const Header = () => {
           transition: opacity 0.3s ease;
           border-radius: 8px;
         }
-
         .nav-item:hover::after {
           opacity: 1;
         }
@@ -185,27 +142,27 @@ const Header = () => {
           background: rgba(0, 0, 0, 0.8);
           border-bottom: 1px solid rgba(249, 115, 22, 0.2);
         }
+
+        .mobile-menu {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.4s ease, opacity 0.3s ease;
+          opacity: 0;
+        }
+        .mobile-menu.open {
+          max-height: 400px;
+          opacity: 1;
+        }
       `}</style>
 
-      <header
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          scrolled
-            ? 'header-backdrop shadow-xl shadow-orange-500/20'
-            : 'bg-transparent'
-        }`}
-      >
+      <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled ? 'header-backdrop shadow-xl shadow-orange-500/20' : 'bg-transparent'}`}>
         <div className="container mx-auto px-6 py-2">
           <div className="flex items-center justify-between">
-            {/* Logo avec effets avancés */}
-            <div
-              className="flex items-center space-x-3 group cursor-pointer"
-              onClick={() => {
-                document.getElementById('accueil')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <div className={`logo-glow relative transition-all duration-700 ease-out transform group-hover:scale-110 ${
-                scrolled ? 'h-12 w-12' : 'h-16 w-16'
-              }`}>
+            {/* Logo */}
+            <div className="flex items-center space-x-3 group cursor-pointer" onClick={() => {
+              document.getElementById('accueil')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              <div className={`logo-glow relative transition-all duration-700 ease-out transform group-hover:scale-110 ${scrolled ? 'h-12 w-12' : 'h-16 w-16'}`}>
                 <img
                   src="/images/aria-logo.png"
                   alt="ARIA Logo"
@@ -216,19 +173,14 @@ const Header = () => {
                       : 'drop-shadow(0 0 5px rgba(249, 115, 22, 0.3))'
                   }}
                 />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500/30 to-orange-600/30 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse-custom blur-md" />
               </div>
-              <div className={`transition-all duration-500 ${
-                scrolled ? 'opacity-0 w-0' : 'opacity-100'
-              }`}>
-                <span className="text-white font-bold text-xl group-hover:text-orange-400 transition-colors duration-300">
-                  ARIA
-                </span>
+              <div className={`transition-all duration-500 ${scrolled ? 'opacity-0 w-0' : 'opacity-100'}`}>
+                <span className="text-white font-bold text-xl group-hover:text-orange-400 transition-colors duration-300">ARIA</span>
               </div>
             </div>
 
-            {/* Navigation Desktop */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            {/* Navigation Desktop - CENTRÉ */}
+            <nav className="hidden lg:flex items-center space-x-6">
               {[
                 { href: '#accueil', label: 'Accueil', icon: '' },
                 { href: '#about', label: 'À Propos', icon: '' },
@@ -259,8 +211,10 @@ const Header = () => {
                   )}
                 </a>
               ))}
+            </nav>
 
-              {/* Bouton Contact avancé */}
+            {/* Bouton contact - Déplacé à droite */}
+            <div className="hidden lg:block">
               <Button
                 className="group relative bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold px-8 py-3 rounded-full transform hover:scale-105 transition-all duration-500 shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 overflow-hidden"
                 onClick={() => {
@@ -273,87 +227,31 @@ const Header = () => {
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </Button>
-            </nav>
+            </div>
 
-            {/* Mobile Menu Button avancé */}
+            {/* Mobile menu button */}
             <div className="lg:hidden">
               <button
                 className={`hamburger-open relative w-10 h-10 flex flex-col justify-center items-center rounded-lg transition-all duration-300 hover:bg-orange-500/10 ${
                   mobileMenuOpen ? 'hamburger-open' : ''
-                } ${
-                  scrolled ? 'text-orange-400' : 'text-white'
-                }`}
-                onClick={() => {
-                  setMobileMenuOpen(!mobileMenuOpen);
-                }}
+                } ${scrolled ? 'text-orange-400' : 'text-white'}`}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
-                <span className={`hamburger-line line1 block w-6 h-0.5 bg-current transition-all duration-300 transform ${
-                  mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''
-                }`}></span>
-                <span className={`hamburger-line line2 block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform ${
-                  mobileMenuOpen ? 'opacity-0' : ''
-                }`}></span>
-                <span className={`hamburger-line line3 block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform ${
-                  mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''
-                }`}></span>
+                <span className="hamburger-line line1 block w-6 h-0.5 bg-current transition-all duration-300 transform" />
+                <span className="hamburger-line line2 block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform" />
+                <span className="hamburger-line line3 block w-6 h-0.5 bg-current mt-1.5 transition-all duration-300 transform" />
               </button>
             </div>
           </div>
 
-          {/* Mobile Menu avancé */}
-          <div className={`mobile-menu lg:hidden mt-6 ${mobileMenuOpen ? 'open' : ''}`}>
-            <nav className="bg-black/95 backdrop-blur-xl rounded-2xl border border-orange-500/30 shadow-2xl shadow-orange-500/20 overflow-hidden">
-              <div className="p-6">
-                {[
-                  { href: '#accueil', label: 'Accueil', icon: '🏠' },
-                  { href: '#about', label: 'À Propos', icon: '✨' },
-                  { href: '#realisations', label: 'Réalisations', icon: '🚀' },
-                  { href: '#services', label: 'Services', icon: '⚡' },
-                  { href: '#contact', label: 'Contact', icon: '📧' }
-                ].map((item, index) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    className={`nav-item flex items-center space-x-3 px-4 py-4 rounded-xl transition-all duration-300 mb-2 group ${
-                      activeSection === item.href.substring(1)
-                        ? 'text-orange-400 bg-gradient-to-r from-orange-500/20 to-orange-600/20 border border-orange-500/30'
-                        : 'text-gray-300 hover:text-orange-400 hover:bg-gradient-to-r hover:from-orange-500/10 hover:to-orange-600/10'
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <span className="text-lg group-hover:animate-bounce">{item.icon}</span>
-                    <span className="font-medium">{item.label}</span>
-                    <ChevronRight className="w-4 h-4 ml-auto transform group-hover:translate-x-1 transition-transform duration-300" />
-                  </a>
-                ))}
-
-                <div className="pt-6 mt-6 border-t border-orange-500/30">
-                  <Button
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-black font-bold py-4 rounded-full transform hover:scale-105 transition-all duration-300 shadow-xl shadow-orange-500/40 group"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                  >
-                    <span className="flex items-center justify-center space-x-2">
-                      <span>Parlons projet</span>
-                      <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                    </span>
-                  </Button>
-                </div>
-              </div>
-            </nav>
-          </div>
-        </div>
-
-        {/* Barre de progression scroll avancée */}
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-800/30">
-          <div
-            className="h-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 transition-all duration-300 relative overflow-hidden"
-            style={{ width: `${scrollProgress}%` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+          {/* Barre de progression scroll */}
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-800/30">
+            <div
+              className="h-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 transition-all duration-300 relative overflow-hidden"
+              style={{ width: `${scrollProgress}%` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+            </div>
           </div>
         </div>
       </header>
