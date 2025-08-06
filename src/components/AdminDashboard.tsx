@@ -189,12 +189,12 @@ const AdminDashboard = () => {
             imageUrl = uploadResponse.data.imageUrl;
           }
         } catch (uploadError) {
-          console.error('Erreur lors de l\'upload:', uploadError);
-          toast({
-            title: "Erreur",
-            description: "Erreur lors de l'upload de l'image. Le projet sera créé sans image.",
-            variant: "destructive",
-          });
+          // console.error('Erreur lors de l\'upload:', uploadError);
+          // toast({
+          //   title: "Erreur",
+          //   description: "Erreur lors de l'upload de l'image. Le projet sera créé sans image.",
+          //   variant: "destructive",
+          // });
         } finally {
           setIsUploadingImage(false);
         }
@@ -945,7 +945,6 @@ const AdminDashboard = () => {
                           </a>
                         </div>
                       )}
-
                       {(project.imagePreview || project.imageUrl) && (
                         <img
                           src={project.imagePreview || project.imageUrl}

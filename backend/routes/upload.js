@@ -31,23 +31,22 @@ const storage = multer.diskStorage({
   }
 });
 
-// Configuration multer avec validations
+// Configuration multer pour la mémoire (pas de stockage disque)
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB par défaut
     files: 5 // Maximum 5 fichiers
   },
   fileFilter: (req, file, cb) => {
-    // Types de fichiers acceptés
-    const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error('Seules les images sont autorisées (JPEG, JPG, PNG, GIF, WebP, SVG)'));
+      cb(new Error('Seules les images sont autorisées (JPEG, JPG, PNG, GIF, WebP)'));
     }
   }
 });
@@ -86,18 +85,24 @@ router.post('/image', authenticateToken, upload.single('image'), handleMulterErr
       return res.status(400).json({ error: 'Aucun fichier uploadé' });
     }
 
-    const imageUrl = `/uploads/projects/${req.file.filename}`;
-    
-    console.log(`📷 Image uploaded: ${req.file.filename} by ${req.user.email}`);
+    // Stocker l'image dans la base de données
+    const image = await prisma.projectImage.create({
+      data: {
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        data: req.file.buffer
+      }
+    });
 
     res.json({
       success: true,
       message: 'Image uploadée avec succès',
       data: {
-        imageUrl: imageUrl,
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size
+        imageId: image.id,
+        filename: image.filename,
+        size: image.size,
+        url: `/api/upload/image/${image.id}` // URL pour récupérer l'image
       }
     });
 
@@ -114,20 +119,30 @@ router.post('/images', authenticateToken, upload.array('images', 5), handleMulte
       return res.status(400).json({ error: 'Aucun fichier uploadé' });
     }
 
-    const uploadedFiles = req.files.map(file => ({
-      imageUrl: `/uploads/projects/${file.filename}`,
-      filename: file.filename,
-      originalName: file.originalname,
-      size: file.size
-    }));
+    // Stocker toutes les images
+    const uploadPromises = req.files.map(file => 
+      prisma.projectImage.create({
+        data: {
+          filename: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          data: file.buffer
+        }
+      })
+    );
 
-    console.log(`📷 ${req.files.length} images uploaded by ${req.user.email}`);
+    const uploadedImages = await Promise.all(uploadPromises);
 
     res.json({
       success: true,
-      message: `${req.files.length} image(s) uploadée(s) avec succès`,
+      message: `${uploadedImages.length} image(s) uploadée(s) avec succès`,
       data: {
-        images: uploadedFiles
+        images: uploadedImages.map(img => ({
+          imageId: img.id,
+          filename: img.filename,
+          size: img.size,
+          url: `/api/upload/image/${img.id}`
+        }))
       }
     });
 
@@ -163,6 +178,48 @@ router.delete('/image/:filename', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error deleting image:', error);
     res.status(500).json({ error: 'Erreur lors de la suppression de l\'image' });
+  }
+});
+
+router.delete('/image/:id', authenticateToken, async (req, res) => {
+  try {
+    await prisma.projectImage.delete({
+      where: { id: req.params.id }
+    });
+
+    res.json({
+      success: true,
+      message: 'Image supprimée avec succès'
+    });
+
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      return res.status(404).json({ error: 'Image non trouvée' });
+    }
+
+    res.status(500).json({ error: 'Erreur lors de la suppression de l\'image' });
+  }
+});
+
+router.get('/image/:id', async (req, res) => {
+  try {
+    const image = await prisma.projectImage.findUnique({
+      where: { id: req.params.id },
+      select: { data: true, mimetype: true }
+    });
+
+    if (!image) {
+      return res.status(404).json({ error: 'Image non trouvée' });
+    }
+
+    res.set('Content-Type', image.mimetype);
+    res.send(image.data);
+
+  } catch (error) {
+    console.error('Error retrieving image:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération de l\'image' });
   }
 });
 

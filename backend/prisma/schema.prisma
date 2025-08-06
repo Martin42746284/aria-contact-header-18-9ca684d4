@@ -70,3 +70,15 @@ model Upload {
 
   @@map("uploads")
 }
+
+model ProjectImage {
+  id          String   @id @default(cuid())
+  filename    String
+  mimetype    String
+  size        Int
+  data        Bytes    // Le contenu binaire de l'image
+  project     Project? @relation(fields: [projectId], references: [id])
+  projectId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
