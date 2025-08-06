@@ -28,7 +28,7 @@ const HeroSection = () => {
       setCurrentWordIndex((prev) => (prev + 1) % dynamicWords.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  },);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -62,6 +62,41 @@ const HeroSection = () => {
             rgba(0, 0, 0, 0.9) 100%
           );
         }
+          @keyframes typewriter {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blinkCaret {
+  0%, 100% { border-color: transparent }
+  50% { border-color: orange }
+}
+
+@keyframes typewriter {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes textColorShift {
+  0%   { color: #ffffff; }
+  50%  { color: #f97316; }
+  100% { color: #ffffff; }
+}
+
+.typewriter-text {
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.05em;
+  width: fit-content;
+  display: inline-block;
+  animation: 
+    typewriter 4s steps(60, end),
+    textColorShift 2s ease-in-out infinite;
+}
+
+
+
 
         .floating-elements {
           position: absolute;
@@ -208,7 +243,7 @@ const HeroSection = () => {
   
 
   {/* Texte de présentation */}
-  <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
+  {/* <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto animate-fade-in-up delay-300">
     <span className="block animate-fade-in-left delay-500">
       Chaque projet est pour nous une aventure unique où
     </span>
@@ -218,9 +253,51 @@ const HeroSection = () => {
     <span className="block animate-fade-in-left delay-1000">
       pour donner vie à votre vision et dépasser vos attentes.
     </span>
-  </p>
+  </p> */}
+  <p className="text-xl md:text-2xl text-gray-200 mb-6 leading-relaxed max-w-4xl mx-auto">
+  <span className="typewriter-text block text-orange-300 font-semibold">
+    Chaque projet est pour nous une aventure unique où créativité et <br />
+    technologie se rencontrent pour donner vie à votre vision et dépasser vos
+    <br /> attentes.
+  </span>
+</p>
 
-  {/* Statistiques animées */}
+
+ 
+
+ <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up delay-1000">
+  {/* Bouton 1 - scroll vers #realisations */}
+  <Button
+    className="interactive-button group text-lg px-10 py-6 rounded-full font-bold text-black shadow-2xl transform hover:scale-105 transition-all duration-300 hover-lift"
+    style={{
+      boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4)'
+    }}
+    onClick={() => {
+      document.getElementById('realisations')?.scrollIntoView({ behavior: 'smooth' });
+    }}
+  >
+    <span className="flex items-center space-x-2">
+      <Rocket className="w-5 h-5 group-hover:animate-bounce" />
+      <span>Découvrir nos réalisations</span>
+    </span>
+  </Button>
+
+  {/* Bouton 2 - scroll vers #about */}
+  <Button
+    variant="outline"
+    className="border-2 border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-black px-8 py-6 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm bg-black/20"
+    onClick={() => {
+      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+    }}
+  >
+    <span className="flex items-center space-x-2">
+      <span>En savoir plus</span>
+      <ChevronDown className="w-4 h-4" />
+    </span>
+  </Button>
+</div>
+
+   {/* Statistiques animées */}
   <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6 mb-12 animate-fade-in-up delay-1000">
     {[
       { number: "+50", label: "Projets réalisés" },
@@ -239,31 +316,6 @@ const HeroSection = () => {
         <p className="text-gray-300 text-sm uppercase tracking-wider">{stat.label}</p>
       </div>
     ))}
-  </div>
-
-  {/* Boutons CTA */}
-  <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up delay-1000">
-    <Button
-      className="interactive-button group text-lg px-10 py-6 rounded-full font-bold text-black shadow-2xl transform hover:scale-105 transition-all duration-300 hover-lift"
-      style={{
-        boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4)'
-      }}
-    >
-      <span className="flex items-center space-x-2">
-        <Rocket className="w-5 h-5 group-hover:animate-bounce" />
-        <span>Découvrir nos réalisations</span>
-      </span>
-    </Button>
-
-    <Button
-      variant="outline"
-      className="border-2 border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-black px-8 py-6 rounded-full font-semibold transition-all duration-300 backdrop-blur-sm bg-black/20"
-    >
-      <span className="flex items-center space-x-2">
-        <span>En savoir plus</span>
-        <ChevronDown className="w-4 h-4" />
-      </span>
-    </Button>
   </div>
 </div>
 
