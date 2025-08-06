@@ -180,8 +180,10 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    // Préparer les données pour SQLite (technologies en JSON string)
     const projectData = {
       ...value,
+      technologies: JSON.stringify(value.technologies), // Convert array to JSON string
       date: value.date || new Date().toLocaleDateString('fr-FR')
     };
 
@@ -189,16 +191,23 @@ router.post('/', authenticateToken, async (req, res) => {
       data: projectData
     });
 
-    console.log(`📝 New project created: ${newProject.title} by ${req.user.email}`);
+    console.log(`📝 New project created: ${newProject.title} by ${req.user.email || 'Unknown'}`);
+
+    // Return formatted project (convert back to array)
+    const formattedProject = formatProjectForAPI(newProject);
 
     res.status(201).json({
       success: true,
       message: 'Projet créé avec succès',
-      project: newProject
+      data: { project: formattedProject }
     });
   } catch (error) {
     console.error('Error creating project:', error);
-    res.status(500).json({ error: 'Erreur lors de la création du projet' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la création du projet',
+      details: error.message
+    });
   }
 });
 
@@ -209,31 +218,48 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const { error, value } = projectSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
+        success: false,
         error: 'Données invalides',
         details: error.details[0].message
       });
     }
 
+    // Préparer les données pour SQLite (technologies en JSON string)
+    const updateData = {
+      ...value,
+      technologies: JSON.stringify(value.technologies), // Convert array to JSON string
+    };
+
     const updatedProject = await prisma.project.update({
       where: {
         id: req.params.id
       },
-      data: value
+      data: updateData
     });
 
-    console.log(`📝 Project updated: ${updatedProject.title} by ${req.user.email}`);
+    console.log(`📝 Project updated: ${updatedProject.title} by ${req.user.email || 'Unknown'}`);
+
+    // Return formatted project (convert back to array)
+    const formattedProject = formatProjectForAPI(updatedProject);
 
     res.json({
       success: true,
       message: 'Projet mis à jour avec succès',
-      project: updatedProject
+      data: { project: formattedProject }
     });
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Projet non trouvé' });
+      return res.status(404).json({
+        success: false,
+        error: 'Projet non trouvé'
+      });
     }
     console.error('Error updating project:', error);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du projet' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la mise à jour du projet',
+      details: error.message
+    });
   }
 });
 
