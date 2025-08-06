@@ -29,18 +29,23 @@ async function checkDatabaseConnection() {
     const result = await prisma.$queryRaw`SELECT 1+1 AS result`;
     console.log('✅ Connexion à la base de données établie avec succès.');
 
-    // Check tables
+    // Check tables (PostgreSQL version)
     const tables = await prisma.$queryRaw`
-      SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+      AND table_type = 'BASE TABLE'
     `;
 
     console.log('📊 Tables disponibles dans la base de données:');
     for (const table of tables) {
-      console.log(`   📋 Table: ${table.name}`);
+      console.log(`   📋 Table: ${table.table_name}`);
 
       // Get count for each table
       try {
-        const count = await prisma.$queryRawUnsafe(`SELECT COUNT(*) as count FROM ${table.name}`);
+        const count = await prisma.$queryRawUnsafe(
+          `SELECT COUNT(*) as count FROM "${table.table_name}"`
+        );
         console.log(`      └─ Enregistrements: ${count[0].count}`);
       } catch (e) {
         console.log(`      └─ Erreur lecture: ${e.message}`);
@@ -66,7 +71,7 @@ async function startServer() {
   console.log(`📁 Working directory: ${process.cwd()}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔧 Port: ${PORT}`);
-  console.log(`🎯 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:8080'}`);
+  console.log(`🎯 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:8081'}`);
 
   // Check database connection
   const dbConnected = await checkDatabaseConnection();
@@ -87,7 +92,7 @@ async function startServer() {
 
   // CORS configuration
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+    origin: process.env.FRONTEND_URL || 'http://localhost:8081',
     credentials: true
   }));
   console.log('   ✅ CORS configuré');

@@ -1,52 +1,44 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+// Charger les variables d'environnement
+dotenv.config();
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Début du seeding...');
+// Configuration des données par défaut
+const DEFAULT_ADMIN = {
+  email: process.env.ADMIN_EMAIL || 'admin@aria-creative.com',
+  password: process.env.ADMIN_PASSWORD || 'admin123',
+  name: 'Administrateur',
+  role: 'ADMIN' // Utilisation d'une constante en majuscules pour les rôles
+};
 
-  // Créer l'utilisateur admin
-  const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
-  
-  const admin = await prisma.user.upsert({
-    where: { email: process.env.ADMIN_EMAIL || 'admin@aria-creative.com' },
-    update: {},
-    create: {
-      email: process.env.ADMIN_EMAIL || 'admin@aria-creative.com',
-      password: adminPassword,
-      name: 'Administrateur',
-      role: 'admin'
-    }
-  });
-
-  console.log('👤 Admin user created:', admin.email);
-
-  // Créer les projets par défaut
-  const projects = [
-    {
-      title: "CGEPRO",
-      description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
-      technologies: ["WordPress", "PHP", "MySQL", "SEO"],
-      client: "CGEPRO",
-      duration: "2 mois",
-      status: "TERMINE",
-      imageUrl: "/uploads/projects/cgepro.jpg",
-      date: "15/03/2024",
-      url: "https://cgepro.com"
-    },
-    {
-      title: "ERIC RABY",
-      description: "Coaching en compétences sociales et émotionnelles",
-      technologies: ["React", "Node.js", "Stripe", "Calendar API"],
-      client: "Eric Raby Coaching",
-      duration: "3 mois",
-      status: "TERMINE",
-      imageUrl: "/uploads/projects/eric.jpg",
-      date: "22/04/2024",
-      url: "https://eric-raby.com"
-    },
-    {
+const DEFAULT_PROJECTS = [
+  {
+    title: "CGEPRO",
+    description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
+    technologies: ["WordPress", "PHP", "MySQL", "SEO"],
+    client: "CGEPRO",
+    duration: "2 mois",
+    status: "TERMINE",
+    imageUrl: "/uploads/projects/cgepro.jpg",
+    date: new Date("2024-03-15"),
+    url: "https://cgepro.com"
+  },
+  {
+    title: "ERIC RABY",
+    description: "Coaching en compétences sociales et émotionnelles",
+    technologies: ["React", "Node.js", "Stripe", "Calendar API"],
+    client: "Eric Raby Coaching",
+    duration: "3 mois",
+    status: "TERMINE",
+    imageUrl: "/uploads/projects/eric.jpg",
+    date: new Date("2024-04-22"),
+    url: "https://eric-raby.com"
+  },
+  {
       title: "CONNECT TALENT",
       description: "Plateforme de mise en relation entre entreprises et talents africains",
       technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
@@ -90,33 +82,99 @@ async function main() {
       date: "01/07/2024",
       url: null
     }
-  ];
+];
 
-  // Vérifier si des projets existent déjà
-  const existingProjects = await prisma.project.count();
+async function createAdminUser() {
+  const hashedPassword = await bcrypt.hash(DEFAULT_ADMIN.password, 12);
+  
+  return await prisma.user.upsert({
+    where: { email: DEFAULT_ADMIN.email },
+    update: {
+      password: hashedPassword,
+      name: DEFAULT_ADMIN.name,
+      role: DEFAULT_ADMIN.role
+    },
+    create: {
+      email: DEFAULT_ADMIN.email,
+      password: hashedPassword,
+      name: DEFAULT_ADMIN.name,
+      role: DEFAULT_ADMIN.role
+    }
+  });
+}
 
-  if (existingProjects === 0) {
-    // Convert technologies array to JSON string for each project
-    const projectsForDB = projects.map(project => ({
-      ...project,
-      technologies: JSON.stringify(project.technologies)
-    }));
-
-    // Créer tous les projets en une fois si aucun n'existe
-    const createdProjects = await prisma.project.createMany({
-      data: projectsForDB
-    });
-    console.log(`📄 ${createdProjects.count} projets créés`);
-  } else {
-    console.log(`📄 ${existingProjects} projets existent déjà dans la base`);
+async function seedProjects() {
+  const existingCount = await prisma.project.count();
+  
+  if (existingCount > 0) {
+    console.log(`⏩ ${existingCount} projets existent déjà, skip...`);
+    return;
   }
 
-  console.log('✅ Seeding terminé !');
+  const projectsToCreate = DEFAULT_PROJECTS.map(project => ({
+    ...project,
+    technologies: JSON.stringify(project.technologies),
+    date: project.date, // Utilisation directe de l'objet Date
+    slug: project.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  }));
+
+  const createdProjects = await prisma.project.createMany({
+    data: projectsToCreate,
+    skipDuplicates: true
+  });
+
+  return createdProjects.count;
+}
+
+async function main() {
+  console.log('\n🌱 Début du seeding...');
+
+  // 1. Créer l'utilisateur admin
+  console.log('\n👤 Création de l\'utilisateur admin...');
+  const admin = await createAdminUser();
+  console.log(`✅ Admin créé/mis à jour: ${admin.email} (ID: ${admin.id})`);
+
+  // 2. Créer les catégories si nécessaire
+  console.log('\n🏷️  Vérification des catégories...');
+  const categories = ['Site Web', 'Application', 'E-commerce', 'Mobile'];
+  await prisma.category.createMany({
+    data: categories.map(name => ({ name })),
+    skipDuplicates: true
+  });
+  console.log(`✅ ${categories.length} catégories disponibles`);
+
+  // 3. Créer les projets
+  console.log('\n📂 Création des projets...');
+  const projectCount = await seedProjects();
+  if (projectCount) {
+    console.log(`✅ ${projectCount} projets créés avec succès`);
+  }
+
+  // 4. Lier projets et catégories
+  console.log('\n🔗 Association projets/catégories...');
+  const allProjects = await prisma.project.findMany();
+  const webCategory = await prisma.category.findFirst({ where: { name: 'Site Web' }});
+  
+  if (webCategory) {
+    await Promise.all(
+      allProjects.map(project => 
+        prisma.projectCategory.create({
+          data: {
+            projectId: project.id,
+            categoryId: webCategory.id
+          }
+        })
+      )
+    );
+    console.log(`✅ ${allProjects.length} projets associés à la catégorie "Site Web"`);
+  }
+
+  console.log('\n🎉 Seeding terminé avec succès !');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Erreur lors du seeding:', e);
+    console.error('\n❌ Erreur lors du seeding:', e.message);
     process.exit(1);
   })
   .finally(async () => {

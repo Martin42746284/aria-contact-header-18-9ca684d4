@@ -3,165 +3,319 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Joi from 'joi';
 import rateLimit from 'express-rate-limit';
+import { prisma } from '../lib/prisma.js';
 
 const router = express.Router();
 
-// Rate limiting pour les tentatives de connexion
+// Configuration du rate limiting
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login requests per windowMs
-  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' }
+  max: 5, // 5 tentatives max
+  handler: (req, res) => {
+    res.status(429).json({ 
+      error: 'Trop de tentatives',
+      message: 'Veuillez réessayer dans 15 minutes',
+      retryAfter: req.rateLimit.resetTime
+    });
+  },
+  keyGenerator: (req) => {
+    return req.ip + req.body.email; // Limite par IP + email
+  }
 });
 
-// Validation schemas
+// Schémas de validation
 const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required()
+  email: Joi.string().email().required().messages({
+    'string.email': 'Email invalide',
+    'any.required': 'Email requis'
+  }),
+  password: Joi.string().min(8).required().messages({
+    'string.min': 'Le mot de passe doit contenir au moins 8 caractères',
+    'any.required': 'Mot de passe requis'
+  })
 });
 
-// Middleware d'authentification
+// Middleware d'authentification amélioré
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
   if (!token) {
-    return res.status(401).json({ error: 'Token d\'accès requis' });
+    return res.status(401).json({ 
+      error: 'Non autorisé',
+      message: 'Token d\'accès manquant'
+    });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
-      return res.status(403).json({ error: 'Token invalide' });
+      const message = err.name === 'TokenExpiredError' 
+        ? 'Token expiré' 
+        : 'Token invalide';
+      
+      return res.status(403).json({ 
+        error: 'Accès refusé',
+        message,
+        expiredAt: err.expiredAt
+      });
     }
-    req.user = user;
-    next();
+
+    try {
+      // Vérification supplémentaire en base de données
+      const user = await prisma.user.findUnique({
+        where: { email: decoded.email },
+        select: { id: true, role: true, active: true }
+      });
+
+      if (!user || !user.active) {
+        return res.status(403).json({
+          error: 'Accès refusé',
+          message: 'Compte non valide'
+        });
+      }
+
+      req.user = { ...decoded, id: user.id };
+      next();
+    } catch (dbError) {
+      console.error('Database verification error:', dbError);
+      res.status(500).json({ 
+        error: 'Erreur serveur',
+        message: 'Impossible de vérifier le token'
+      });
+    }
   });
 };
 
-// Utilisateur admin par défaut (en production, utiliser une base de données)
-const getAdminUser = () => {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@aria-creative.com';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  
-  return {
-    email: adminEmail,
-    password: bcrypt.hashSync(adminPassword, 10),
-    role: 'admin',
-    name: 'Administrateur'
-  };
-};
-
-// POST /api/admin/login - Connexion admin
+// POST /api/admin/login - Connexion sécurisée
 router.post('/login', loginLimiter, async (req, res) => {
   try {
-    // Validation des données
-    const { error, value } = loginSchema.validate(req.body);
+    // Validation avancée
+    const { error, value } = loginSchema.validate(req.body, { 
+      abortEarly: false 
+    });
+
     if (error) {
       return res.status(400).json({
-        error: 'Données invalides',
-        details: error.details[0].message
+        error: 'Validation failed',
+        details: error.details.map(d => ({
+          field: d.path[0],
+          message: d.message
+        }))
       });
     }
 
     const { email, password } = value;
-    const adminUser = getAdminUser();
 
-    // Vérification de l'email
-    if (email !== adminUser.email) {
-      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-    }
-
-    // Vérification du mot de passe
-    const isPasswordValid = await bcrypt.compare(password, adminUser.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
-    }
-
-    // Création du JWT
-    const token = jwt.sign(
-      { 
-        email: adminUser.email, 
-        role: adminUser.role,
-        name: adminUser.name
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    // Log de connexion
-    console.log(`🔐 Admin login successful: ${email} at ${new Date().toISOString()}`);
-
-    res.json({
-      success: true,
-      message: 'Connexion réussie',
-      token,
-      user: {
-        email: adminUser.email,
-        name: adminUser.name,
-        role: adminUser.role
+    // Recherche de l'utilisateur en base de données
+    const user = await prisma.user.findUnique({
+      where: { email, role: 'ADMIN' },
+      select: { 
+        id: true,
+        email: true,
+        password: true,
+        name: true,
+        role: true,
+        active: true 
       }
     });
 
+    if (!user || !user.active) {
+      return res.status(401).json({ 
+        error: 'Non autorisé',
+        message: 'Identifiants incorrects ou compte désactivé'
+      });
+    }
+
+    // Comparaison sécurisée du mot de passe
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ 
+        error: 'Non autorisé',
+        message: 'Identifiants incorrects'
+      });
+    }
+
+    // Génération du token avec des claims personnalisés
+    const token = jwt.sign(
+      {
+        sub: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        iss: 'aria-creative-api',
+        aud: 'aria-creative-client'
+      },
+      process.env.JWT_SECRET,
+      { 
+        expiresIn: process.env.JWT_EXPIRES_IN || '4h',
+        algorithm: 'HS256'
+      }
+    );
+
+    // Cookie sécurisé en plus du token dans la réponse
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 4 * 60 * 60 * 1000 // 4 heures
+    });
+
+    // Log de sécurité
+    console.log(`🔐 Connexion admin réussie: ${user.email} (ID: ${user.id})`);
+
+    // Réponse sans le mot de passe
+    const userData = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    };
+
+    res.json({
+      success: true,
+      message: 'Authentification réussie',
+      token,
+      user: userData
+    });
+
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Erreur serveur lors de la connexion' });
+    console.error('Erreur de connexion:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur',
+      message: 'Échec de l\'authentification'
+    });
   }
 });
 
-// POST /api/admin/verify - Vérification du token
-router.post('/verify', authenticateToken, (req, res) => {
-  res.json({
-    success: true,
-    user: req.user,
-    message: 'Token valide'
-  });
+// POST /api/admin/verify - Vérification améliorée
+router.post('/verify', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { email: true, name: true, role: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Non trouvé',
+        message: 'Utilisateur introuvable' 
+      });
+    }
+
+    res.json({
+      success: true,
+      user,
+      message: 'Session valide',
+      expiresIn: req.user.exp
+    });
+  } catch (error) {
+    console.error('Erreur vérification token:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur',
+      message: 'Impossible de vérifier la session'
+    });
+  }
 });
 
-// POST /api/admin/refresh - Renouvellement du token
-router.post('/refresh', authenticateToken, (req, res) => {
+// POST /api/admin/refresh - Renouvellement sécurisé
+router.post('/refresh', authenticateToken, async (req, res) => {
   try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { id: true, email: true, name: true, role: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Non trouvé',
+        message: 'Utilisateur introuvable' 
+      });
+    }
+
     const newToken = jwt.sign(
-      { 
-        email: req.user.email, 
-        role: req.user.role,
-        name: req.user.name
+      {
+        sub: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
       },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '4h' }
     );
+
+    // Mise à jour du cookie
+    res.cookie('auth_token', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 4 * 60 * 60 * 1000
+    });
 
     res.json({
       success: true,
       token: newToken,
-      message: 'Token renouvelé'
+      message: 'Token rafraîchi'
     });
-
   } catch (error) {
-    console.error('Token refresh error:', error);
-    res.status(500).json({ error: 'Erreur lors du renouvellement du token' });
+    console.error('Erreur rafraîchissement token:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur',
+      message: 'Échec du rafraîchissement'
+    });
   }
 });
 
-// POST /api/admin/logout - Déconnexion (côté client principalement)
+// POST /api/admin/logout - Déconnexion complète
 router.post('/logout', authenticateToken, (req, res) => {
-  // Log de déconnexion
-  console.log(`🔓 Admin logout: ${req.user.email} at ${new Date().toISOString()}`);
-  
+  // Effacement du cookie
+  res.clearCookie('auth_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+
+  console.log(`🔓 Déconnexion admin: ${req.user.email} (ID: ${req.user.sub})`);
+
   res.json({
     success: true,
     message: 'Déconnexion réussie'
   });
 });
 
-// GET /api/admin/profile - Profil admin
-router.get('/profile', authenticateToken, (req, res) => {
-  res.json({
-    success: true,
-    user: {
-      email: req.user.email,
-      name: req.user.name,
-      role: req.user.role
+// GET /api/admin/profile - Profil complet
+router.get('/profile', authenticateToken, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.sub },
+      select: { 
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Non trouvé',
+        message: 'Profil introuvable' 
+      });
     }
-  });
+
+    res.json({
+      success: true,
+      user,
+      message: 'Profil récupéré avec succès'
+    });
+  } catch (error) {
+    console.error('Erreur récupération profil:', error);
+    res.status(500).json({ 
+      error: 'Erreur serveur',
+      message: 'Impossible de récupérer le profil'
+    });
+  }
 });
 
 export default router;

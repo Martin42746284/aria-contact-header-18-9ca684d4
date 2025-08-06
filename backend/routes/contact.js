@@ -16,23 +16,25 @@ const contactLimiter = rateLimit({
 
 // Validation schema
 const contactSchema = Joi.object({
-  name: Joi.string().min(2).max(100).required(),
+  name: Joi.string().min(2).max(50).required(),
   email: Joi.string().email().required(),
-  company: Joi.string().max(100).allow('', null).optional(),
-  subject: Joi.string().min(2).max(200).required(),
-  message: Joi.string().min(10).max(1000).required()
+  company: Joi.string().max(100).allow('', null),
+  subject: Joi.string().min(5).max(100).required(),
+  message: Joi.string().min(10).max(2000).required()
 });
 
 // Configuration du transporteur email
-const createTransporter = () => {
-  return nodemailer.createTransporter({
-    service: process.env.EMAIL_SERVICE || 'gmail',
+function createTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT || 587,
+    secure: process.env.EMAIL_SECURE === 'true',
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
+      pass: process.env.EMAIL_PASSWORD
     }
   });
-};
+}
 
 // POST /api/contact - Envoyer un message de contact
 router.post('/', contactLimiter, async (req, res) => {
@@ -67,18 +69,46 @@ router.post('/', contactLimiter, async (req, res) => {
       // Continue même si la DB échoue
     }
 
+    // Vérification des variables d'environnement requises
+    if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.error('Configuration SMTP incomplète:', {
+        host: !!process.env.EMAIL_HOST,
+        user: !!process.env.EMAIL_USER,
+        pass: !!process.env.EMAIL_PASSWORD
+      });
+      
+      if (savedMessage) {
+        return res.status(200).json({
+          success: true,
+          message: 'Message sauvegardé mais configuration email incomplète',
+          data: { id: savedMessage.id }
+        });
+      }
+      throw new Error('Configuration SMTP incomplète');
+    }
+
     // Configuration de l'email
-    const transporter = createTransporter();
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT || '587'),
+      secure: process.env.EMAIL_SECURE === 'true',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      },
+      tls: {
+        rejectUnauthorized: process.env.NODE_ENV === 'production'
+      }
+    });
 
     // Email à l'admin
     const adminMailOptions = {
-      from: process.env.EMAIL_USER,
-      to: process.env.ADMIN_EMAIL || 'contact@aria-creative.com',
+      from: `"Aria Creative" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
       subject: `[ARIA CREATIVE] Nouveau message: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">Nouveau message de contact</h2>
-          
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Nom:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
@@ -101,7 +131,7 @@ router.post('/', contactLimiter, async (req, res) => {
 
     // Email de confirmation au client
     const clientMailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"Aria Creative" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Confirmation de réception - Aria Creative',
       html: `
@@ -135,27 +165,48 @@ router.post('/', contactLimiter, async (req, res) => {
       `
     };
 
-    // Envoi des emails
-    await Promise.all([
-      transporter.sendMail(adminMailOptions),
-      transporter.sendMail(clientMailOptions)
-    ]);
+    // Envoi des emails avec gestion d'erreur améliorée
+    try {
+      const [adminResult, clientResult] = await Promise.all([
+        transporter.sendMail(adminMailOptions),
+        transporter.sendMail(clientMailOptions)
+      ]);
+      
+      console.log('📧 Emails envoyés avec succès:', {
+        adminId: adminResult.messageId,
+        clientId: clientResult.messageId,
+        toAdmin: adminMailOptions.to,
+        toClient: email,
+        subject: subject
+      });
 
-    // Log pour le monitoring
-    console.log(`📧 Contact message sent from: ${email} - Subject: ${subject}`);
+      res.status(200).json({
+        success: true,
+        message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.',
+        data: savedMessage ? { id: savedMessage.id } : null
+      });
 
-    res.status(200).json({
-      success: true,
-      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.',
-      data: savedMessage ? { id: savedMessage.id } : null
-    });
+    } catch (emailError) {
+      console.error('Erreur envoi email:', emailError);
+      
+      if (savedMessage) {
+        return res.status(200).json({
+          success: true,
+          message: 'Message sauvegardé mais erreur lors de l\'envoi des emails',
+          data: { id: savedMessage.id }
+        });
+      }
+      
+      throw emailError;
+    }
 
   } catch (error) {
-    console.error('Error sending contact email:', error);
-    
+    console.error('Erreur globale du contact:', error);
     res.status(500).json({
-      error: 'Erreur lors de l\'envoi du message',
-      message: 'Veuillez réessayer plus tard ou nous contacter directement.'
+      error: 'Erreur lors du traitement de votre message',
+      message: process.env.NODE_ENV === 'development' 
+        ? error.message 
+        : 'Veuillez réessayer plus tard ou nous contacter directement.'
     });
   }
 });
