@@ -212,6 +212,8 @@ const AdminDashboard = () => {
         date: new Date().toLocaleDateString('fr-FR')
       };
 
+      console.log('📝 Données projet à créer:', projectData);
+
       if (editingProjectId !== null) {
         // Mise à jour
         const updatedProject = await updateProject(editingProjectId, projectData);
