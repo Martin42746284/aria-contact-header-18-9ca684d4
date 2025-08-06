@@ -96,10 +96,15 @@ async function main() {
   const existingProjects = await prisma.project.count();
 
   if (existingProjects === 0) {
+    // Convert technologies array to JSON string for each project
+    const projectsForDB = projects.map(project => ({
+      ...project,
+      technologies: JSON.stringify(project.technologies)
+    }));
+
     // Créer tous les projets en une fois si aucun n'existe
     const createdProjects = await prisma.project.createMany({
-      data: projects,
-      skipDuplicates: true
+      data: projectsForDB
     });
     console.log(`📄 ${createdProjects.count} projets créés`);
   } else {
