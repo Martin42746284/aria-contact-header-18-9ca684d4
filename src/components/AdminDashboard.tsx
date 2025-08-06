@@ -1,25 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
-import { adminApi, uploadApi, contactApi, healthApi } from "@/services/api";
+import { adminApi, uploadApi, contactApi, healthApi, type ContactMessage } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-
-interface CustomerMessage {
-  id: string;
-  subject: string;
-  name: string;
-  email: string;
-  company?: string;
-  message: string;
-  status: 'NOUVEAU' | 'LU' | 'TRAITE' | 'ARCHIVE';
-  createdAt: string;
-  updatedAt: string;
-}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<AdminProject[]>([]);
-  const [messages, setMessages] = useState<CustomerMessage[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
@@ -61,9 +49,9 @@ const AdminDashboard = () => {
       
       // Charger les projets depuis l'API
       await loadProjects();
-      
-      // Charger les messages (simulation pour l'instant)
-      setMessages([]);
+
+      // Charger les messages de contact
+      await loadMessages();
       
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
