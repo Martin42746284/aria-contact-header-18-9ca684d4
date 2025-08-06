@@ -175,7 +175,7 @@ const Header = () => {
                 />
               </div>
               <div className={`transition-all duration-500 ${scrolled ? 'opacity-0 w-0' : 'opacity-100'}`}>
-                <span className="text-white font-bold text-xl group-hover:text-orange-400 transition-colors duration-300">ARIA</span>
+                <span className="text-white font-bold text-xl group-hover:text-orange-400 transition-colors duration-300"></span>
               </div>
             </div>
 

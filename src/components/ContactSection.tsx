@@ -387,7 +387,7 @@ const ContactSection = () => {
         }`}>
           <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 backdrop-blur-xl p-8 rounded-2xl border border-orange-500/30 max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold text-white mb-4">
-              🚀 Prêt pour le décollage ?
+               Prêt pour le décollage ?
             </h3>
             <p className="text-gray-300 mb-6">
               Rejoignez les entreprises qui ont déjà fait confiance à ARIA pour transformer leur présence digitale.
