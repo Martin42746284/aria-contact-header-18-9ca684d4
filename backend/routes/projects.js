@@ -100,9 +100,11 @@ router.get('/', async (req, res) => {
       }
     });
 
+    const formattedProjects = projects.map(formatProjectForAPI);
+
     res.json({
       success: true,
-      data: { projects: projects }
+      data: { projects: formattedProjects }
     });
   } catch (error) {
     console.error('Database not available, using fallback data:', error.message);
