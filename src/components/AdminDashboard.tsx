@@ -1,25 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllAdminProjects, createProject, updateProject, deleteProject, updateProjectStatus, type AdminProject } from "@/services/projectsService";
-import { adminApi, uploadApi, contactApi, healthApi } from "@/services/api";
+import { adminApi, uploadApi, contactApi, healthApi, type ContactMessage } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-
-interface CustomerMessage {
-  id: string;
-  subject: string;
-  name: string;
-  email: string;
-  company?: string;
-  message: string;
-  status: 'NOUVEAU' | 'LU' | 'TRAITE' | 'ARCHIVE';
-  createdAt: string;
-  updatedAt: string;
-}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<AdminProject[]>([]);
-  const [messages, setMessages] = useState<CustomerMessage[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
@@ -61,9 +49,9 @@ const AdminDashboard = () => {
       
       // Charger les projets depuis l'API
       await loadProjects();
-      
-      // Charger les messages (simulation pour l'instant)
-      setMessages([]);
+
+      // Charger les messages de contact
+      await loadMessages();
       
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -103,6 +91,23 @@ const AdminDashboard = () => {
       toast({
         title: "Erreur",
         description: "Impossible de charger les projets depuis l'API",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadMessages = async () => {
+    try {
+      const response = await contactApi.getAllMessages();
+      if (response.success && response.data) {
+        setMessages(response.data.messages);
+        console.log('📧 Messages de contact chargés:', response.data.messages.length);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des messages:', error);
+      toast({
+        title: "Messages",
+        description: "Impossible de charger les messages de contact",
         variant: "destructive",
       });
     }
@@ -206,6 +211,8 @@ const AdminDashboard = () => {
         url: newProject.url,
         date: new Date().toLocaleDateString('fr-FR')
       };
+
+      console.log('📝 Données projet à créer:', projectData);
 
       if (editingProjectId !== null) {
         // Mise à jour
@@ -313,14 +320,74 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteMessage = (messageId: string) => {
-    setMessages(messages.filter((message) => message.id !== messageId));
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
+      return;
+    }
+
+    try {
+      const response = await contactApi.deleteMessage(messageId);
+      if (response.success) {
+        setMessages(messages.filter((message) => message.id !== messageId));
+        toast({
+          title: "Succès",
+          description: "Message supprimé avec succès",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression du message",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleMarkAsRead = (messageId: string) => {
-    setMessages(messages.map(msg =>
-      msg.id === messageId ? { ...msg, status: 'LU' as const } : msg
-    ));
+  const handleMarkAsRead = async (messageId: string) => {
+    try {
+      const response = await contactApi.updateMessageStatus(messageId, 'LU');
+      if (response.success && response.data) {
+        setMessages(messages.map(msg =>
+          msg.id === messageId ? response.data.message : msg
+        ));
+        toast({
+          title: "Succès",
+          description: "Message marqué comme lu",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour du statut",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleChangeMessageStatus = async (messageId: string, newStatus: ContactMessage['status']) => {
+    if (!newStatus) return;
+
+    try {
+      const response = await contactApi.updateMessageStatus(messageId, newStatus);
+      if (response.success && response.data) {
+        setMessages(messages.map(msg =>
+          msg.id === messageId ? response.data.message : msg
+        ));
+        toast({
+          title: "Succès",
+          description: `Statut changé vers "${newStatus}"`,
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour du statut",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -611,9 +678,22 @@ const AdminDashboard = () => {
           <div className="lg:col-span-2">
             {/* Customer Messages */}
             <div className="bg-gray-900 p-6 rounded-xl shadow-2xl mb-8 animate-fadeInRight border border-gray-800">
-              <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-1">
-                 Messages des clients
-              </h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-orange-400 transform transition duration-500 hover:translate-x-1">
+                   Messages des clients
+                </h2>
+                <div className="flex items-center space-x-3">
+                  <div className="text-sm text-gray-400">
+                    {messages.filter(m => m.status === 'NOUVEAU').length} nouveaux
+                  </div>
+                  <button
+                    onClick={loadMessages}
+                    className="bg-orange-500 hover:bg-orange-400 text-black px-3 py-1 rounded-lg text-sm font-medium transition duration-300"
+                  >
+                    🔄 Actualiser
+                  </button>
+                </div>
+              </div>
               {messages.length === 0 ? (
                 <p className="text-gray-400 animate-pulse text-center py-8">Aucun message pour le moment</p>
               ) : (
@@ -621,14 +701,39 @@ const AdminDashboard = () => {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className="bg-black border border-gray-800 rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn"
+                      className={`bg-black border rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn ${
+                        message.status === 'NOUVEAU' ? 'border-orange-500/50 bg-orange-500/5' : 'border-gray-800'
+                      }`}
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-orange-400">
-                          {message.subject}
-                        </h3>
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-xl font-bold text-orange-400">
+                            {message.subject}
+                          </h3>
+                          <select
+                            value={message.status}
+                            onChange={(e) => handleChangeMessageStatus(message.id!, e.target.value as ContactMessage['status'])}
+                            className={`text-xs px-2 py-1 rounded-full border ${
+                              message.status === 'NOUVEAU' ? 'bg-orange-500/20 text-orange-400 border-orange-500' :
+                              message.status === 'LU' ? 'bg-blue-500/20 text-blue-400 border-blue-500' :
+                              message.status === 'TRAITE' ? 'bg-green-500/20 text-green-400 border-green-500' :
+                              'bg-gray-500/20 text-gray-400 border-gray-500'
+                            } bg-transparent cursor-pointer`}
+                          >
+                            <option value="NOUVEAU" className="bg-gray-900">🆕 Nouveau</option>
+                            <option value="LU" className="bg-gray-900">👁 Lu</option>
+                            <option value="TRAITE" className="bg-gray-900">✅ Traité</option>
+                            <option value="ARCHIVE" className="bg-gray-900">📁 Archivé</option>
+                          </select>
+                        </div>
                         <span className="text-gray-400 text-sm bg-gray-800 px-3 py-1 rounded-full">
-                          {new Date(message.createdAt).toLocaleDateString('fr-FR')}
+                          {message.createdAt ? new Date(message.createdAt).toLocaleDateString('fr-FR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Date inconnue'}
                         </span>
                       </div>
                       <div className="mb-3">
@@ -655,14 +760,16 @@ const AdminDashboard = () => {
                           >
                             {selectedMessageId === message.id ? '▲ Masquer' : '✉ Répondre'}
                           </button>
+                          {message.status === 'NOUVEAU' && (
+                            <button
+                              onClick={() => handleMarkAsRead(message.id!)}
+                              className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
+                            >
+                              ✓ Marquer lu
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleMarkAsRead(message.id)}
-                            className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
-                          >
-                            ✓ Marquer lu
-                          </button>
-                          <button
-                            onClick={() => handleDeleteMessage(message.id)}
+                            onClick={() => handleDeleteMessage(message.id!)}
                             className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
                           >
                             🗑 Supprimer

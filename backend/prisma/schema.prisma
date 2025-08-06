@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -23,10 +23,10 @@ model Project {
   id          String   @id @default(cuid())
   title       String
   description String
-  technologies String[]
+  technologies String  // JSON string for SQLite compatibility
   client      String
   duration    String
-  status      ProjectStatus @default(EN_ATTENTE)
+  status      String   @default("EN_ATTENTE") // String instead of enum
   imageUrl    String?
   url         String?
   date        String
@@ -43,7 +43,7 @@ model ContactMessage {
   company   String?
   subject   String
   message   String
-  status    MessageStatus @default(NOUVEAU)
+  status    String   @default("NOUVEAU") // String instead of enum
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -63,17 +63,4 @@ model Upload {
   updatedAt    DateTime @updatedAt
 
   @@map("uploads")
-}
-
-enum ProjectStatus {
-  EN_COURS
-  TERMINE
-  EN_ATTENTE
-}
-
-enum MessageStatus {
-  NOUVEAU
-  LU
-  TRAITE
-  ARCHIVE
 }

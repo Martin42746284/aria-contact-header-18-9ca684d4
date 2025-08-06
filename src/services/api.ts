@@ -25,11 +25,15 @@ export interface Project {
 }
 
 export interface ContactMessage {
+  id?: string;
   name: string;
   email: string;
   company?: string;
   subject: string;
   message: string;
+  status?: 'NOUVEAU' | 'LU' | 'TRAITE' | 'ARCHIVE';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface User {
@@ -162,6 +166,27 @@ export const contactApi = {
 
   async testEmailConfig(): Promise<ApiResponse> {
     return ApiClient.get('/contact/test');
+  },
+
+  // Routes admin pour la gestion des messages
+  async getAllMessages(): Promise<ApiResponse<{ messages: ContactMessage[] }>> {
+    return ApiClient.get('/contact/admin');
+  },
+
+  async getMessage(id: string): Promise<ApiResponse<{ message: ContactMessage }>> {
+    return ApiClient.get(`/contact/admin/${id}`);
+  },
+
+  async updateMessageStatus(id: string, status: string): Promise<ApiResponse<{ message: ContactMessage }>> {
+    return ApiClient.put(`/contact/admin/${id}/status`, { status });
+  },
+
+  async deleteMessage(id: string): Promise<ApiResponse> {
+    return ApiClient.delete(`/contact/admin/${id}`);
+  },
+
+  async getStats(): Promise<ApiResponse<{ stats: { total: number; nouveau: number; traite: number; archive: number } }>> {
+    return ApiClient.get('/contact/admin/stats');
   }
 };
 

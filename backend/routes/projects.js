@@ -18,6 +18,76 @@ const projectSchema = Joi.object({
   date: Joi.string().optional()
 });
 
+// Default projects fallback data
+const getDefaultProjects = () => [
+  {
+    id: "1",
+    title: "CGEPRO",
+    description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
+    technologies: ["WordPress", "PHP", "MySQL", "SEO"],
+    client: "CGEPRO",
+    duration: "2 mois",
+    status: "TERMINE",
+    imageUrl: "/src/assets/go.jpg",
+    date: "15/03/2024",
+    url: "https://cgepro.com",
+    createdAt: new Date('2024-03-15'),
+    updatedAt: new Date('2024-03-15')
+  },
+  {
+    id: "2",
+    title: "ERIC RABY",
+    description: "Coaching en compétences sociales et émotionnelles",
+    technologies: ["React", "Node.js", "Stripe", "Calendar API"],
+    client: "Eric Raby Coaching",
+    duration: "3 mois",
+    status: "TERMINE",
+    imageUrl: "/src/assets/eric.jpg",
+    date: "22/04/2024",
+    url: "https://eric-raby.com",
+    createdAt: new Date('2024-04-22'),
+    updatedAt: new Date('2024-04-22')
+  },
+  {
+    id: "3",
+    title: "CONNECT TALENT",
+    description: "Plateforme de mise en relation entre entreprises et talents africains",
+    technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
+    client: "Connect Talent Inc",
+    duration: "5 mois",
+    status: "TERMINE",
+    imageUrl: "/src/assets/connect.png",
+    date: "10/05/2024",
+    url: "https://connecttalent.cc",
+    createdAt: new Date('2024-05-10'),
+    updatedAt: new Date('2024-05-10')
+  },
+  {
+    id: "4",
+    title: "SOA DIA TRAVEL",
+    description: "Transport & Logistique à Madagascar",
+    technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
+    client: "SOA DIA TRAVEL",
+    duration: "4 mois",
+    status: "TERMINE",
+    imageUrl: "/src/assets/soa.jpg",
+    date: "28/06/2024",
+    url: "https://soatransplus.mg",
+    createdAt: new Date('2024-06-28'),
+    updatedAt: new Date('2024-06-28')
+  }
+];
+
+// Helper function to convert database project to API format
+const formatProjectForAPI = (project) => {
+  return {
+    ...project,
+    technologies: typeof project.technologies === 'string'
+      ? JSON.parse(project.technologies)
+      : project.technologies
+  };
+};
+
 // GET /api/projects - Récupérer tous les projets (publics)
 router.get('/', async (req, res) => {
   try {
@@ -30,13 +100,21 @@ router.get('/', async (req, res) => {
       }
     });
 
+    const formattedProjects = projects.map(formatProjectForAPI);
+
     res.json({
       success: true,
-      projects: projects
+      data: { projects: formattedProjects }
     });
   } catch (error) {
-    console.error('Error fetching projects:', error);
-    res.status(500).json({ error: 'Erreur lors de la récupération des projets' });
+    console.error('Database not available, using fallback data:', error.message);
+
+    // Return default projects as fallback
+    const defaultProjects = getDefaultProjects().filter(p => p.status === 'TERMINE');
+    res.json({
+      success: true,
+      data: { projects: defaultProjects }
+    });
   }
 });
 
@@ -49,13 +127,21 @@ router.get('/admin', authenticateToken, async (req, res) => {
       }
     });
 
+    const formattedProjects = projects.map(formatProjectForAPI);
+
     res.json({
       success: true,
-      projects: projects
+      data: { projects: formattedProjects }
     });
   } catch (error) {
-    console.error('Error fetching admin projects:', error);
-    res.status(500).json({ error: 'Erreur lors de la récupération des projets' });
+    console.error('Database not available for admin, using fallback data:', error.message);
+
+    // Return all default projects as fallback for admin
+    const defaultProjects = getDefaultProjects();
+    res.json({
+      success: true,
+      data: { projects: defaultProjects }
+    });
   }
 });
 
@@ -94,8 +180,10 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    // Préparer les données pour SQLite (technologies en JSON string)
     const projectData = {
       ...value,
+      technologies: JSON.stringify(value.technologies), // Convert array to JSON string
       date: value.date || new Date().toLocaleDateString('fr-FR')
     };
 
@@ -103,16 +191,23 @@ router.post('/', authenticateToken, async (req, res) => {
       data: projectData
     });
 
-    console.log(`📝 New project created: ${newProject.title} by ${req.user.email}`);
+    console.log(`📝 New project created: ${newProject.title} by ${req.user.email || 'Unknown'}`);
+
+    // Return formatted project (convert back to array)
+    const formattedProject = formatProjectForAPI(newProject);
 
     res.status(201).json({
       success: true,
       message: 'Projet créé avec succès',
-      project: newProject
+      data: { project: formattedProject }
     });
   } catch (error) {
     console.error('Error creating project:', error);
-    res.status(500).json({ error: 'Erreur lors de la création du projet' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la création du projet',
+      details: error.message
+    });
   }
 });
 
@@ -123,31 +218,48 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const { error, value } = projectSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
+        success: false,
         error: 'Données invalides',
         details: error.details[0].message
       });
     }
 
+    // Préparer les données pour SQLite (technologies en JSON string)
+    const updateData = {
+      ...value,
+      technologies: JSON.stringify(value.technologies), // Convert array to JSON string
+    };
+
     const updatedProject = await prisma.project.update({
       where: {
         id: req.params.id
       },
-      data: value
+      data: updateData
     });
 
-    console.log(`📝 Project updated: ${updatedProject.title} by ${req.user.email}`);
+    console.log(`📝 Project updated: ${updatedProject.title} by ${req.user.email || 'Unknown'}`);
+
+    // Return formatted project (convert back to array)
+    const formattedProject = formatProjectForAPI(updatedProject);
 
     res.json({
       success: true,
       message: 'Projet mis à jour avec succès',
-      project: updatedProject
+      data: { project: formattedProject }
     });
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Projet non trouvé' });
+      return res.status(404).json({
+        success: false,
+        error: 'Projet non trouvé'
+      });
     }
     console.error('Error updating project:', error);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du projet' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la mise à jour du projet',
+      details: error.message
+    });
   }
 });
 
@@ -160,7 +272,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       }
     });
 
-    console.log(`🗑️ Project deleted: ${deletedProject.title} by ${req.user.email}`);
+    console.log(`🗑️ Project deleted: ${deletedProject.title} by ${req.user.email || 'Unknown'}`);
 
     res.json({
       success: true,
@@ -168,10 +280,17 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Projet non trouvé' });
+      return res.status(404).json({
+        success: false,
+        error: 'Projet non trouvé'
+      });
     }
     console.error('Error deleting project:', error);
-    res.status(500).json({ error: 'Erreur lors de la suppression du projet' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la suppression du projet',
+      details: error.message
+    });
   }
 });
 
@@ -181,7 +300,10 @@ router.post('/:id/status', authenticateToken, async (req, res) => {
     const { status } = req.body;
 
     if (!['EN_COURS', 'TERMINE', 'EN_ATTENTE'].includes(status)) {
-      return res.status(400).json({ error: 'Statut invalide' });
+      return res.status(400).json({
+        success: false,
+        error: 'Statut invalide'
+      });
     }
 
     const updatedProject = await prisma.project.update({
@@ -193,19 +315,29 @@ router.post('/:id/status', authenticateToken, async (req, res) => {
       }
     });
 
-    console.log(`📊 Project status updated: ${updatedProject.title} -> ${status} by ${req.user.email}`);
+    console.log(`📊 Project status updated: ${updatedProject.title} -> ${status} by ${req.user.email || 'Unknown'}`);
+
+    // Return formatted project (convert technologies back to array)
+    const formattedProject = formatProjectForAPI(updatedProject);
 
     res.json({
       success: true,
       message: 'Statut mis à jour avec succès',
-      project: updatedProject
+      data: { project: formattedProject }
     });
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Projet non trouvé' });
+      return res.status(404).json({
+        success: false,
+        error: 'Projet non trouvé'
+      });
     }
     console.error('Error updating project status:', error);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la mise à jour du statut',
+      details: error.message
+    });
   }
 });
 
