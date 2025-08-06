@@ -28,7 +28,7 @@ const HeroSection = () => {
       setCurrentWordIndex((prev) => (prev + 1) % dynamicWords.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  },);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
