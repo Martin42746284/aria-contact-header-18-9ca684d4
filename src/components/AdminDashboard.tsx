@@ -96,6 +96,23 @@ const AdminDashboard = () => {
     }
   };
 
+  const loadMessages = async () => {
+    try {
+      const response = await contactApi.getAllMessages();
+      if (response.success && response.data) {
+        setMessages(response.data.messages);
+        console.log('📧 Messages de contact chargés:', response.data.messages.length);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des messages:', error);
+      toast({
+        title: "Messages",
+        description: "Impossible de charger les messages de contact",
+        variant: "destructive",
+      });
+    }
+  };
+
   const [newProject, setNewProject] = useState({
     title: "",
     description: "",
@@ -301,14 +318,74 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteMessage = (messageId: string) => {
-    setMessages(messages.filter((message) => message.id !== messageId));
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
+      return;
+    }
+
+    try {
+      const response = await contactApi.deleteMessage(messageId);
+      if (response.success) {
+        setMessages(messages.filter((message) => message.id !== messageId));
+        toast({
+          title: "Succès",
+          description: "Message supprimé avec succès",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression du message",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleMarkAsRead = (messageId: string) => {
-    setMessages(messages.map(msg =>
-      msg.id === messageId ? { ...msg, status: 'LU' as const } : msg
-    ));
+  const handleMarkAsRead = async (messageId: string) => {
+    try {
+      const response = await contactApi.updateMessageStatus(messageId, 'LU');
+      if (response.success && response.data) {
+        setMessages(messages.map(msg =>
+          msg.id === messageId ? response.data.message : msg
+        ));
+        toast({
+          title: "Succès",
+          description: "Message marqué comme lu",
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour du statut",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleChangeMessageStatus = async (messageId: string, newStatus: ContactMessage['status']) => {
+    if (!newStatus) return;
+
+    try {
+      const response = await contactApi.updateMessageStatus(messageId, newStatus);
+      if (response.success && response.data) {
+        setMessages(messages.map(msg =>
+          msg.id === messageId ? response.data.message : msg
+        ));
+        toast({
+          title: "Succès",
+          description: `Statut changé vers "${newStatus}"`,
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour du statut",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
