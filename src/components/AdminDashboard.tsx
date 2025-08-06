@@ -676,9 +676,22 @@ const AdminDashboard = () => {
           <div className="lg:col-span-2">
             {/* Customer Messages */}
             <div className="bg-gray-900 p-6 rounded-xl shadow-2xl mb-8 animate-fadeInRight border border-gray-800">
-              <h2 className="text-2xl font-semibold mb-6 text-orange-400 transform transition duration-500 hover:translate-x-1">
-                 Messages des clients
-              </h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-orange-400 transform transition duration-500 hover:translate-x-1">
+                   Messages des clients
+                </h2>
+                <div className="flex items-center space-x-3">
+                  <div className="text-sm text-gray-400">
+                    {messages.filter(m => m.status === 'NOUVEAU').length} nouveaux
+                  </div>
+                  <button
+                    onClick={loadMessages}
+                    className="bg-orange-500 hover:bg-orange-400 text-black px-3 py-1 rounded-lg text-sm font-medium transition duration-300"
+                  >
+                    🔄 Actualiser
+                  </button>
+                </div>
+              </div>
               {messages.length === 0 ? (
                 <p className="text-gray-400 animate-pulse text-center py-8">Aucun message pour le moment</p>
               ) : (
@@ -686,14 +699,39 @@ const AdminDashboard = () => {
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className="bg-black border border-gray-800 rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn"
+                      className={`bg-black border rounded-lg p-6 transition-all duration-300 hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 animate-fadeIn ${
+                        message.status === 'NOUVEAU' ? 'border-orange-500/50 bg-orange-500/5' : 'border-gray-800'
+                      }`}
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold text-orange-400">
-                          {message.subject}
-                        </h3>
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-xl font-bold text-orange-400">
+                            {message.subject}
+                          </h3>
+                          <select
+                            value={message.status}
+                            onChange={(e) => handleChangeMessageStatus(message.id!, e.target.value as ContactMessage['status'])}
+                            className={`text-xs px-2 py-1 rounded-full border ${
+                              message.status === 'NOUVEAU' ? 'bg-orange-500/20 text-orange-400 border-orange-500' :
+                              message.status === 'LU' ? 'bg-blue-500/20 text-blue-400 border-blue-500' :
+                              message.status === 'TRAITE' ? 'bg-green-500/20 text-green-400 border-green-500' :
+                              'bg-gray-500/20 text-gray-400 border-gray-500'
+                            } bg-transparent cursor-pointer`}
+                          >
+                            <option value="NOUVEAU" className="bg-gray-900">🆕 Nouveau</option>
+                            <option value="LU" className="bg-gray-900">👁 Lu</option>
+                            <option value="TRAITE" className="bg-gray-900">✅ Traité</option>
+                            <option value="ARCHIVE" className="bg-gray-900">📁 Archivé</option>
+                          </select>
+                        </div>
                         <span className="text-gray-400 text-sm bg-gray-800 px-3 py-1 rounded-full">
-                          {new Date(message.createdAt).toLocaleDateString('fr-FR')}
+                          {message.createdAt ? new Date(message.createdAt).toLocaleDateString('fr-FR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          }) : 'Date inconnue'}
                         </span>
                       </div>
                       <div className="mb-3">
@@ -720,14 +758,16 @@ const AdminDashboard = () => {
                           >
                             {selectedMessageId === message.id ? '▲ Masquer' : '✉ Répondre'}
                           </button>
+                          {message.status === 'NOUVEAU' && (
+                            <button
+                              onClick={() => handleMarkAsRead(message.id!)}
+                              className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
+                            >
+                              ✓ Marquer lu
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleMarkAsRead(message.id)}
-                            className="text-blue-400 hover:text-blue-300 transition duration-300 font-medium px-3 py-1 rounded border border-blue-500 hover:bg-blue-500 hover:text-black"
-                          >
-                            ✓ Marquer lu
-                          </button>
-                          <button
-                            onClick={() => handleDeleteMessage(message.id)}
+                            onClick={() => handleDeleteMessage(message.id!)}
                             className="text-red-400 hover:text-red-300 transition duration-300 font-medium px-3 py-1 rounded border border-red-500 hover:bg-red-500 hover:text-black"
                           >
                             🗑 Supprimer
