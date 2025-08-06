@@ -127,9 +127,11 @@ router.get('/admin', authenticateToken, async (req, res) => {
       }
     });
 
+    const formattedProjects = projects.map(formatProjectForAPI);
+
     res.json({
       success: true,
-      data: { projects: projects }
+      data: { projects: formattedProjects }
     });
   } catch (error) {
     console.error('Database not available for admin, using fallback data:', error.message);
