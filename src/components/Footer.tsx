@@ -66,12 +66,13 @@ const Footer = () => {
 
           {/* Bottom */}
           <div className="border-t border-white/20 mt-12 pt-8 text-center">
-            <p className="text-white/60">
-              © 2025 ARIA - Agence de développement digital. Tous droits réservés.
-            </p>
+          
             <p className="text-white/40 mt-2 text-sm">
               Notre approche unique et notre engagement envers l'excellence nous permettent
               de nous démarquer et de fournir des solutions qui dépassent les attentes.
+            </p>
+             <p className="text-white/60">
+              © 2025 ARIA - Agence de développement digital. Tous droits réservés.
             </p>
           </div>
         </div>
