@@ -93,10 +93,12 @@ router.post('/image', authenticateToken, upload.single('image'), handleMulterErr
     res.json({
       success: true,
       message: 'Image uploadée avec succès',
-      imageUrl: imageUrl,
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      size: req.file.size
+      data: {
+        imageUrl: imageUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      }
     });
 
   } catch (error) {
@@ -124,7 +126,9 @@ router.post('/images', authenticateToken, upload.array('images', 5), handleMulte
     res.json({
       success: true,
       message: `${req.files.length} image(s) uploadée(s) avec succès`,
-      images: uploadedFiles
+      data: {
+        images: uploadedFiles
+      }
     });
 
   } catch (error) {
@@ -173,7 +177,9 @@ router.get('/images', authenticateToken, async (req, res) => {
       // Répertoire n'existe pas
       return res.json({
         success: true,
-        images: []
+        data: {
+          images: []
+        }
       });
     }
 
@@ -203,8 +209,10 @@ router.get('/images', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      images: images,
-      total: images.length
+      data: {
+        images: images,
+        total: images.length
+      }
     });
 
   } catch (error) {
@@ -223,10 +231,12 @@ router.get('/stats', authenticateToken, async (req, res) => {
     } catch {
       return res.json({
         success: true,
-        stats: {
-          totalFiles: 0,
-          totalSize: 0,
-          averageSize: 0
+        data: {
+          stats: {
+            totalFiles: 0,
+            totalSize: 0,
+            averageSize: 0
+          }
         }
       });
     }
@@ -244,12 +254,14 @@ router.get('/stats', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      stats: {
-        totalFiles: files.length,
-        totalSize: totalSize,
-        totalSizeMB: Math.round(totalSize / (1024 * 1024) * 100) / 100,
-        averageSize: Math.round(averageSize),
-        averageSizeMB: Math.round(averageSize / (1024 * 1024) * 100) / 100
+      data: {
+        stats: {
+          totalFiles: files.length,
+          totalSize: totalSize,
+          totalSizeMB: Math.round(totalSize / (1024 * 1024) * 100) / 100,
+          averageSize: Math.round(averageSize),
+          averageSizeMB: Math.round(averageSize / (1024 * 1024) * 100) / 100
+        }
       }
     });
 
