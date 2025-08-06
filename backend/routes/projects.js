@@ -272,7 +272,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       }
     });
 
-    console.log(`🗑️ Project deleted: ${deletedProject.title} by ${req.user.email}`);
+    console.log(`🗑️ Project deleted: ${deletedProject.title} by ${req.user.email || 'Unknown'}`);
 
     res.json({
       success: true,
@@ -280,10 +280,17 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Projet non trouvé' });
+      return res.status(404).json({
+        success: false,
+        error: 'Projet non trouvé'
+      });
     }
     console.error('Error deleting project:', error);
-    res.status(500).json({ error: 'Erreur lors de la suppression du projet' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la suppression du projet',
+      details: error.message
+    });
   }
 });
 
@@ -293,7 +300,10 @@ router.post('/:id/status', authenticateToken, async (req, res) => {
     const { status } = req.body;
 
     if (!['EN_COURS', 'TERMINE', 'EN_ATTENTE'].includes(status)) {
-      return res.status(400).json({ error: 'Statut invalide' });
+      return res.status(400).json({
+        success: false,
+        error: 'Statut invalide'
+      });
     }
 
     const updatedProject = await prisma.project.update({
@@ -305,19 +315,29 @@ router.post('/:id/status', authenticateToken, async (req, res) => {
       }
     });
 
-    console.log(`📊 Project status updated: ${updatedProject.title} -> ${status} by ${req.user.email}`);
+    console.log(`📊 Project status updated: ${updatedProject.title} -> ${status} by ${req.user.email || 'Unknown'}`);
+
+    // Return formatted project (convert technologies back to array)
+    const formattedProject = formatProjectForAPI(updatedProject);
 
     res.json({
       success: true,
       message: 'Statut mis à jour avec succès',
-      project: updatedProject
+      data: { project: formattedProject }
     });
   } catch (error) {
     if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Projet non trouvé' });
+      return res.status(404).json({
+        success: false,
+        error: 'Projet non trouvé'
+      });
     }
     console.error('Error updating project status:', error);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la mise à jour du statut',
+      details: error.message
+    });
   }
 });
 
