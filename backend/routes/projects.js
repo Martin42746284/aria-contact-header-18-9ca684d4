@@ -78,6 +78,16 @@ const getDefaultProjects = () => [
   }
 ];
 
+// Helper function to convert database project to API format
+const formatProjectForAPI = (project) => {
+  return {
+    ...project,
+    technologies: typeof project.technologies === 'string'
+      ? JSON.parse(project.technologies)
+      : project.technologies
+  };
+};
+
 // GET /api/projects - Récupérer tous les projets (publics)
 router.get('/', async (req, res) => {
   try {
