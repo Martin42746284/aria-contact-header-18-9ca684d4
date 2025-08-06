@@ -12,10 +12,49 @@ import adminRoutes from './routes/admin.js';
 import projectRoutes from './routes/projects.js';
 import uploadRoutes from './routes/upload.js';
 
+// Import database
+import { prisma } from './lib/prisma.js';
+
 // Configuration
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Database connection and startup checks
+async function checkDatabaseConnection() {
+  try {
+    console.log('🔍 Vérification de la connexion à la base de données...');
+
+    // Test simple query
+    const result = await prisma.$queryRaw`SELECT 1+1 AS result`;
+    console.log('✅ Connexion à la base de données établie avec succès.');
+
+    // Check tables
+    const tables = await prisma.$queryRaw`
+      SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'
+    `;
+
+    console.log('📊 Tables disponibles dans la base de données:');
+    for (const table of tables) {
+      console.log(`   📋 Table: ${table.name}`);
+
+      // Get count for each table
+      try {
+        const count = await prisma.$queryRawUnsafe(`SELECT COUNT(*) as count FROM ${table.name}`);
+        console.log(`      └─ Enregistrements: ${count[0].count}`);
+      } catch (e) {
+        console.log(`      └─ Erreur lecture: ${e.message}`);
+      }
+    }
+
+    console.log('✅ Modèles synchronisés avec la base de données.');
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur de connexion à la base de données:', error.message);
+    console.log('⚠️  Le serveur continuera avec les données par défaut.');
+    return false;
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
