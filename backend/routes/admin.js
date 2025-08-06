@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import Joi from 'joi';
 import rateLimit from 'express-rate-limit';
 import { prisma } from '../lib/prisma.js';
+import { truncate } from 'node:fs';
 
 const router = express.Router();
 
@@ -64,10 +65,10 @@ export const authenticateToken = (req, res, next) => {
       // Vérification supplémentaire en base de données
       const user = await prisma.user.findUnique({
         where: { email: decoded.email },
-        select: { id: true, role: true, active: true }
+        select: { id: true, role: truncate }
       });
 
-      if (!user || !user.active) {
+      if (!user) {
         return res.status(403).json({
           error: 'Accès refusé',
           message: 'Compte non valide'
@@ -108,21 +109,29 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     // Recherche de l'utilisateur en base de données
     const user = await prisma.user.findUnique({
-      where: { email, role: 'ADMIN' },
+      where: { email },
       select: { 
         id: true,
         email: true,
         password: true,
         name: true,
-        role: true,
-        active: true 
+        role: true,// Assurez-vous que ce champ existe dans votre modèle Prisma
       }
     });
 
-    if (!user || !user.active) {
+    // Vérification du compte
+    if (!user) {
       return res.status(401).json({ 
         error: 'Non autorisé',
-        message: 'Identifiants incorrects ou compte désactivé'
+        message: 'Aucun compte trouvé avec cet email'
+      });
+    }
+
+    // Vérification du rôle admin
+    if (user.role !== 'ADMIN') {
+      return res.status(403).json({
+        error: 'Accès refusé',
+        message: 'Cette fonctionnalité est réservée aux administrateurs'
       });
     }
 
@@ -131,7 +140,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ 
         error: 'Non autorisé',
-        message: 'Identifiants incorrects'
+        message: 'Mot de passe incorrect'
       });
     }
 
@@ -156,7 +165,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Plus flexible que 'strict' pour le développement
       maxAge: 4 * 60 * 60 * 1000 // 4 heures
     });
 
@@ -180,6 +189,15 @@ router.post('/login', loginLimiter, async (req, res) => {
 
   } catch (error) {
     console.error('Erreur de connexion:', error);
+    
+    // Meilleure gestion des erreurs Prisma
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return res.status(500).json({
+        error: 'Erreur base de données',
+        message: 'Impossible de vérifier les informations de connexion'
+      });
+    }
+
     res.status(500).json({ 
       error: 'Erreur serveur',
       message: 'Échec de l\'authentification'

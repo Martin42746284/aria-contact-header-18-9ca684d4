@@ -12,9 +12,15 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      String   @default("admin")
+  role      String   @default("USER") // Modifié pour avoir "USER" par défaut
+  active    Boolean  @default(true)   // Ajouté pour gérer les comptes désactivés
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lastLogin DateTime? // Ajouté pour suivre les connexions
+
+  // Relations possibles (exemple)
+  // posts      Post[]
+  // sessions   Session[]
 
   @@map("users")
 }
@@ -23,7 +29,7 @@ model Project {
   id          String   @id @default(cuid())
   title       String
   description String
-  technologies String  // JSON string for SQLite compatibility
+  technologies Json  // JSON string for SQLite compatibility
   client      String
   duration    String
   status      String   @default("EN_ATTENTE") // String instead of enum

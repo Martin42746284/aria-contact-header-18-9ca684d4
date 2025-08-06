@@ -18,65 +18,65 @@ const projectSchema = Joi.object({
   date: Joi.string().optional()
 });
 
-// Default projects fallback data
-const getDefaultProjects = () => [
-  {
-    id: "1",
-    title: "CGEPRO",
-    description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
-    technologies: ["WordPress", "PHP", "MySQL", "SEO"],
-    client: "CGEPRO",
-    duration: "2 mois",
-    status: "TERMINE",
-    imageUrl: "/src/assets/go.jpg",
-    date: "15/03/2024",
-    url: "https://cgepro.com",
-    createdAt: new Date('2024-03-15'),
-    updatedAt: new Date('2024-03-15')
-  },
-  {
-    id: "2",
-    title: "ERIC RABY",
-    description: "Coaching en compétences sociales et émotionnelles",
-    technologies: ["React", "Node.js", "Stripe", "Calendar API"],
-    client: "Eric Raby Coaching",
-    duration: "3 mois",
-    status: "TERMINE",
-    imageUrl: "/src/assets/eric.jpg",
-    date: "22/04/2024",
-    url: "https://eric-raby.com",
-    createdAt: new Date('2024-04-22'),
-    updatedAt: new Date('2024-04-22')
-  },
-  {
-    id: "3",
-    title: "CONNECT TALENT",
-    description: "Plateforme de mise en relation entre entreprises et talents africains",
-    technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
-    client: "Connect Talent Inc",
-    duration: "5 mois",
-    status: "TERMINE",
-    imageUrl: "/src/assets/connect.png",
-    date: "10/05/2024",
-    url: "https://connecttalent.cc",
-    createdAt: new Date('2024-05-10'),
-    updatedAt: new Date('2024-05-10')
-  },
-  {
-    id: "4",
-    title: "SOA DIA TRAVEL",
-    description: "Transport & Logistique à Madagascar",
-    technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
-    client: "SOA DIA TRAVEL",
-    duration: "4 mois",
-    status: "TERMINE",
-    imageUrl: "/src/assets/soa.jpg",
-    date: "28/06/2024",
-    url: "https://soatransplus.mg",
-    createdAt: new Date('2024-06-28'),
-    updatedAt: new Date('2024-06-28')
-  }
-];
+// // Default projects fallback data
+// const getDefaultProjects = () => [
+//   {
+//     id: "1",
+//     title: "CGEPRO",
+//     description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
+//     technologies: ["WordPress", "PHP", "MySQL", "SEO"],
+//     client: "CGEPRO",
+//     duration: "2 mois",
+//     status: "TERMINE",
+//     imageUrl: "/src/assets/go.jpg",
+//     date: "15/03/2024",
+//     url: "https://cgepro.com",
+//     createdAt: new Date('2024-03-15'),
+//     updatedAt: new Date('2024-03-15')
+//   },
+//   {
+//     id: "2",
+//     title: "ERIC RABY",
+//     description: "Coaching en compétences sociales et émotionnelles",
+//     technologies: ["React", "Node.js", "Stripe", "Calendar API"],
+//     client: "Eric Raby Coaching",
+//     duration: "3 mois",
+//     status: "TERMINE",
+//     imageUrl: "/src/assets/eric.jpg",
+//     date: "22/04/2024",
+//     url: "https://eric-raby.com",
+//     createdAt: new Date('2024-04-22'),
+//     updatedAt: new Date('2024-04-22')
+//   },
+//   {
+//     id: "3",
+//     title: "CONNECT TALENT",
+//     description: "Plateforme de mise en relation entre entreprises et talents africains",
+//     technologies: ["Vue.js", "Laravel", "PostgreSQL", "Socket.io"],
+//     client: "Connect Talent Inc",
+//     duration: "5 mois",
+//     status: "TERMINE",
+//     imageUrl: "/src/assets/connect.png",
+//     date: "10/05/2024",
+//     url: "https://connecttalent.cc",
+//     createdAt: new Date('2024-05-10'),
+//     updatedAt: new Date('2024-05-10')
+//   },
+//   {
+//     id: "4",
+//     title: "SOA DIA TRAVEL",
+//     description: "Transport & Logistique à Madagascar",
+//     technologies: ["Angular", "Express.js", "MongoDB", "Maps API"],
+//     client: "SOA DIA TRAVEL",
+//     duration: "4 mois",
+//     status: "TERMINE",
+//     imageUrl: "/src/assets/soa.jpg",
+//     date: "28/06/2024",
+//     url: "https://soatransplus.mg",
+//     createdAt: new Date('2024-06-28'),
+//     updatedAt: new Date('2024-06-28')
+//   }
+// ];
 
 // Helper function to convert database project to API format
 const formatProjectForAPI = (project) => {
@@ -180,10 +180,24 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    // Conversion des technologies si nécessaire
+    let technologies = value.technologies;
+    if (typeof technologies === 'string') {
+      try {
+        technologies = JSON.parse(technologies);
+      } catch (parseError) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid technologies format',
+          details: 'Technologies must be a valid JSON array'
+        });
+      }
+    }
+
     // Préparer les données pour SQLite (technologies en JSON string)
     const projectData = {
       ...value,
-      technologies: JSON.stringify(value.technologies), // Convert array to JSON string
+      technologies: technologies, // Convert array to JSON string
       date: value.date || new Date().toLocaleDateString('fr-FR')
     };
 
@@ -214,51 +228,68 @@ router.post('/', authenticateToken, async (req, res) => {
 // PUT /api/projects/:id - Mettre à jour un projet (admin seulement)
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
-    // Validation des données
+    const { id } = req.params;
     const { error, value } = projectSchema.validate(req.body);
+
     if (error) {
       return res.status(400).json({
         success: false,
-        error: 'Données invalides',
-        details: error.details[0].message
+        error: 'Validation failed',
+        details: error.details
       });
     }
 
-    // Préparer les données pour SQLite (technologies en JSON string)
+    // Conversion des technologies si nécessaire
+    let technologies = value.technologies;
+    if (typeof technologies === 'string') {
+      try {
+        technologies = JSON.parse(technologies);
+      } catch (parseError) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid technologies format',
+          details: 'Technologies must be a valid JSON array'
+        });
+      }
+    }
+
     const updateData = {
       ...value,
-      technologies: JSON.stringify(value.technologies), // Convert array to JSON string
+      technologies, // Utilise directement l'objet/tableau
+      updatedAt: new Date()
     };
 
     const updatedProject = await prisma.project.update({
-      where: {
-        id: req.params.id
-      },
+      where: { id },
       data: updateData
     });
 
-    console.log(`📝 Project updated: ${updatedProject.title} by ${req.user.email || 'Unknown'}`);
-
-    // Return formatted project (convert back to array)
-    const formattedProject = formatProjectForAPI(updatedProject);
-
     res.json({
       success: true,
-      message: 'Projet mis à jour avec succès',
-      data: { project: formattedProject }
+      data: {
+        project: formatProjectForAPI(updatedProject)
+      }
     });
+
   } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({
-        success: false,
-        error: 'Projet non trouvé'
-      });
+    console.error('Update error:', error);
+
+    // Importez Prisma en haut de votre fichier
+    // const { Prisma } = require('@prisma/client');
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2025') {
+        return res.status(404).json({
+          success: false,
+          error: 'Project not found'
+        });
+      }
     }
-    console.error('Error updating project:', error);
+
     res.status(500).json({
       success: false,
-      error: 'Erreur lors de la mise à jour du projet',
-      details: error.message
+      error: 'Update failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
