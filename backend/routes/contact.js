@@ -2,6 +2,8 @@ import express from 'express';
 import nodemailer from 'nodemailer';
 import Joi from 'joi';
 import rateLimit from 'express-rate-limit';
+import { authenticateToken } from './admin.js';
+import { prisma } from '../lib/prisma.js';
 
 const router = express.Router();
 
@@ -16,8 +18,8 @@ const contactLimiter = rateLimit({
 const contactSchema = Joi.object({
   name: Joi.string().min(2).max(100).required(),
   email: Joi.string().email().required(),
-  company: Joi.string().max(100).allow(''),
-  subject: Joi.string().min(5).max(200).required(),
+  company: Joi.string().max(100).allow('', null).optional(),
+  subject: Joi.string().min(2).max(200).required(),
   message: Joi.string().min(10).max(1000).required()
 });
 
@@ -45,6 +47,25 @@ router.post('/', contactLimiter, async (req, res) => {
     }
 
     const { name, email, company, subject, message } = value;
+
+    // Sauvegarder le message en base de données
+    let savedMessage = null;
+    try {
+      savedMessage = await prisma.contactMessage.create({
+        data: {
+          name,
+          email,
+          company: company || null,
+          subject,
+          message,
+          status: 'NOUVEAU'
+        }
+      });
+      console.log('💾 Message sauvegardé en base avec ID:', savedMessage.id);
+    } catch (dbError) {
+      console.error('Erreur sauvegarde DB:', dbError);
+      // Continue même si la DB échoue
+    }
 
     // Configuration de l'email
     const transporter = createTransporter();
@@ -125,7 +146,8 @@ router.post('/', contactLimiter, async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.'
+      message: 'Message envoyé avec succès ! Nous vous recontacterons bientôt.',
+      data: savedMessage ? { id: savedMessage.id } : null
     });
 
   } catch (error) {
