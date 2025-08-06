@@ -52,7 +52,7 @@ const AdminLoginForm = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-orange-60 p-4 overflow-hidden">
+    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-orange-600 p-4 overflow-hidden">
       <div className="w-full max-w-sm">
         {/* Logo et titre */}
         <div className="text-center mb-4 animate-fadeInDown">
