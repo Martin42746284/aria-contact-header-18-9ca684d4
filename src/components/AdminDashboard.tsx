@@ -411,6 +411,34 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEmail = (message: ContactMessage) => {
+    return () => {
+      const email = message.email;
+      const name = message.name;
+      const subject = encodeURIComponent('Réponse à votre message');
+      const body = encodeURIComponent(
+        `Bonjour ${name},\n\n` +
+      `Nous avons bien reçu votre demande concernant :\n"${message.subject || ''}"\n\n` +
+      `Notre équipe vous contactera rapidement.\n\n` +
+      `Cordialement,\nL'équipe de l'Aria Creative\n\n`
+      );
+
+      const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+
+      try {
+        if (navigator.onLine) {
+          console.log('Ouverture de Gmail…');
+          window.open(gmailURL, '_blank');
+        } else {
+          alert("Veuillez vérifier votre connexion Internet avant d'envoyer un message.");
+        }
+      } catch (error) {
+        console.error("Erreur lors de l'ouverture de Gmail :", error);
+        alert("Impossible d'ouvrir Gmail. Veuillez nous contacter manuellement à : " + email);
+      }
+    }
+  };
+
   return (
     <div className="p-6 min-h-screen bg-black">
       <div className="max-w-6xl mx-auto">
@@ -723,7 +751,7 @@ const AdminDashboard = () => {
                             <option value="NOUVEAU" className="bg-gray-900">🆕 Nouveau</option>
                             <option value="LU" className="bg-gray-900">👁 Lu</option>
                             <option value="TRAITE" className="bg-gray-900">✅ Traité</option>
-                            <option value="ARCHIVE" className="bg-gray-900">📁 Archivé</option>
+                            {/* <option value="ARCHIVE" className="bg-gray-900">📁 Archivé</option> */}
                           </select>
                         </div>
                         <span className="text-gray-400 text-sm bg-gray-800 px-3 py-1 rounded-full">
@@ -754,12 +782,6 @@ const AdminDashboard = () => {
                       </div>
                       <div className="mt-4 flex justify-between items-center">
                         <div className="flex space-x-2">
-                          <button
-                            onClick={() => setSelectedMessageId(selectedMessageId === message.id ? null : message.id)}
-                            className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
-                          >
-                            {selectedMessageId === message.id ? '▲ Masquer' : '✉ Répondre'}
-                          </button>
                           {message.status === 'NOUVEAU' && (
                             <button
                               onClick={() => handleMarkAsRead(message.id!)}
@@ -775,12 +797,23 @@ const AdminDashboard = () => {
                             🗑 Supprimer
                           </button>
                         </div>
-                        <a
+                          <button 
+                            onClick={() => handleEmail(message)}
+                            className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                              message.status === 'LU' || message.status === 'TRAITE'
+                                ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
+                                : 'bg-green-500 hover:bg-green-600 text-white'
+                            }`}
+                            disabled={message.status === 'LU'}
+                          >
+                            ✉ Répondre au client
+                          </button>
+                        {/* <a
                           href={`mailto:${message.email}?subject=Re: ${message.subject}`}
                           className="text-orange-400 hover:text-orange-300 transition duration-300 font-medium px-3 py-1 rounded border border-orange-500 hover:bg-orange-500 hover:text-black"
                         >
                           📧 Email direct
-                        </a>
+                        </a> */}
                       </div>
                       {selectedMessageId === message.id && (
                         <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700 animate-fadeIn">
