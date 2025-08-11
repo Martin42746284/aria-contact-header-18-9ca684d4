@@ -8,36 +8,36 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   password  String
   name      String
-  role      String   @default("USER") // Modifié pour avoir "USER" par défaut
-  active    Boolean  @default(true)   // Ajouté pour gérer les comptes désactivés
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  lastLogin DateTime? // Ajouté pour suivre les connexions
-
-  // Relations possibles (exemple)
-  // posts      Post[]
-  // sessions   Session[]
+  role      String    @default("USER") // Valeur par défaut "USER"
+  active    Boolean   @default(true) // Pour gérer les comptes désactivés
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  lastLogin DateTime? // Pour suivre les connexions
 
   @@map("users")
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  technologies Json  // JSON string for SQLite compatibility
-  client      String
-  duration    String
-  status      String   @default("EN_ATTENTE") // String instead of enum
-  imageUrl    String?
-  url         String?
-  date        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  technologies Json // JSON string pour compatibilité
+  client       String
+  duration     String
+  status       String   @default("EN_ATTENTE")
+  url          String?
+  date         DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  slug         String
+
+  // Relation avec ProjectImage
+  image        Bytes?
+  categories ProjectCategory[] // relation many-to-many
 
   @@map("projects")
 }
@@ -49,7 +49,7 @@ model ContactMessage {
   company   String?
   subject   String
   message   String
-  status    String   @default("NOUVEAU") // String instead of enum
+  status    String   @default("NOUVEAU")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -71,14 +71,16 @@ model Upload {
   @@map("uploads")
 }
 
-model ProjectImage {
-  id          String   @id @default(cuid())
-  filename    String
-  mimetype    String
-  size        Int
-  data        Bytes    // Le contenu binaire de l'image
-  project     Project? @relation(fields: [projectId], references: [id])
-  projectId   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Category {
+  id       String            @id @default(cuid())
+  name     String            @unique
+  projects ProjectCategory[]
+}
+
+model ProjectCategory {
+  id         String   @id @default(cuid())
+  project    Project  @relation(fields: [projectId], references: [id])
+  projectId  String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
 }

@@ -9,6 +9,16 @@ export interface ApiResponse<T = any> {
   details?: string;
 }
 
+export interface ProjectImage {
+  id: string;
+  filename: string;
+  mimetype: string;
+  size: number;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -17,7 +27,7 @@ export interface Project {
   client: string;
   duration: string;
   status: 'EN_COURS' | 'TERMINE' | 'EN_ATTENTE';
-  imageUrl?: string;
+  imageUrl?: Uint8Array | null; 
   url?: string;
   date: string;
   createdAt: string;

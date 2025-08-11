@@ -2,8 +2,10 @@ import express from 'express';
 import Joi from 'joi';
 import { authenticateToken } from './admin.js';
 import { prisma } from '../lib/prisma.js';
+import multer from 'multer';
 
 const router = express.Router();
+const upload = multer(); // stockage en mémoire, buffer accessible via req.file.buffer
 
 // Validation schema pour les projets
 const projectSchema = Joi.object({
@@ -169,18 +171,19 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/projects - Créer un nouveau projet (admin seulement)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
   try {
-    // Validation des données
+    // Joi ne gère pas multipart/form-data, on valide ici les champs texte
     const { error, value } = projectSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
+        success: false,
         error: 'Données invalides',
         details: error.details[0].message
       });
     }
 
-    // Conversion des technologies si nécessaire
+    // Conversion des technologies si c'est une string JSON
     let technologies = value.technologies;
     if (typeof technologies === 'string') {
       try {
@@ -188,26 +191,27 @@ router.post('/', authenticateToken, async (req, res) => {
       } catch (parseError) {
         return res.status(400).json({
           success: false,
-          error: 'Invalid technologies format',
-          details: 'Technologies must be a valid JSON array'
+          error: 'Format technologies invalide',
+          details: 'Les technologies doivent être un tableau JSON valide'
         });
       }
     }
 
-    // Préparer les données pour SQLite (technologies en JSON string)
+    // Préparer données pour Prisma
     const projectData = {
       ...value,
-      technologies: technologies, // Convert array to JSON string
-      date: value.date || new Date().toLocaleDateString('fr-FR')
+      technologies,
+      date: value.date ? new Date(value.date) : new Date(),
+      image: req.file?.buffer || null,  // Buffer binaire ou null
     };
 
     const newProject = await prisma.project.create({
-      data: projectData
+      data: projectData,
     });
 
-    console.log(`📝 New project created: ${newProject.title} by ${req.user.email || 'Unknown'}`);
+    console.log(`📝 Nouveau projet créé : ${newProject.title} par ${req.user.email || 'Inconnu'}`);
 
-    // Return formatted project (convert back to array)
+    // Formatter le projet avant renvoi (ex: convertir technologies JSON vers array)
     const formattedProject = formatProjectForAPI(newProject);
 
     res.status(201).json({
@@ -216,110 +220,10 @@ router.post('/', authenticateToken, async (req, res) => {
       data: { project: formattedProject }
     });
   } catch (error) {
-    console.error('Error creating project:', error);
+    console.error('Erreur lors de la création du projet :', error);
     res.status(500).json({
       success: false,
-      error: 'Erreur lors de la création du projet',
-      details: error.message
-    });
-  }
-});
-
-// PUT /api/projects/:id - Mettre à jour un projet (admin seulement)
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { error, value } = projectSchema.validate(req.body);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: error.details
-      });
-    }
-
-    // Conversion des technologies si nécessaire
-    let technologies = value.technologies;
-    if (typeof technologies === 'string') {
-      try {
-        technologies = JSON.parse(technologies);
-      } catch (parseError) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid technologies format',
-          details: 'Technologies must be a valid JSON array'
-        });
-      }
-    }
-
-    const updateData = {
-      ...value,
-      technologies, // Utilise directement l'objet/tableau
-      updatedAt: new Date()
-    };
-
-    const updatedProject = await prisma.project.update({
-      where: { id },
-      data: updateData
-    });
-
-    res.json({
-      success: true,
-      data: {
-        project: formatProjectForAPI(updatedProject)
-      }
-    });
-
-  } catch (error) {
-    console.error('Update error:', error);
-
-    // Importez Prisma en haut de votre fichier
-    // const { Prisma } = require('@prisma/client');
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2025') {
-        return res.status(404).json({
-          success: false,
-          error: 'Project not found'
-        });
-      }
-    }
-
-    res.status(500).json({
-      success: false,
-      error: 'Update failed',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// DELETE /api/projects/:id - Supprimer un projet (admin seulement)
-router.delete('/:id', authenticateToken, async (req, res) => {
-  try {
-    const deletedProject = await prisma.project.delete({
-      where: {
-        id: req.params.id
-      }
-    });
-
-    console.log(`🗑️ Project deleted: ${deletedProject.title} by ${req.user.email || 'Unknown'}`);
-
-    res.json({
-      success: true,
-      message: 'Projet supprimé avec succès'
-    });
-  } catch (error) {
-    if (error.code === 'P2025') {
-      return res.status(404).json({
-        success: false,
-        error: 'Projet non trouvé'
-      });
-    }
-    console.error('Error deleting project:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Erreur lors de la suppression du projet',
+      error: 'Erreur serveur lors de la création du projet',
       details: error.message
     });
   }
