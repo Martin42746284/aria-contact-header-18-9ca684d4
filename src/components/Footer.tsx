@@ -1,24 +1,7 @@
-import ContactForm from "./ContactForm";
-import ariaLogo from "@/assets/aria-logo.png";
-
 const Footer = () => {
   return (
     <footer id="contact" className="bg-black text-white">
       <div className="container mx-auto px-6 py-16">
-        {/* Contact Form Section */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-orange-500">
-              Prêt à transformer vos défis digitaux ?
-            </h2>
-            <p className="text-white/80 text-lg max-w-2xl mx-auto">
-              Découvrez comment ARIA peut donner vie à votre vision et créer des solutions qui dépassent les attentes.
-            </p>
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <ContactForm />
-          </div>
-        </div>
 
         {/* Footer Content */}
         <div className="border-t border-white/20 pt-12">
@@ -27,7 +10,7 @@ const Footer = () => {
             <div className="md:col-span-2">
               <div className="flex items-center space-x-3 mb-6">
                 <img
-                  src={ariaLogo}
+                  src="/images/aria-logo.png"
                   alt="ARIA Logo"
                   className="h-12 w-12"
                 />
@@ -67,15 +50,15 @@ const Footer = () => {
               <div className="space-y-3 text-white/80">
                 <div>
                   <p className="font-medium text-white">Email</p>
-                  <p className="hover:text-orange-400 transition-colors">contact@aria-digital.com</p>
+                  <p className="hover:text-orange-400 transition-colors">aria.madacom@gmail.com</p>
                 </div>
                 <div>
                   <p className="font-medium text-white">Téléphone</p>
-                  <p>+33 (0)1 23 45 67 89</p>
+                  <p>+262 693 52 16 26</p>
                 </div>
                 <div>
                   <p className="font-medium text-white">Adresse</p>
-                  <p>123 Avenue de l'Innovation<br />75001 Paris, France</p>
+                  <p>................<br />Antananarivo, Madagascar</p>
                 </div>
               </div>
             </div>
@@ -84,7 +67,7 @@ const Footer = () => {
           {/* Bottom */}
           <div className="border-t border-white/20 mt-12 pt-8 text-center">
             <p className="text-white/60">
-              © 2024 ARIA - Agence de développement digital. Tous droits réservés.
+              © 2025 ARIA - Agence de développement digital. Tous droits réservés.
             </p>
             <p className="text-white/40 mt-2 text-sm">
               Notre approche unique et notre engagement envers l'excellence nous permettent

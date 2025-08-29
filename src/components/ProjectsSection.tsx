@@ -1,136 +1,129 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProjectCard from "@/components/ProjectCard";
-import cgeproMockup from "@/assets/go.jpg";
-import ericRabyMockup from "@/assets/eric.jpg";
-import connectTalentMockup from "@/assets/connect.png";
-import soaDiaTravelMockup from "@/assets/soa.jpg";
+import { getClientProjects, getDefaultProjects, type ClientProject } from "@/services/projectsService";
+import { useScrollAnimation, useStaggeredAnimation } from "@/hooks/useScrollAnimation";
+import "@/styles/animations.css";
 
-const projects = [
-  {
-    title: "CGEPRO",
-    description: "Votre spécialiste du bois exotique et des aménagements extérieurs sur La Réunion",
-    sector: "BTP / Équipements professionnels",
-    objectives: [
-      "Présenter l'expertise de CGEPRO dans le domaine des équipements techniques",
-      "Renforcer la crédibilité de la marque auprès des partenaires industriels",
-      "Proposer un catalogue clair des produits"
-    ],
-    solutions: [
-      "Site vitrine professionnel avec une identité sobre et élégante",
-      "Fiches produits accessibles et consultables facilement",
-      "Design responsive et contenu optimisé SEO",
-      "Back-office simple pour mise à jour autonome du client"
-    ],
-    imageUrl: cgeproMockup,
-    websiteUrl: "https://cgepro.com"
-  },
-  {
-    title: "ERIC RABY",
-    description: "Coaching en compétences sociales et émotionnelles",
-    sector: "Coaching / Formation",
-    objectives: [
-      "Présenter clairement l'expertise du coach",
-      "Renforcer la visibilité en ligne du coach",
-      "Faciliter la prise de contact et la réservation de séances",
-      "Proposer du contenu à valeur ajoutée",
-      "Créer un lien de confiance avec les clients potentiels"
-    ],
-    solutions: [
-      "Site vitrine moderne et responsive",
-      "Développement d'un parcours utilisateur optimisé",
-      "Intégration d'outils de réservation ou de prise de rendez-vous en ligne",
-      "Proposition des différentes expertises et des expériences professionnelles",
-      "Mise en place d'un blog intégré",
-      "SEO et hébergement optimaux"
-    ],
-    imageUrl: ericRabyMockup,
-    websiteUrl: "https://eric-raby.com"
-  },
-  {
-    title: "CONNECT TALENT",
-    description: "Plateforme de mise en relation entre entreprises et talents africains",
-    sector: "Recrutement & Talents internationaux",
-    objectives: [
-      "Créer une plateforme de mise en relation entre entreprises et talents africains",
-      "Valoriser la dimension humaine et l'impact social du projet",
-      "Faciliter l'enregistrement et la candidature en ligne"
-    ],
-    solutions: [
-      "UI/UX épuré pour une navigation intuitive",
-      "Formulaires interactifs pour les candidats et recruteurs",
-      "Intégration d'un espace sécurisé pour les profils",
-      "Site multilingue prêt à l'internationalisation"
-    ],
-    imageUrl: connectTalentMockup,
-    websiteUrl: "https://connecttalent.cc"
-  },
-  {
-    title: "SOA DIA TRAVEL",
-    description: "Transport & Logistique à Madagascar",
-    sector: "Transport & Logistique",
-    objectives: [
-      "Mettre en avant la flotte de transport et les services logistiques",
-      "Créer une plateforme responsive et professionnelle",
-      "Intégrer une navigation simple et une identité visuelle forte"
-    ],
-    solutions: [
-      "Design moderne centré sur la fiabilité",
-      "Structure claire et hiérarchisée pour les services",
-      "Intégration d'un formulaire de demande de devis",
-      "Site rapide et optimisé mobile"
-    ],
-    imageUrl: soaDiaTravelMockup,
-    websiteUrl: "https://soatransplus.mg"
-  }
-];
+// Les projets sont maintenant chargés dynamiquement depuis le dashboard admin
 
 const ProjectsSection = () => {
+  const [projects, setProjects] = useState<ClientProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { elementRef, isVisible } = useScrollAnimation<HTMLDivElement>();
+  const { containerRef, visibleItems } = useStaggeredAnimation<HTMLDivElement>(projects.length, 200);
+
+  
+  useEffect(() => {
+    // Charger les projets depuis l'API backend
+    const loadProjects = async () => {
+      setIsLoading(true);
+
+      try {
+        // Récupérer les projets depuis l'API
+        const clientProjects = await getClientProjects();
+
+        if (clientProjects.length > 0) {
+          setProjects(clientProjects);
+        } else {
+          // Fallback vers les projets par défaut s'il n'y en a aucun dans l'API
+          setProjects(getDefaultProjects());
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des projets:', error);
+        // Fallback vers les projets par défaut en cas d'erreur
+        setProjects(getDefaultProjects());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProjects();
+
+    // Recharger les projets toutes les 30 secondes pour sync avec l'API
+    const interval = setInterval(loadProjects, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <>
-      <style>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.8s ease-out forwards;
-        }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <section
+      ref={elementRef}
+      id="realisations"
+      className="py-20 bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden"
+    >
+      {/* Background décoratif */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-20 left-20 w-96 h-96 bg-orange-500 rounded-full filter blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-orange-400 rounded-full filter blur-3xl animate-float delay-1000" />
+      </div>
 
-      {/* Section Réalisations */}
-      <section id="realisations" className="py-20 bg-gray-900">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-orange-500 mb-6 animate-fadeIn">
-              NOS RÉALISATIONS
-            </h2>
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed animate-fadeIn delay-100">
-              Laissez-vous inspirer par ces histoires de transformation digitale réussie. 
-              Chaque projet reflète notre engagement à comprendre les enjeux spécifiques 
-              de chaque secteur et à concevoir des solutions sur mesure.
-            </p>
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Header section */}
+        <div className={`text-center mb-16 transform transition-all duration-700 ${
+          isVisible ? 'animate-fade-in-down' : 'opacity-0 translate-y-10'
+        }`}>
+          <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 mb-6">
+            NOS RÉALISATIONS
+          </h2>
+          <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            Laissez-vous inspirer par ces histoires de transformation digitale réussie.
+            Chaque projet reflète notre engagement à comprendre les enjeux spécifiques
+            de chaque secteur et à concevoir des solutions sur mesure.
+          </p>
+
+          {/* Indicateur de synchronisation avec l'API
+          <div className="mt-6 flex items-center justify-center space-x-2 text-sm text-gray-400">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span>Synchronisé avec l'API backend • {projects.length} projets publiés</span>
+          </div> */}
+        </div>
+
+        {/* Grille des projets */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
+            <span className="ml-3 text-gray-300">Chargement des projets...</span>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+        ) : projects.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🚧</div>
+            <h3 className="text-2xl font-bold text-gray-300 mb-2">Aucun projet publié</h3>
+            <p className="text-gray-400">Les projets créés dans le dashboard admin avec le statut "Terminé" apparaitront ici.</p>
+          </div>
+        ) : (
+          <div
+            ref={containerRef}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto"
+          >
             {projects.map((project, index) => (
-              <div 
-                key={index} 
-                className="animate-fadeIn"
-                style={{ animationDelay: `${index * 100 + 200}ms` }}
+              <div
+                key={`${project.title}-${index}`}
+                className={`transform transition-all duration-500 ${
+                  visibleItems.has(index) ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'
+                }`}
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                <ProjectCard 
-                  {...project}
-                />
+                <ProjectCard {...project} />
               </div>
             ))}
           </div>
-        </div>
-      </section>
-    </>
+        )}
+
+        {/* Message informatif pour l'admin */}
+        {projects.length > 0 && (
+          <div className={`text-center mt-12 transform transition-all duration-700 ${
+            isVisible ? 'animate-fade-in-up' : 'opacity-0 translate-y-10'
+          }`}>
+            {/* <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 backdrop-blur-xl p-6 rounded-2xl border border-orange-500/30 max-w-2xl mx-auto">
+              <p className="text-gray-300 text-sm">
+                📝 <strong>Pour les administrateurs :</strong> Ces projets sont automatiquement synchronisés
+                depuis l'API backend. Seuls les projets avec le statut "Terminé" sont affichés ici.
+              </p>
+            </div> */}
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 
