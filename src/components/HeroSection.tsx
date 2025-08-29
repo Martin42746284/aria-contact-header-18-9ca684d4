@@ -39,11 +39,11 @@ const HeroSection = () => {
       >
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="flex justify-center mb-8 animate-float">
+            <div className="flex justify-center mb-2 animate-float"> {/* Changé de mb-8 à mb-6 */}
               <img 
                 src="src/assets/aria-logo.png" 
                 alt="ARIA Logo" 
-                className="h-40 w-34"
+                className="h-72 md:h-80 lg:h-96"
               />
             </div>
             <h1 className="text-5xl font-bold mb-6 animate-fadeIn">
